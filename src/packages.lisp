@@ -5,9 +5,9 @@
                 #:empty-map #:do-map #:do-set)
   (:nicknames #:cl-grph)
   (:export
-    #:@edges #:@enum #:@incident #:@verts #:@vnum #:@prop #:@mem
+    #:@edges #:@enum #:@out #:@verts #:@vnum #:@prop #:@mem
     #:add #:del #:add! #:del!  #:prop #:prop!
-    #:itr-edges #:itr-incident #:itr-verts
+    #:itr-edges #:itr-out #:itr-verts
     #:ext-symbols?
     #:compile-query #:facts-qry
     #:grph))

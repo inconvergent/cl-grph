@@ -4,6 +4,26 @@
 (defmacro adj (g) (declare (symbol g)) `(grph-adj ,g))
 (defmacro props (g) (declare (symbol g)) `(grph-props ,g))
 
+
+; (defmacro del-multi-rel (a b &optional val))
+(defmacro get-multi-rel (props k &key prop (default nil))
+  (weird:awg (pmap)
+    `(let ((,pmap (@ ,props ,k)))
+      ,(if prop `(and ,pmap (values (@ ,pmap ,prop)))
+                `(or ,pmap ,default)))))
+
+(defmacro set-multi-rel (props k p &optional val
+                                   &aux (default (if val 'nilmap 'nilset)))
+  (declare (symbol k))
+  (weird:awg (pk props*)
+    `(let* ((,props* ,props)
+            (,pk (@ ,props* ,k)))
+      (fset:with ,props* ,k ; props is a map
+        ; pk is a map if val is provided, otherwise set
+        (fset:with (or ,pk ,default) ,p
+                   ,@(if val `(,val)))))))
+
+
 ; TODO: itr prop edges, itr prop verts?
 ; TODO: ignore half?
 (defmacro itr-edges ((g a &optional b) &body body)
@@ -15,9 +35,9 @@
         ,(if b `(let ((,a ,a*) (,b ,b*)) ,@body)
                `(let ((,a (list ,a* ,b*))) ,@body))))))
 
-(defmacro itr-incident ((g a b) &body body)
+(defmacro itr-out ((g a b) &body body)
   (declare (symbol g b))
-  "iterate all incident verts, b, of a."
+  "iterate all outboud verts, b, of a."
   (awg (a* b* eset)
     `(let* ((,a* ,a)
             (,eset (@ (adj ,g) ,a*)))
