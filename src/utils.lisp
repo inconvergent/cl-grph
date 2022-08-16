@@ -2,6 +2,7 @@
 (in-package #:grph)
 
 (deftype pn (&optional (bits 31)) `(unsigned-byte ,bits))
+(defvar *opt* '(optimize (safety 1) (speed 3) debug space))
 
 (defun v? (&optional (silent t))
   (let ((v (slot-value (asdf:find-system 'grph) 'asdf:version)))

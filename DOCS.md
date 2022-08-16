@@ -19,7 +19,7 @@ To load "grph":
   Load 1 ASDF system:
     grph
 ; Loading "grph"
-
+.....
 #### GRPH:@EDGES
 
 ```
@@ -53,20 +53,20 @@ total number of edges in graph.
  ;   Source file: src/grph.lisp
 ```
 
-#### GRPH:@INCIDENT
+#### GRPH:@INV
 
 ```
-list all incident verts of a.
+get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
 
- ; GRPH:@INCIDENT
+ ; GRPH:@INV
  ;   [symbol]
  ;
- ; @INCIDENT names a compiled function:
- ;   Lambda-list: (G A &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 31))
- ;                  (VALUES LIST &OPTIONAL))
+ ; @INV names a compiled function:
+ ;   Lambda-list: (G K &OPTIONAL P)
+ ;   Derived type: (FUNCTION (GRPH:GRPH T &OPTIONAL T)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     list all incident verts of a.
+ ;     get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
  ;   Source file: src/grph.lisp
 ```
 
@@ -87,19 +87,37 @@ t if edge (a b) exists.
  ;   Source file: src/grph.lisp
 ```
 
+#### GRPH:@OUT
+
+```
+list all outboud verts of a.
+
+ ; GRPH:@OUT
+ ;   [symbol]
+ ;
+ ; @OUT names a compiled function:
+ ;   Lambda-list: (G A &AUX (RES (LIST)))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 31))
+ ;                  (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     list all outboud verts of a.
+ ;   Source file: src/grph.lisp
+```
+
 #### GRPH:@PROP
 
 ```
-get prop, p, of key, k. k should be an edge k=(a b) or a vert, k=a.
+get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
 
  ; GRPH:@PROP
  ;   [symbol]
  ;
  ; @PROP names a compiled function:
- ;   Lambda-list: (G K P &AUX (PSET (@ (PROPS G) K)))
- ;   Derived type: (FUNCTION (GRPH:GRPH T SYMBOL) (VALUES T &OPTIONAL))
+ ;   Lambda-list: (G K &OPTIONAL P)
+ ;   Derived type: (FUNCTION (GRPH:GRPH T &OPTIONAL T)
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     get prop, p, of key, k. k should be an edge k=(a b) or a vert, k=a.
+ ;     get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
  ;   Source file: src/grph.lisp
 ```
 
@@ -149,7 +167,7 @@ new edge (a b). optionally set prop, p, (with val).
  ;   Derived type: (FUNCTION
  ;                  (GRPH:GRPH (UNSIGNED-BYTE 31) (UNSIGNED-BYTE 31)
  ;                             &OPTIONAL T T)
- ;                  (VALUES GRPH:GRPH &OPTIONAL))
+ ;                  (VALUES (OR NULL GRPH:GRPH) BOOLEAN &OPTIONAL))
  ;   Documentation:
  ;     new edge (a b). optionally set prop, p, (with val).
  ;   Source file: src/grph.lisp
@@ -194,7 +212,7 @@ consider all relevant facts for a given stage. see facts-qry for an example.
 #### GRPH:DEL
 
 ```
-delete edge (a b).
+delete edge (a b). deletes associated props.
 
  ; GRPH:DEL
  ;   [symbol]
@@ -203,9 +221,9 @@ delete edge (a b).
  ;   Lambda-list: (G A B)
  ;   Derived type: (FUNCTION
  ;                  (GRPH:GRPH (UNSIGNED-BYTE 31) (UNSIGNED-BYTE 31))
- ;                  (VALUES GRPH:GRPH &OPTIONAL))
+ ;                  (VALUES GRPH:GRPH BOOLEAN &OPTIONAL))
  ;   Documentation:
- ;     delete edge (a b).
+ ;     delete edge (a b). deletes associated props.
  ;   Source file: src/grph.lisp
 ```
 
@@ -265,9 +283,11 @@ run this datalog qry on all input facts.
  ;   [symbol]
  ;
  ; GRPH names a compiled function:
- ;   Lambda-list: (&OPTIONAL (ADJ NILMAP) (NUM-EDGES 0) (PROPS NILMAP))
+ ;   Lambda-list: (&OPTIONAL (ADJ NILMAP) (NUM-EDGES 0) (PROPS NILMAP)
+ ;                 (INV NILMAP))
  ;   Derived type: (FUNCTION
- ;                  (&OPTIONAL FSET:MAP (UNSIGNED-BYTE 31) FSET:MAP)
+ ;                  (&OPTIONAL FSET:MAP (UNSIGNED-BYTE 31) FSET:MAP
+ ;                   FSET:MAP)
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Inline proclamation: INLINE (inline expansion available)
  ;   Source file: src/grph.lisp
@@ -304,6 +324,9 @@ run this datalog qry on all input facts.
  ;     GRPH::PROPS
  ;       Type: FSET:MAP
  ;       Initform: GRPH::NILMAP
+ ;     GRPH::INV
+ ;       Type: FSET:MAP
+ ;       Initform: GRPH::NILMAP
  ;     GRPH::NUM-EDGES
  ;       Type: GRPH::PN
  ;       Initform: 0
@@ -312,7 +335,7 @@ run this datalog qry on all input facts.
 #### GRPH:ITR-EDGES
 
 ```
-iterate all edges, as either a or (a b).
+iterate all edges, as either a=(v1 v2) or a=v1, b=v2.
 
  ; GRPH:ITR-EDGES
  ;   [symbol]
@@ -320,22 +343,22 @@ iterate all edges, as either a or (a b).
  ; ITR-EDGES names a macro:
  ;   Lambda-list: ((G A &OPTIONAL B) &BODY BODY)
  ;   Documentation:
- ;     iterate all edges, as either a or (a b).
+ ;     iterate all edges, as either a=(v1 v2) or a=v1, b=v2.
  ;   Source file: src/macros.lisp
 ```
 
-#### GRPH:ITR-INCIDENT
+#### GRPH:ITR-OUT
 
 ```
-iterate all incident verts, b, of a.
+iterate all outboud verts, b, of a.
 
- ; GRPH:ITR-INCIDENT
+ ; GRPH:ITR-OUT
  ;   [symbol]
  ;
- ; ITR-INCIDENT names a macro:
+ ; ITR-OUT names a macro:
  ;   Lambda-list: ((G A B) &BODY BODY)
  ;   Documentation:
- ;     iterate all incident verts, b, of a.
+ ;     iterate all outboud verts, b, of a.
  ;   Source file: src/macros.lisp
 ```
 

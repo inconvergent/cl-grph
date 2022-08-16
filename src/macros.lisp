@@ -1,21 +1,20 @@
 (in-package :grph)
 
-(defmacro -srt (a b) (declare (symbol a b)) `(if (< ,a ,b) (list a b) (list b a)))
+(defmacro srt (a b) (declare (symbol a b)) `(if (< ,a ,b) (list a b) (list b a)))
 (defmacro adj (g) (declare (symbol g)) `(grph-adj ,g))
+(defmacro inv (g) (declare (symbol g)) `(grph-inv ,g))
 (defmacro props (g) (declare (symbol g)) `(grph-props ,g))
 
 
-; (defmacro del-multi-rel (a b &optional val))
 (defmacro get-multi-rel (props k &key prop (default nil))
-  (weird:awg (pmap)
+  (awg (pmap)
     `(let ((,pmap (@ ,props ,k)))
       ,(if prop `(and ,pmap (values (@ ,pmap ,prop)))
                 `(or ,pmap ,default)))))
 
 (defmacro set-multi-rel (props k p &optional val
                                    &aux (default (if val 'nilmap 'nilset)))
-  (declare (symbol k))
-  (weird:awg (pk props*)
+  (awg (pk props*)
     `(let* ((,props* ,props)
             (,pk (@ ,props* ,k)))
       (fset:with ,props* ,k ; props is a map
@@ -23,12 +22,21 @@
         (fset:with (or ,pk ,default) ,p
                    ,@(if val `(,val)))))))
 
+; TODO: optional p drops entire k
+(defmacro del-multi-rel (props k &optional p)
+  (awg (props* pk)
+    `(let* ((,props* ,props)
+            (,pk (@ ,props* ,k)))
+       ,(if p `(fset:with ,props* ,k
+                 (when ,pk (fset:less ,pk ,p)))
+              `(fset:less ,props* ,k)))))
 
 ; TODO: itr prop edges, itr prop verts?
 ; TODO: ignore half?
 (defmacro itr-edges ((g a &optional b) &body body)
-  (declare (symbol g a b))
-  "iterate all edges, as either a or (a b)."
+  (declare (symbol g a))
+  "iterate all edges, as either a=(v1 v2) or a=v1, b=v2."
+  (unless (or (not b) (symbolp b)) (error "bad arg to itr-edges"))
   (awg (a* b* eset)
     `(do-map (,a* ,eset (adj ,g))
       (do-set (,b* ,eset)
@@ -47,14 +55,14 @@
 (defmacro itr-verts ((g a) &body body)
   (declare (symbol g a))
   "iterate all connected verts, as a."
-  (awg (visited b)
-    `(let ((,visited (make-hash-table :test #'eql)))
-      (labels ((,visited (,b) (when (not (gethash ,b ,visited))
-                                    (setf (gethash ,b ,visited) t)
-                                    t)))
+  (awg (seen b)
+    `(let ((,seen (make-hash-table :test #'eql)))
+      (labels ((,seen (,b) (when (not (gethash ,b ,seen))
+                             (setf (gethash ,b ,seen) t)
+                             t)))
         (itr-edges (,g ,a ,b)
-          (when (not (,visited ,a)) (let ((,a ,a)) ,@body))
-          (when (not (,visited ,b)) (let ((,a ,b)) ,@body)))))))
+          (when (not (,seen ,a)) (let ((,a ,a)) ,@body))
+          (when (not (,seen ,b)) (let ((,a ,b)) ,@body)))))))
 
 (defmacro add! (g a b &optional prop (val t))
   (declare (symbol g))

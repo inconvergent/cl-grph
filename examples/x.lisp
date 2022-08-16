@@ -51,32 +51,15 @@
             summing 1)))
 
 
-  ; (print :old)
-  ; (time
-  ;   (loop repeat n
-  ;         do (graph:add graph (rnd:rndi k) (rnd:rndi k))
-  ;            (graph:del graph (rnd:rndi k) (rnd:rndi k))
-  ;         finally (print graph)))
-  ; (time
-  ;   (loop repeat n2
-  ;         do (graph:mem graph (rnd:rndi k) (rnd:rndi k))))
-
-   ; (grph:prop! grph '(1 2) :name)
-   ; (grph:prop! grph '(1 2) :name :fuck)
-   ; (grph:prop! grph '(1 2) :thing :aa)
-   ; (grph:prop! grph '(1 2) :other :sss)
-   ; (grph:prop! grph '(8 2) :other :sss)
-   ; (print grph)
-   ; (print (grph::grph-props grph))
-   ; (veq:vpr (grph:get-prop grph '(1 2) :name))
-   ; (grph:prop! grph '(1 2) :name)
-   ; (grph:prop! grph '(1 2) :name nil)
-   ; (print grph)
-   ; (veq:vpr (grph:get-prop grph '(1 2) :name))
-   ; (veq:vpr (grph:get-prop grph '(1 7) :name))
-  )
-
-  )
+  (print :old)
+  (time
+    (loop repeat n
+          do (graph:add graph (rnd:rndi k) (rnd:rndi k))
+             (graph:del graph (rnd:rndi k) (rnd:rndi k))
+          finally (print graph)))
+  (time
+    (loop repeat n2
+          do (graph:mem graph (rnd:rndi k) (rnd:rndi k))))))
 
 (main)
 
