@@ -125,7 +125,7 @@ this terminology is used :
     (if (@mem g a b) (values (prune-props) t)
                      (values g nil))))
 
-(defun del (g a b) ; option to dont delete props?
+(defun del (g a b) ; option to dont delete props?, option to force del prop?
   (declare (grph g) (pn a b))
   "delete edge (a b). deletes associated props."
   (-del g a b))

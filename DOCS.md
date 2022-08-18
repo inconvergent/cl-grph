@@ -2,16 +2,7 @@
 
 ### Explanation
 
-#### Context
-
-#### Abbreviations
-
-`dsb` is short for `destructuring-bind`.
-
-`mvb` is short for `multiple-value-bind`.
-
-`mvc` is short for `multiple-value-call`.
-
+:todo:
 
 ### Symbols
 
@@ -19,7 +10,7 @@ To load "grph":
   Load 1 ASDF system:
     grph
 ; Loading "grph"
-.....
+
 #### GRPH:@EDGES
 
 ```

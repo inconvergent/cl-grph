@@ -12,16 +12,7 @@ cat << EOF > DOCS.md
 
 ### Explanation
 
-#### Context
-
-#### Abbreviations
-
-\`dsb\` is short for \`destructuring-bind\`.
-
-\`mvb\` is short for \`multiple-value-bind\`.
-
-\`mvc\` is short for \`multiple-value-call\`.
-
+:todo:
 
 ### Symbols
 

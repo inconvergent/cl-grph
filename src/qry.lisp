@@ -102,7 +102,8 @@ consider all relevant facts for a given stage. see facts-qry for an example."
                   (dsb ,nsym ,fact
                     (declare (ignorable ,@nsym))
                     (let ((,m (list ,@(compile-match1 q nsym))))
-                      (when (match? ,m) (only-vars ,m)))))))))
+                      (when (match? ,m) (only-vars ,m)))))
+                ',q))))
 
        ; TODO: strip all with no var?
        (compile-next (qc &aux (qc (sort-nots qc)))
@@ -147,7 +148,8 @@ consider all relevant facts for a given stage. see facts-qry for an example."
   "run this datalog qry on all input facts."
   (awg (fact-reduce fx f m res lp)
    `(labels
-      ((,fact-reduce (,fx)
+      ((,fact-reduce (,fx &rest rest)
+        (declare (ignore rest))
          (loop named ,lp
                with ,res of-type list = (list)
                for ,f of-type list in ,facts
@@ -155,4 +157,31 @@ consider all relevant facts for a given stage. see facts-qry for an example."
                if ,m do (push ,m ,res)
                finally (return-from ,lp ,res))))
       (compile-query ,fact-reduce ,@qry))))
+
+
+(defun splice-fact (e p)
+  (awg (a b) `(dsb (,a ,b) ,e (list ,a ,p ,b))))
+(defun select-index (p eset g q &aux (q (second q)))
+  (if (or (any? (second q)) (var? (second q)))
+     `(do-map (,p ,eset (inv ,g)))
+     `(let* ((,p ,(second q))
+             (,eset (@ (inv ,g) ,p))))))
+
+(defmacro qry2 (g &rest qry)
+  (declare (symbol g))
+  (awg (fact-reduce fx p e q eset m res)
+    `(macrolet
+       ((,fact-reduce (,fx ,q) ; q == (a p b)
+         `(let ((,',res (list)))
+           ; how to included non prop edges?
+           (,@(select-index ',p ',eset ',g ,q);do-map (,',p ,',eset (inv ,',g))
+           (do-set (,',e ,',eset)
+             (typecase ,',e
+               (cons (let ((,',m (funcall ,,fx ,(splice-fact ',e ',p))))
+                       (when ,',m (push ,',m ,',res))))
+               (fixnum nil)
+               (t (error "unexpected element in inv")))))
+           ,',res)
+         ))
+     (compile-query ,fact-reduce ,@qry))))
 

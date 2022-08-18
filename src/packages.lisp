@@ -9,6 +9,6 @@
     #:add #:del #:add! #:del!  #:prop #:prop!
     #:itr-edges #:itr-out #:itr-verts
     #:ext-symbols?
-    #:compile-query #:facts-qry
+    #:compile-query #:facts-qry #:qry
     #:grph))
 
