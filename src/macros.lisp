@@ -2,7 +2,7 @@
 
 (defmacro srt (a b) (declare (symbol a b)) `(if (< ,a ,b) (list a b) (list b a)))
 (defmacro adj (g) (declare (symbol g)) `(grph-adj ,g))
-(defmacro inv (g) (declare (symbol g)) `(grph-inv ,g))
+(defmacro mid (g) (declare (symbol g)) `(grph-mid ,g))
 (defmacro props (g) (declare (symbol g)) `(grph-props ,g))
 
 
@@ -12,15 +12,16 @@
       ,(if prop `(and ,pmap (values (@ ,pmap ,prop)))
                 `(or ,pmap ,default)))))
 
-(defmacro set-multi-rel (props k p &optional val
-                                   &aux (default (if val 'nilmap 'nilset)))
+(defmacro set-multi-rel (props k p &optional (val nil val?)
+                                   &aux (default (if val?
+                                                  'nilmap 'nilset)))
   (awg (pk props*)
     `(let* ((,props* ,props)
             (,pk (@ ,props* ,k)))
       (fset:with ,props* ,k ; props is a map
         ; pk is a map if val is provided, otherwise set
         (fset:with (or ,pk ,default) ,p
-                   ,@(if val `(,val)))))))
+                   ,@(if val? `(,val)))))))
 
 ; TODO: optional p drops entire k
 (defmacro del-multi-rel (props k &optional p)
@@ -33,24 +34,27 @@
 
 ; TODO: itr prop edges, itr prop verts?
 ; TODO: ignore half?
+; TODO: optional arg for rev?
 (defmacro itr-edges ((g a &optional b) &body body)
   (declare (symbol g a))
   "iterate all edges, as either a=(v1 v2) or a=v1, b=v2."
   (unless (or (not b) (symbolp b)) (error "bad arg to itr-edges"))
-  (awg (a* b* eset)
+  (awg (a* b* eset has)
     `(do-map (,a* ,eset (adj ,g))
-      (do-set (,b* ,eset)
-        ,(if b `(let ((,a ,a*) (,b ,b*)) ,@body)
-               `(let ((,a (list ,a* ,b*))) ,@body))))))
+      (do-map (,b* ,has ,eset)
+        (when ,has
+           ,(if b `(let ((,a ,a*) (,b ,b*)) ,@body)
+               `(let ((,a (list ,a* ,b*))) ,@body)))))))
 
-(defmacro itr-out ((g a b) &body body)
+(defmacro itr-adj ((g a b &optional (mode :out)) &body body)
   (declare (symbol g b))
   "iterate all outboud verts, b, of a."
-  (awg (a* b* eset)
+  (awg (a* b* eset has)
     `(let* ((,a* ,a)
             (,eset (@ (adj ,g) ,a*)))
-      (when ,eset (do-set (,b* ,eset)
-                    (let ((,b ,b*)) ,@body))))))
+      (when ,eset (do-map (,b* ,has ,eset)
+                    (,@(if (eq mode :out) `(when ,has) `(unless ,has))
+                      (let ((,b ,b*)) ,@body)))))))
 
 (defmacro itr-verts ((g a) &body body)
   (declare (symbol g a))

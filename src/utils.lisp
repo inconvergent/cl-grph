@@ -2,7 +2,7 @@
 (in-package #:grph)
 
 (deftype pn (&optional (bits 31)) `(unsigned-byte ,bits))
-(defvar *opt* '(optimize (safety 1) (speed 3) debug space))
+(defvar *opt* '(optimize (safety 3) (speed 3) debug space))
 
 (defun v? (&optional (silent t))
   (let ((v (slot-value (asdf:find-system 'grph) 'asdf:version)))
@@ -82,3 +82,8 @@
     (let ((res (splt (concatenate 'string s (string x)))))
       (if prune (remove-if (lambda (s) (= 0 (length s))) res)
                 res))))
+
+(defun interject (ll &optional (s :-) &aux (res (list)))
+  (loop for l in ll do (push l res) (push s res))
+  (reverse (cdr res)))
+

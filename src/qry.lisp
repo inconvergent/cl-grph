@@ -1,26 +1,42 @@
-
 (in-package :grph)
 
-(defun symlen (s) (declare (symbol s)) (length (symbol-name s)))
+
 (defun has-symchar? (s c &optional (pos :first))
   (let ((name (symbol-name s)))
     (declare (string name))
     (eq (char name (if :first 0 (1- (length name)))) c)))
-(defun var? (s) (and (symbolp s) (has-symchar? s #\?)))
-(defun any? (s) (and (symbolp s) (= (symlen s) 1) (has-symchar? s #\_)))
-(defun match? (m) (every #'identity m))
-(defun only-vars (m) (remove-if-not #'consp m))
+(defun interned? (s) (and (symbolp s) (symbol-package s)))
+(defun var? (s) (and (interned? s) (has-symchar? s #\?)))
+(defun symlen (s) (declare (symbol s)) (length (symbol-name s)))
+(defun any? (s) (and (interned? s) (= (symlen s) 1) (has-symchar? s #\_)))
 (defun eq-car? (a s) (eq (car a) s))
+(defun val? (s) (and (symbolp s) (not (symbol-package s))))
+(defun free? (s)
+  (cond ((or (var? s) (any? s)) t)
+        ((or (val? s) (numberp s) (keywordp s)) nil)
+        (t (error "FREE?: unexpected clause: ~a" s))))
 
 (defun symb-sort-fx (a b) (string-lessp (symbol-name a) (symbol-name b)))
-
-; TODO: fact reducer fx as arg to compile match
-
 (defun varset-sort (a &optional (fx #'car))
   (sort (copy-tree a) #'symb-sort-fx :key fx))
-(defun all-vars (a)
-  (undup (varset-sort (tree-find-all a #'var?)
-                            #'identity)))
+(defun all-vars (a) (undup (varset-sort (tree-find-all a #'var?) #'identity)))
+
+
+(defun var-to-val (in w &aux (res (list)))
+  (labels
+    ((new (s &aux (gs (gensym (string-upcase (mkstr s)))))
+       (push (list gs s) res)
+       gs)
+     (convert (s &aux (m (car (member s res :key #'second))))
+       (if m (car m) (new s)))
+     (rec (w)
+       (cond ((null w) w)
+             ((and (var? w) (member w in)) (convert w))
+             ((atom w) w)
+             ((consp w) (cons (rec (car w)) (rec (cdr w))))
+             (t (warn "VAR-TO-VAL: unexpected clause in: ~a" w)))))
+    (let ((w* (rec w))) (values (reverse res) w*))))
+
 
 (defun match-var-and (aa bb &aux (res (list)))
   (declare (list aa bb))
@@ -33,9 +49,9 @@
                                (return-from merge-and (values nil nil)))))
              (values a t)))
     (loop for a in aa do (loop for b in bb
-      do (mvb (mset match) (merge-and a b)
-                    (when (and match (not (member mset res)))
-                      (push mset res))))))
+          do (mvb (mset match) (merge-and a b)
+               (when (and match (not (member mset res)))
+                     (push mset res))))))
   res)
 
 (defun match-var-or (aa bb)
@@ -58,54 +74,33 @@
 
 (defun sort-nots (a)
   (if (and (listp a) (eq-car? a 'and))
-      (mvb (yes no)
-        (filter-by-predicate (cdr a)
-          (lambda (p) (and (listp p) (eq-car? p 'not))))
+      (mvb (yes no) (filter-by-predicate (cdr a)
+                       (lambda (p) (and (listp p) (eq-car? p 'not))))
         (concatenate 'list (list 'and) yes no))
       a))
-
-(defun bad-clauses-or (qc)
-  (dsb (a . vars) (mapcar #'all-vars qc)
-    (loop for b in vars unless (equal a b)
-                        do (return-from bad-clauses-or t))))
 
 
 (defmacro mode (expr)
   `(values ,expr ,(intern (mkstr (car expr)) :keyword)))
 
 
-(defmacro compile-query (fact-reduce &key where (select (all-vars where)) in)
-  (declare (symbol fact-reduce) (cons select where))
+(defmacro compile-query (compile-match &key where (select (all-vars where)) in)
+  (declare (symbol compile-match) (cons where))
   "compile a datalog query.
 
 facts reduce should be the name of a function that will be used to
 consider all relevant facts for a given stage. see facts-qry for an example."
   ; TODO:
-  ;  - use in to set variables. syntax?
   ;  - use select to filter variables
-  (awg (fact)
+  ;  - warn on _ _ _ ?
+  (unless (every #'var? select)
+          (warn "COMPILE-QUERY: got bad value for select: ~a" select))
+  (unless (every #'var? in) (warn "COMPILE-QUERY: got bad value for in:  ~a" in))
+
+  (mvb (in where) (var-to-val in where)
     (labels
-      ((compile-match1 (q fact)
-         (loop for qs in q for f in fact
-               collect (cond ((any? qs) t)
-                             ((var? qs) `(cons ',qs ,f))
-                             ((keywordp qs) `(eq ,qs  ,f))
-                             ((numberp qs) `(= ,qs  ,f))
-                             ((symbolp qs) `(equal ,qs  ,f))
-                             (t (error "MATCH1: bad symb: ~s" qs)))))
-
-       (compile-match (q)
-         (awg (m)
-           (let ((nsym (-gensyms :match 3)))
-             `(,fact-reduce
-                (lambda (,fact)
-                  (dsb ,nsym ,fact
-                    (declare (ignorable ,@nsym))
-                    (let ((,m (list ,@(compile-match1 q nsym))))
-                      (when (match? ,m) (only-vars ,m)))))
-                ',q))))
-
-       ; TODO: strip all with no var?
+      ((compile-match (q) `(block ,(apply #'symb (interject q))
+                                  (,compile-match ,q)))
        (compile-next (qc &aux (qc (sort-nots qc)))
          (case (car qc) (and (mode (compile-and #1=(cdr qc))))
                         (or (mode (compile-or #1#)))
@@ -113,75 +108,100 @@ consider all relevant facts for a given stage. see facts-qry for an example."
                         (t (mode (compile-match qc)))))
 
        (do-compile-and-or (qc fxname)
-         (reduce
-           (lambda (res qc)
-             (awg (nxt res*)
-               (mvb (nxt* mode) (compile-next qc)
-                 (if res `(let ((,res* ,res) (,nxt ,nxt*))
-                           (,(if (equal :compile-not mode)
-                                 'match-var-not fxname)
-                                 ,res* ,nxt))
-                          nxt*))))
-           (reverse qc) :initial-value (list)))
+         (reduce (lambda (res qc)
+                   (awg (nxt res*)
+                     (mvb (nxt* mode) (compile-next qc)
+                       (if res `(let ((,res* ,res) (,nxt ,nxt*))
+                                 (,(if (equal :compile-not mode)
+                                       'match-var-not fxname)
+                                       ,res* ,nxt))
+                                nxt*))))
+                 (reverse qc) :initial-value (list)))
 
        (compile-and (qc)
          (unless qc (warn "AND: missing qc?"))
-         `(block ,(symb :and qc)
-            ,(do-compile-and-or qc 'match-var-and)))
+         (do-compile-and-or qc 'match-var-and))
 
+       (bad-or-clause (qc)
+         (dsb (a . vars) (mapcar #'all-vars qc)
+           (loop for b in vars unless (equal a b)
+                 do (return-from bad-or-clause t))))
        (compile-or (qc)
          (unless qc (warn "OR: missing qc?"))
-         (when (bad-clauses-or qc) (warn "bad OR clause ~a" qc))
-         `(block ,(symb :or qc)
-           ,(do-compile-and-or qc 'match-var-or)))
+         (when (bad-or-clause qc) (warn "bad OR clause ~a" qc))
+         (do-compile-and-or qc 'match-var-or))
 
        (compile-not (qc)
           (unless qc (warn "NOT: missing qc?"))
-          `(block ,(symb :not qc)
-            ,(compile-next
-               (if (= (length qc) 1) (car qc) `(and ,@qc))))))
+          (compile-next (if (= (length qc) 1) (car qc) `(and ,@qc)))))
 
-      `(progn ,(compile-next where)))))
+      `(let (,@in) ,(compile-next where)))))
 
 
-(defmacro facts-qry (facts &rest qry)
-  "run this datalog qry on all input facts."
-  (awg (fact-reduce fx f m res lp)
-   `(labels
-      ((,fact-reduce (,fx &rest rest)
-        (declare (ignore rest))
-         (loop named ,lp
-               with ,res of-type list = (list)
-               for ,f of-type list in ,facts
-               for ,m of-type cons = (funcall ,fx ,f)
-               if ,m do (push ,m ,res)
-               finally (return-from ,lp ,res))))
-      (compile-query ,fact-reduce ,@qry))))
-
-
-(defun splice-fact (e p)
-  (awg (a b) `(dsb (,a ,b) ,e (list ,a ,p ,b))))
-(defun select-index (p eset g q &aux (q (second q)))
-  (if (or (any? (second q)) (var? (second q)))
-     `(do-map (,p ,eset (inv ,g)))
-     `(let* ((,p ,(second q))
-             (,eset (@ (inv ,g) ,p))))))
-
-(defmacro qry2 (g &rest qry)
+(defmacro qry (g &rest qry)
   (declare (symbol g))
-  (awg (fact-reduce fx p e q eset m res)
+  (awg (compile-match f p q m res)
     `(macrolet
-       ((,fact-reduce (,fx ,q) ; q == (a p b)
+       ((,compile-match (,q) ; q == (l mid r)
          `(let ((,',res (list)))
-           ; how to included non prop edges?
-           (,@(select-index ',p ',eset ',g ,q);do-map (,',p ,',eset (inv ,',g))
-           (do-set (,',e ,',eset)
-             (typecase ,',e
-               (cons (let ((,',m (funcall ,,fx ,(splice-fact ',e ',p))))
-                       (when ,',m (push ,',m ,',res))))
-               (fixnum nil)
-               (t (error "unexpected element in inv")))))
-           ,',res)
-         ))
-     (compile-query ,fact-reduce ,@qry))))
+            (match (,',g ,',f ,@,q)
+              (let ((,',m (remove-if-not
+                            (lambda (s) (var? (car s))) ,',f)))
+                (when (and ,',m (not (member ,',m ,',res :test #'equalp)))
+                      (push ,',m ,',res))))
+            ,',res)))
+       (compile-query ,compile-match ,@qry))))
+
+(defun -match (g f lft mid rht body &optional (full t))
+  (awg (l p r eset has v s)
+    (labels
+      ((pattern () (list (free? lft) (free? mid) (free? rht)))
+       (mem (l r body) `(when (@mem ,g ,l ,r) ,body))
+       (prop (l p r body) `(when (@prop ,g (list ,l ,r) ,p) ,body))
+       (fact (l p r)
+         (if full
+           `(let ((,f `((,',lft . ,,l) (,',mid . ,,p) (,',rht . ,,r)))) ,@body)
+           `(let ((,f (list ,l ,p ,r))) ,@body)))
+       (hit (pat &rest rest) (equal pat rest))
+       (do-lft (r body)
+         `(let ((,eset (@ (adj ,g) ,lft)))
+            (when ,eset (do-map (,r ,has ,eset)
+                         (declare (ignorable ,has))
+                         ,(mem lft r body)))))
+       (do-rht (l body)
+         `(let ((,eset (@ (adj ,g) ,rht)))
+            (when ,eset (do-map (,l ,has ,eset)
+                          (declare (ignorable ,has))
+                          ,(mem l rht body)))))
+       (do-props (l p r body)
+         `(do-map (,p ,v (or (@ (props ,g) (list ,l ,r))
+                             (fset:map (:_ t))))
+           (declare (ignorable ,v))
+           ,body)))
+
+      (let ((pat (pattern)))
+        (cond
+
+          ((hit pat nil nil nil) (mem lft rht (prop lft mid rht (fact lft mid rht))))
+          ((hit pat nil t nil) (mem lft rht (do-props lft p rht (fact lft p rht))))
+
+          ((hit pat nil nil t) (do-lft r (prop lft mid r (fact lft mid r))))
+          ((hit pat nil t t) (do-lft r (do-props lft p r (fact lft p r))))
+
+          ((hit pat t nil nil) (do-rht l (prop l mid rht (fact l mid rht))))
+          ((hit pat t t nil) (do-rht l (do-props l p rht (fact l p rht))))
+
+          ((hit pat t t t)
+            `(do-map (,l ,eset (adj ,g))
+               (do-map (,r ,has ,eset)
+                 (declare (ignorable ,has))
+                 (when ,has ,(do-props l p r (fact l p r))))))
+          ((hit pat t nil t) ; if props has verts, we need a fixnum test here:
+            `(do-set (,s (or (@ (mid ,g) ,mid) ,nilset))
+              (typecase ,s (list (dsb (,l ,r) ,s ,(fact l mid r)))
+                           (t (error "unexpected clause: ~a ~a ~a" ',lft ',mid ',rht)))))
+          (otherwise (error "internal error: bad pattern: ~a ~a ~a" lft mid rht)))))))
+
+(defmacro %match ((g f lft mid rht) &body body) (-match g f lft mid rht body nil))
+(defmacro match ((g f lft mid rht) &body body) (-match g f lft mid rht body t))
 
