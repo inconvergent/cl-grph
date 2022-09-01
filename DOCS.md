@@ -10,7 +10,7 @@ To load "grph":
   Load 1 ASDF system:
     grph
 ; Loading "grph"
-
+.
 #### GRPH:@EDGES
 
 ```
@@ -44,21 +44,30 @@ total number of edges in graph.
  ;   Source file: src/grph.lisp
 ```
 
+#### GRPH:@IN
+
+```
+list all outboud verts of a.
+
+ ; GRPH:@IN
+ ;   [symbol]
+ ;
+ ; @IN names a compiled function:
+ ;   Lambda-list: (G A &AUX (RES (LIST)))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 31))
+ ;                  (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     list all outboud verts of a.
+ ;   Source file: src/grph.lisp
+```
+
 #### GRPH:@INV
 
 ```
-get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
+:missing:todo:
 
  ; GRPH:@INV
  ;   [symbol]
- ;
- ; @INV names a compiled function:
- ;   Lambda-list: (G K &OPTIONAL P)
- ;   Derived type: (FUNCTION (GRPH:GRPH T &OPTIONAL T)
- ;                  (VALUES T &OPTIONAL))
- ;   Documentation:
- ;     get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
- ;   Source file: src/grph.lisp
 ```
 
 #### GRPH:@MEM
@@ -131,7 +140,7 @@ list of all connected verts.
 #### GRPH:@VNUM
 
 ```
-list all connected verts.
+count all connected verts.
 
  ; GRPH:@VNUM
  ;   [symbol]
@@ -141,7 +150,7 @@ list all connected verts.
  ;   Derived type: (FUNCTION (GRPH:GRPH)
  ;                  (VALUES (UNSIGNED-BYTE 31) &OPTIONAL))
  ;   Documentation:
- ;     list all connected verts.
+ ;     count all connected verts.
  ;   Source file: src/grph.lisp
 ```
 
@@ -182,22 +191,10 @@ add edge edge and re-bind.
 #### GRPH:COMPILE-QUERY
 
 ```
-compile a datalog query.
-
-facts reduce should be the name of a function that will be used to
-consider all relevant facts for a given stage. see facts-qry for an example.
+:missing:todo:
 
  ; GRPH:COMPILE-QUERY
  ;   [symbol]
- ;
- ; COMPILE-QUERY names a macro:
- ;   Lambda-list: (FACT-REDUCE &KEY WHERE (SELECT (ALL-VARS WHERE)) IN)
- ;   Documentation:
- ;     compile a datalog query.
- ;
- ;     facts reduce should be the name of a function that will be used to
- ;     consider all relevant facts for a given stage. see facts-qry for an example.
- ;   Source file: src/qry.lisp
 ```
 
 #### GRPH:DEL
@@ -253,16 +250,10 @@ use :pretty to print verbose output to stdout in a readable form.
 #### GRPH:FACTS-QRY
 
 ```
-run this datalog qry on all input facts.
+:missing:todo:
 
  ; GRPH:FACTS-QRY
  ;   [symbol]
- ;
- ; FACTS-QRY names a macro:
- ;   Lambda-list: (FACTS &REST QRY)
- ;   Documentation:
- ;     run this datalog qry on all input facts.
- ;   Source file: src/qry.lisp
 ```
 
 #### GRPH:GRPH
@@ -275,7 +266,7 @@ run this datalog qry on all input facts.
  ;
  ; GRPH names a compiled function:
  ;   Lambda-list: (&OPTIONAL (ADJ NILMAP) (NUM-EDGES 0) (PROPS NILMAP)
- ;                 (INV NILMAP))
+ ;                 (MID NILMAP))
  ;   Derived type: (FUNCTION
  ;                  (&OPTIONAL FSET:MAP (UNSIGNED-BYTE 31) FSET:MAP
  ;                   FSET:MAP)
@@ -315,12 +306,27 @@ run this datalog qry on all input facts.
  ;     GRPH::PROPS
  ;       Type: FSET:MAP
  ;       Initform: GRPH::NILMAP
- ;     GRPH::INV
+ ;     GRPH::MID
  ;       Type: FSET:MAP
  ;       Initform: GRPH::NILMAP
  ;     GRPH::NUM-EDGES
  ;       Type: GRPH::PN
  ;       Initform: 0
+```
+
+#### GRPH:ITR-ADJ
+
+```
+iterate all outboud verts, b, of a.
+
+ ; GRPH:ITR-ADJ
+ ;   [symbol]
+ ;
+ ; ITR-ADJ names a macro:
+ ;   Lambda-list: ((G A B &OPTIONAL (MODE OUT)) &BODY BODY)
+ ;   Documentation:
+ ;     iterate all outboud verts, b, of a.
+ ;   Source file: src/macros.lisp
 ```
 
 #### GRPH:ITR-EDGES
@@ -338,21 +344,6 @@ iterate all edges, as either a=(v1 v2) or a=v1, b=v2.
  ;   Source file: src/macros.lisp
 ```
 
-#### GRPH:ITR-OUT
-
-```
-iterate all outboud verts, b, of a.
-
- ; GRPH:ITR-OUT
- ;   [symbol]
- ;
- ; ITR-OUT names a macro:
- ;   Lambda-list: ((G A B) &BODY BODY)
- ;   Documentation:
- ;     iterate all outboud verts, b, of a.
- ;   Source file: src/macros.lisp
-```
-
 #### GRPH:ITR-VERTS
 
 ```
@@ -366,6 +357,19 @@ iterate all connected verts, as a.
  ;   Documentation:
  ;     iterate all connected verts, as a.
  ;   Source file: src/macros.lisp
+```
+
+#### GRPH:MATCH
+
+```
+:missing:todo:
+
+ ; GRPH:MATCH
+ ;   [symbol]
+ ;
+ ; MATCH names a macro:
+ ;   Lambda-list: ((G F LFT MID RHT) &BODY BODY)
+ ;   Source file: src/qry.lisp
 ```
 
 #### GRPH:PROP
@@ -399,5 +403,33 @@ set prop and re-bind.
  ;   Documentation:
  ;     set prop and re-bind.
  ;   Source file: src/macros.lisp
+```
+
+#### GRPH:PRT
+
+```
+:missing:todo:
+
+ ; GRPH:PRT
+ ;   [symbol]
+ ;
+ ; PRT names a compiled function:
+ ;   Lambda-list: (O &OPTIONAL S)
+ ;   Derived type: (FUNCTION (T &OPTIONAL T)
+ ;                  (VALUES (OR STRING NULL) &OPTIONAL))
+ ;   Source file: src/grph.lisp
+```
+
+#### GRPH:QRY
+
+```
+:missing:todo:
+
+ ; GRPH:QRY
+ ;   [symbol]
+ ;
+ ; QRY names a macro:
+ ;   Lambda-list: (G &KEY WHERE SELECT IN THEN COLLECT)
+ ;   Source file: src/qry.lisp
 ```
 

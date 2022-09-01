@@ -2,9 +2,10 @@
 
 
 (defun has-symchar? (s c &optional (pos :first))
+  (declare (ignorable pos))
   (let ((name (symbol-name s)))
     (declare (string name))
-    (eq (char name (if :first 0 (1- (length name)))) c)))
+    (eq (char name (case pos (:first 0) (otherwise (1- (length name))))) c)))
 (defun interned? (s) (and (symbolp s) (symbol-package s)))
 (defun var? (s) (and (interned? s) (has-symchar? s #\?)))
 (defun symlen (s) (declare (symbol s)) (length (symbol-name s)))
@@ -14,12 +15,13 @@
 (defun free? (s)
   (cond ((or (var? s) (any? s)) t)
         ((or (val? s) (numberp s) (keywordp s)) nil)
-        (t (error "FREE?: unexpected clause: ~a" s))))
+        (t (error "FREE?: unexpected clause: ~a." s))))
 
 (defun symb-sort-fx (a b) (string-lessp (symbol-name a) (symbol-name b)))
 (defun varset-sort (a &optional (fx #'car))
   (sort (copy-tree a) #'symb-sort-fx :key fx))
-(defun all-vars (a) (undup (varset-sort (tree-find-all a #'var?) #'identity)))
+(defun all-vars (a) (undup (varset-sort (remove-if-not #'var? (undup (awf a)))
+                                        #'identity)))
 
 
 (defun var-to-val (in w &aux (res (list)))
@@ -33,8 +35,7 @@
        (cond ((null w) w)
              ((and (var? w) (member w in)) (convert w))
              ((atom w) w)
-             ((consp w) (cons (rec (car w)) (rec (cdr w))))
-             (t (warn "VAR-TO-VAL: unexpected clause in: ~a" w)))))
+             ((consp w) (cons (rec (car w)) (rec (cdr w)))))))
     (let ((w* (rec w))) (values (reverse res) w*))))
 
 
@@ -76,7 +77,7 @@
   (if (and (listp a) (eq-car? a 'and))
       (mvb (yes no) (filter-by-predicate (cdr a)
                        (lambda (p) (and (listp p) (eq-car? p 'not))))
-        (concatenate 'list (list 'and) yes no))
+        `(and ,@yes ,@no))
       a))
 
 
@@ -84,29 +85,22 @@
   `(values ,expr ,(intern (mkstr (car expr)) :keyword)))
 
 
-(defmacro compile-query (compile-match &key where (select (all-vars where)) in)
-  (declare (symbol compile-match) (cons where))
-  "compile a datalog query.
-
-facts reduce should be the name of a function that will be used to
-consider all relevant facts for a given stage. see facts-qry for an example."
-  ; TODO:
-  ;  - use select to filter variables
-  ;  - warn on _ _ _ ?
-  (unless (every #'var? select)
-          (warn "COMPILE-QUERY: got bad value for select: ~a" select))
-  (unless (every #'var? in) (warn "COMPILE-QUERY: got bad value for in:  ~a" in))
+(defmacro compile-qry-where (compile-match-clause &key where in)
+  (declare (symbol compile-match-clause))
+  "compile datalog query"
+  (unless (every #'var? in)
+          (warn "QRY COMPILE: got bad value for :in: ~a." in))
 
   (mvb (in where) (var-to-val in where)
     (labels
-      ((compile-match (q) `(block ,(apply #'symb (interject q))
-                                  (,compile-match ,q)))
+      ((compile-match-clause (q) `(block ,(apply #'symb (interject q))
+                                  (,compile-match-clause ,q)))
        (compile-next (qc &aux (qc (sort-nots qc)))
+         (unless qc (warn "empty clause in :where: ~a" where))
          (case (car qc) (and (mode (compile-and #1=(cdr qc))))
                         (or (mode (compile-or #1#)))
                         (not (mode (compile-not #1#)))
-                        (t (mode (compile-match qc)))))
-
+                        (t (mode (compile-match-clause qc)))))
        (do-compile-and-or (qc fxname)
          (reduce (lambda (res qc)
                    (awg (nxt res*)
@@ -117,40 +111,52 @@ consider all relevant facts for a given stage. see facts-qry for an example."
                                        ,res* ,nxt))
                                 nxt*))))
                  (reverse qc) :initial-value (list)))
-
-       (compile-and (qc)
-         (unless qc (warn "AND: missing qc?"))
-         (do-compile-and-or qc 'match-var-and))
-
        (bad-or-clause (qc)
          (dsb (a . vars) (mapcar #'all-vars qc)
            (loop for b in vars unless (equal a b)
                  do (return-from bad-or-clause t))))
        (compile-or (qc)
-         (unless qc (warn "OR: missing qc?"))
-         (when (bad-or-clause qc) (warn "bad OR clause ~a" qc))
+         (when (bad-or-clause qc) (warn "QRY-COMPILE: bad OR clause: ~a." qc))
          (do-compile-and-or qc 'match-var-or))
-
+       (compile-and (qc) (do-compile-and-or qc 'match-var-and))
        (compile-not (qc)
-          (unless qc (warn "NOT: missing qc?"))
           (compile-next (if (= (length qc) 1) (car qc) `(and ,@qc)))))
 
       `(let (,@in) ,(compile-next where)))))
 
+; TODO: reduce?
+(defmacro qry (g &key where select in then collect)
+  (declare (symbol g) (list select where))
+  (cond ((not (every #'var? select))
+         (warn "QRY-COMPILE: got bad value for :select: ~a." select))
+        ((> (loop for s in `(,then ,collect) if s summing 1) 1)
+         (warn "QRY-COMPILE: expecting :then, :collect or neither."))
+        ((not (subsetp select (all-vars where)))
+          (warn "QRY-COMPILE: unecpected var in :select: ~a ~%for :where: ~a."
+                select where)))
+  (awg (compile-match-clause f q m s res)
+    (labels ((cdar-member (l) `(cdar (member ',l ,s :key #'car)))
+             (select-let (then select)
+               `(let (,@(loop for l in select collect `(,l ,(cdar-member l))))
+                  ,then))
+             (select-list (select)
+               `(list ,@(loop for l in select collect (cdar-member l)))))
 
-(defmacro qry (g &rest qry)
-  (declare (symbol g))
-  (awg (compile-match f p q m res)
-    `(macrolet
-       ((,compile-match (,q) ; q == (l mid r)
-         `(let ((,',res (list)))
-            (match (,',g ,',f ,@,q)
-              (let ((,',m (remove-if-not
-                            (lambda (s) (var? (car s))) ,',f)))
-                (when (and ,',m (not (member ,',m ,',res :test #'equalp)))
-                      (push ,',m ,',res))))
-            ,',res)))
-       (compile-query ,compile-match ,@qry))))
+      `(macrolet
+        ((,compile-match-clause (,q) ; q == (l mid r)
+          `(let ((,',res (list)))
+             (match (,',g ,',f ,@,q)
+               (let ((,',m (remove-if-not
+                             (lambda (,',s) (var? (car ,',s))) ,',f)))
+                 (when (and ,',m (not (member ,',m ,',res :test #'equalp)))
+                       (push ,',m ,',res))))
+             ,',res)))
+
+        (let ((,res (compile-qry-where ,compile-match-clause :where ,where :in ,in)))
+          ,(cond (then `(map nil (lambda (,s) ,(select-let then select)) ,res))
+                 (collect `(mapcar (lambda (,s) ,(select-let collect select)) ,res))
+                 ; use dotted pairs?
+                 (t `(mapcar (lambda (,s) ,(select-list select)) ,res))))))))
 
 (defun -match (g f lft mid rht body &optional (full t))
   (awg (l p r eset has v s)
@@ -199,8 +205,8 @@ consider all relevant facts for a given stage. see facts-qry for an example."
           ((hit pat t nil t) ; if props has verts, we need a fixnum test here:
             `(do-set (,s (or (@ (mid ,g) ,mid) ,nilset))
               (typecase ,s (list (dsb (,l ,r) ,s ,(fact l mid r)))
-                           (t (error "unexpected clause: ~a ~a ~a" ',lft ',mid ',rht)))))
-          (otherwise (error "internal error: bad pattern: ~a ~a ~a" lft mid rht)))))))
+                           (t (error "QRY-MATCH: unexpected clause: ~a ~a ~a"
+                                     ',lft ',mid ',rht))))))))))
 
 (defmacro %match ((g f lft mid rht) &body body) (-match g f lft mid rht body nil))
 (defmacro match ((g f lft mid rht) &body body) (-match g f lft mid rht body t))

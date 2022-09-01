@@ -127,7 +127,8 @@ this terminology is used :
   (labels
     ((prune-props (&aux (mid (mid g)) (ab `(,a ,b)))
        (do-map (p _ (or (@prop g ab) nilmap)) ; ignore _=v
-               (setf mid (del-multi-rel mid p ab)))
+         (declare (ignorable _))
+         (setf mid (del-multi-rel mid p ab)))
        (let ((adj (if (@mem g b a) (adj g)
                     (del-multi-rel (adj g) b a))))
         (grph (del-multi-rel adj a b)

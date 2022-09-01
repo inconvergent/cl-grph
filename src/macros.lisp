@@ -13,11 +13,11 @@
                 `(or ,pmap ,default)))))
 
 (defmacro set-multi-rel (props k p &optional (val nil val?)
-                                   &aux (default (if val?
-                                                  'nilmap 'nilset)))
+                                   &aux (default (if val?  'nilmap 'nilset)))
   (awg (pk props*)
     `(let* ((,props* ,props)
             (,pk (@ ,props* ,k)))
+      (declare (ignorable ,pk))
       (fset:with ,props* ,k ; props is a map
         ; pk is a map if val is provided, otherwise set
         (fset:with (or ,pk ,default) ,p
@@ -28,6 +28,7 @@
   (awg (props* pk)
     `(let* ((,props* ,props)
             (,pk (@ ,props* ,k)))
+       (declare (ignorable ,pk))
        ,(if p `(fset:with ,props* ,k
                  (when ,pk (fset:less ,pk ,p)))
               `(fset:less ,props* ,k)))))
@@ -43,7 +44,7 @@
     `(do-map (,a* ,eset (adj ,g))
       (do-map (,b* ,has ,eset)
         (when ,has
-           ,(if b `(let ((,a ,a*) (,b ,b*)) ,@body)
+           ,(if b `(let ((,a ,a*) (,b ,b*)) (declare (ignorable ,a ,b)) ,@body)
                `(let ((,a (list ,a* ,b*))) ,@body)))))))
 
 (defmacro itr-adj ((g a b &optional (mode :out)) &body body)
@@ -65,8 +66,8 @@
                              (setf (gethash ,b ,seen) t)
                              t)))
         (itr-edges (,g ,a ,b)
-          (when (not (,seen ,a)) (let ((,a ,a)) ,@body))
-          (when (not (,seen ,b)) (let ((,a ,b)) ,@body)))))))
+          (when (not (,seen ,a)) (let ((,a ,a)) (declare (ignorable ,a)) ,@body))
+          (when (not (,seen ,b)) (let ((,a ,b)) (declare (ignorable ,a)) ,@body)))))))
 
 (defmacro add! (g a b &optional prop (val t))
   (declare (symbol g))

@@ -40,7 +40,7 @@
 
 (defun undup (e)
   (declare (optimize speed))
-  (delete-duplicates (alexandria:flatten e)))
+  (delete-duplicates (awf e)))
 
 ; (defun internal-path-string (path)
 ;   (declare (string path))
@@ -52,16 +52,6 @@
         repeat n
         for x across "XYZWUVPQR"
         collect (gensym (format nil "~a-~a-" name x))))
-
-(defun tree-find-all (root fx &optional (res (list)))
-  (declare (optimize speed) (function fx) (list res))
-  (cond ((funcall fx root) (return-from tree-find-all (cons root res)))
-        ((atom root) nil)
-        (t (let ((l (tree-find-all (car root) fx res))
-                 (r (tree-find-all (cdr root) fx res)))
-             (when l (setf res `(,@l ,@res)))
-             (when r (setf res `(,@r ,@res))))
-           res)))
 
 (defun filter-by-predicate (l fx)
   (declare (list l) (function fx))
@@ -86,4 +76,21 @@
 (defun interject (ll &optional (s :-) &aux (res (list)))
   (loop for l in ll do (push l res) (push s res))
   (reverse (cdr res)))
+
+; modified from on lisp by pg
+(defun group (source n)
+  (if (zerop n) (warn "group: zero length"))
+  (labels ((rec (source acc)
+             (let ((rest (nthcdr n source)))
+               (if (consp rest)
+                   (rec rest (cons (subseq source 0 n) acc))
+                   (nreverse (cons source acc))))))
+    (if source (rec source nil) nil)))
+
+(defun ungroup (source &aux (res (list)))
+  ; (print source)
+  ; (loop for s in source do (print s))
+  (loop for s in source
+        do (loop for k in s do (push k res)))
+  (reverse res))
 
