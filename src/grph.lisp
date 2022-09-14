@@ -95,12 +95,20 @@ this terminology is used :
 ; MUTATE
 
 ; TODO: assert edge exists?
-(defun prop (g k p &optional (val t))
-  (declare #.*opt* (grph g) (list k) (symbol p))
+(defun prop (g k props)
+  (declare #.*opt* (grph g) (list k props))
   "set prop, p, of edge or vert, k."
-  (grph (adj g) (grph-num-edges g)
-        (set-multi-rel (props g) k p val)
-        (set-multi-rel (mid g) p k)))
+  (labels ((with-prop (p val)
+             (declare (symbol p))
+             (grph (adj g) (grph-num-edges g)
+                   (set-multi-rel (props g) k p val)
+                   (set-multi-rel (mid g) p k))))
+    (loop for p* in props
+          do (setf g (typecase p*
+                       (cons (dsb (p val) p* (with-prop p val)))
+                       (symbol (with-prop p* t))
+                       (t (error "PROP: unexpected prop: ~a" p*)))))
+    g))
 
 (defun -add (g a b)
   (declare #.*opt* (grph g) (pn a b))
@@ -111,16 +119,15 @@ this terminology is used :
           (1+ (grph-num-edges g))
           (props g) (mid g))))
 
-(defun add (g a b &optional p (val t)) ; option to force set prop?
-  (declare #.*opt* (grph g) (pn a b))
-  "new edge (a b). optionally set prop, p, (with val)."
+; alter all refs to add
+(defun add (g a b &optional props) ; option to force set prop?
+  (declare #.*opt* (grph g) (pn a b) (list props))
+  "new edge (a b). optionally set prop, p, (with val).
+returns: (values g created?)"
   (unless (/= a b) (warn "-ADD incorrect edge: (~a ~a)." a b))
-  (if (@mem g a b)
-      (values g nil) ; do nothing
-      (values (typecase p ; add edge (and prop)
-                (null #1=(-add g a b))
-                (symbol (prop #1# (list a b) p val)))
-              t)))
+  (if (@mem g a b) (values g nil)
+                   (progn (setf g (-add g a b))
+                          (values (prop g (list a b) props) t))))
 
 (defun -del (g a b)
   (declare #.*opt* (grph g) (pn a b))
@@ -140,12 +147,20 @@ this terminology is used :
 
 (defun del (g a b) ; option to dont delete props?, option to force del prop?
   (declare (grph g) (pn a b))
-  "delete edge (a b). deletes associated props."
+  "delete edge (a b). deletes associated props.
+returns: (values g deleted?)"
   (-del g a b))
+
+; VARIOUS ---------------------------------
+
+(defun grp (g &optional (s :g)) `((,s ,g) ,g))
+; (grph:grp (grph:@prop g (list ?a ?b) :g))
 
 (defun ingest-facts (g f)
   (loop for (l p r) in f
-        do (cond ((not (@mem g l r)) (add! g l r p))
-                 ((not (@prop g (list l r) p)) (prop! g (list l r) p))))
+        do (cond ((not (@mem g l r))
+                    (add! g l r (list p)))
+                 ((not (@prop g (list l r) p))
+                    (prop! g (list l r) (list p)))))
   g)
 

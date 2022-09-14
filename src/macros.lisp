@@ -36,6 +36,7 @@
 ; TODO: itr prop edges, itr prop verts?
 ; TODO: ignore half?
 ; TODO: optional arg for rev?
+; TODO: rename this
 (defmacro itr-edges ((g a &optional b) &body body)
   (declare (symbol g a))
   "iterate all edges, as either a=(v1 v2) or a=v1, b=v2."
@@ -62,25 +63,35 @@
   "iterate all connected verts, as a."
   (awg (seen b)
     `(let ((,seen (make-hash-table :test #'eql)))
-      (labels ((,seen (,b) (when (not (gethash ,b ,seen))
-                             (setf (gethash ,b ,seen) t)
-                             t)))
+      (labels ((,seen (,b) (if (gethash ,b ,seen) t
+                               (progn (setf (gethash ,b ,seen) t)
+                                      nil))))
         (itr-edges (,g ,a ,b)
           (when (not (,seen ,a)) (let ((,a ,a)) (declare (ignorable ,a)) ,@body))
           (when (not (,seen ,b)) (let ((,a ,b)) (declare (ignorable ,a)) ,@body)))))))
 
-(defmacro add! (g a b &optional prop (val t))
+(defmacro add! (g a b &optional props)
   (declare (symbol g))
-  "add edge edge and re-bind."
-  `(setf ,g (add ,g ,a ,b ,@(when prop `(,prop ,val)))))
+  "add edge edge and re-bind.
+returns: (a b) or nil."
+  (awg (g* created?)
+    `(mvb (,g* ,created?) (add ,g ,a ,b ,props)
+      (setf ,g ,g*)
+      (if ,created? (list ,a ,b) nil))))
 
 (defmacro del! (g a b)
   (declare (symbol g))
-  "del edge and re-bind."
-  `(setf ,g (del ,g ,a ,b)))
+  "del edge and re-bind.
+returns: deleted?"
+  (awg (g* deleted?)
+    `(mvb (,g* ,deleted?) (del ,g ,a ,b)
+      (setf ,g ,g*)
+      ,deleted?)))
 
-(defmacro prop! (g k prop &optional (val t val?))
+; TODO: should this return anything else?
+(defmacro prop! (g k props)
   (declare (symbol g))
   "set prop and re-bind."
-  `(setf ,g (prop ,g ,k ,prop ,@(when val? `(,val)))))
+  `(progn (setf ,g (prop ,g ,k ,props))
+          nil))
 

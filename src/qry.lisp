@@ -8,6 +8,8 @@
     (eq (char name (case pos (:first 0) (otherwise (1- (length name))))) c)))
 (defun interned? (s) (and (symbolp s) (symbol-package s)))
 (defun var? (s) (and (interned? s) (has-symchar? s #\?)))
+(defun var^ (v &aux (v (mkstr v)))
+  (and (> (length v) 1) (equalp (char v 0) #\^)))
 (defun symlen (s) (declare (symbol s)) (length (symbol-name s)))
 (defun any? (s) (and (interned? s) (= (symlen s) 1) (has-symchar? s #\_)))
 (defun eq-car? (a s) (eq (car a) s))
@@ -22,7 +24,6 @@
   (sort (copy-tree a) #'symb-sort-fx :key fx))
 (defun all-vars (a) (undup (varset-sort (remove-if-not #'var? (undup (awf a)))
                                         #'identity)))
-
 
 (defun var-to-val (in w &aux (res (list)))
   (labels
@@ -46,7 +47,7 @@
                    for aval = (cdr (assoc bkey a))
                    do (cond ((not aval)
                                (setf a (acons bkey bval a)))
-                            ((not (equal aval bval))
+                            ((not (eql aval bval))
                                (return-from merge-and (values nil nil)))))
              (values a t)))
     (loop for a in aa do (loop for b in bb
@@ -57,14 +58,14 @@
 
 (defun match-var-or (aa bb)
   (declare (list aa bb))
-  (union aa bb :test #'equalp))
+  (union aa bb :test #'equal))
 
 (defun match-var-not (aa bb &aux (res (list)))
   (declare (list aa bb))
   (labels ((merge-not (a b)
             (loop for (bkey . bval) in b
                   for aval = (cdr (assoc bkey a))
-                  if (and aval bval (equal aval bval))
+                  if (and aval bval (eql aval bval))
                   do (return-from merge-not t))))
     (loop for a in aa
           for u = (loop named inner for b in bb
@@ -89,14 +90,14 @@
   (declare (symbol compile-match-clause))
   "compile datalog query"
   (unless (every #'var? in)
-          (warn "QRY COMPILE: got bad value for :in: ~a." in))
+          (error "QRY: got bad value for :in: ~a." in))
 
   (mvb (in where) (var-to-val in where)
     (labels
       ((compile-match-clause (q) `(block ,(apply #'symb (interject q))
                                   (,compile-match-clause ,q)))
        (compile-next (qc &aux (qc (sort-nots qc)))
-         (unless qc (warn "empty clause in :where: ~a" where))
+         (unless qc (warn "QRY: empty clause in :where: ~a" where))
          (case (car qc) (and (mode (compile-and #1=(cdr qc))))
                         (or (mode (compile-or #1#)))
                         (not (mode (compile-not #1#)))
@@ -116,7 +117,7 @@
            (loop for b in vars unless (equal a b)
                  do (return-from bad-or-clause t))))
        (compile-or (qc)
-         (when (bad-or-clause qc) (warn "QRY-COMPILE: bad OR clause: ~a." qc))
+         (when (bad-or-clause qc) (warn "QRY: bad OR clause: ~a." qc))
          (do-compile-and-or qc 'match-var-or))
        (compile-and (qc) (do-compile-and-or qc 'match-var-and))
        (compile-not (qc)
@@ -124,39 +125,64 @@
 
       `(let (,@in) ,(compile-next where)))))
 
-; TODO: reduce?
-(defmacro qry (g &key where select in then collect)
-  (declare (symbol g) (list select where))
-  (cond ((not (every #'var? select))
-         (warn "QRY-COMPILE: got bad value for :select: ~a." select))
-        ((> (loop for s in `(,then ,collect) if s summing 1) 1)
-         (warn "QRY-COMPILE: expecting :then, :collect or neither."))
-        ((not (subsetp select (all-vars where)))
-          (warn "QRY-COMPILE: unecpected var in :select: ~a ~%for :where: ~a."
-                select where)))
-  (awg (compile-match-clause f q m s res)
-    (labels ((cdar-member (l) `(cdar (member ',l ,s :key #'car)))
-             (select-let (then select)
-               `(let (,@(loop for l in select collect `(,l ,(cdar-member l))))
-                  ,then))
-             (select-list (select)
-               `(list ,@(loop for l in select collect (cdar-member l)))))
+; TODO: collect-res var, result list var
+(defmacro qry (g &key using where select in
+                      then collect first
+                      (itr (gensym "ITR")))
+  (declare (symbol g) (list select where using in first))
 
+  (unless (every #'var^ using)
+          (error "QRY: incorrect symb in :using ~a. use eg: ^s." using))
+  (when (not (every #'var? select))
+        (error "QRY: got bad value for :select: ~a." select))
+  (when (not (subsetp select (all-vars where)))
+        (error "QRY: unecpected var in :select: ~a ~%for :where: ~a." select where))
+  (when (intersection select in)
+        (error "QRY: :select ~a and :in ~a can not overlap." select in))
+  (when (> (length (remove-if-not #'identity (list then collect first))) 1)
+        (error "QRY: use either :then, :first, or :collect."))
+
+  (awg (compile-match-clause f q m s res stop* collect-res)
+    (labels
+      ((cdar-member (l) `(cdar (member ',l ,s :key #'car :test #'eq)))
+       (select-let (then select)
+         `(let (,@(loop for l in select collect `(,l ,(cdar-member l)))) ,then))
+       (select-list (select)
+         `(list ,@(loop for l in select collect (cdar-member l))))
+       (re-intern (g) (intern (subseq (mkstr g) 1) (symbol-package g)))
+       (bind-partial () (loop for g in using collect `(,g ,(re-intern g))))
+       (re-bind-result ()
+         `(setf ,@(awf (loop for g in using collect `(,(re-intern g) ,g)))))
+       (itr-body ()
+         (cond (first `(let ((,itr 0) (,s (car ,res)))
+                        ,(select-let first select)))
+               (then `(loop for ,s in ,res for ,itr from 0
+                            do ,(select-let then select)))
+               (collect `(loop for ,s in ,res for ,itr from 0
+                               collect ,(select-let collect select)))
+               (t `(loop for ,s in ,res for ,itr from 0
+                         collect ,(select-list select))))))
       `(macrolet
-        ((,compile-match-clause (,q) ; q == (l mid r)
+         ; cancel and ignore all results
+        ((cancel (&body body) `(return-from ,',stop* (progn ,@body)))
+         ; stop, but keep the results
+         (stop (&body body) `(progn ,',(re-bind-result)
+                               (return-from ,',stop* (progn ,@body))))
+         (,compile-match-clause (,q) ; q == (l mid r)
           `(let ((,',res (list)))
              (match (,',g ,',f ,@,q)
                (let ((,',m (remove-if-not
                              (lambda (,',s) (var? (car ,',s))) ,',f)))
-                 (when (and ,',m (not (member ,',m ,',res :test #'equalp)))
-                       (push ,',m ,',res))))
-             ,',res)))
+                 (when ,',m (push ,',m ,',res))))
+             (remove-duplicates ,',res :test #'equal))))
 
-        (let ((,res (compile-qry-where ,compile-match-clause :where ,where :in ,in)))
-          ,(cond (then `(map nil (lambda (,s) ,(select-let then select)) ,res))
-                 (collect `(mapcar (lambda (,s) ,(select-let collect select)) ,res))
-                 ; use dotted pairs?
-                 (t `(mapcar (lambda (,s) ,(select-list select)) ,res))))))))
+        (let ((,collect-res nil)
+              (,res (compile-qry-where ,compile-match-clause
+                      :where ,where :in ,in))
+              ,@(bind-partial))
+          (block ,stop* (setf ,collect-res ,(itr-body))
+                        ,(re-bind-result)
+                        ,collect-res))))))
 
 (defun -match (g f lft mid rht body &optional (full t))
   (awg (l p r eset has v s)
@@ -190,10 +216,8 @@
 
           ((hit pat nil nil nil) (mem lft rht (prop lft mid rht (fact lft mid rht))))
           ((hit pat nil t nil) (mem lft rht (do-props lft p rht (fact lft p rht))))
-
           ((hit pat nil nil t) (do-lft r (prop lft mid r (fact lft mid r))))
           ((hit pat nil t t) (do-lft r (do-props lft p r (fact lft p r))))
-
           ((hit pat t nil nil) (do-rht l (prop l mid rht (fact l mid rht))))
           ((hit pat t t nil) (do-rht l (do-props l p rht (fact l p rht))))
 
@@ -204,10 +228,24 @@
                  (when ,has ,(do-props l p r (fact l p r))))))
           ((hit pat t nil t) ; if props has verts, we need a fixnum test here:
             `(do-set (,s (or (@ (mid ,g) ,mid) ,nilset))
-              (typecase ,s (list (dsb (,l ,r) ,s ,(fact l mid r)))
-                           (t (error "QRY-MATCH: unexpected clause: ~a ~a ~a"
-                                     ',lft ',mid ',rht))))))))))
+              (typecase ,s
+                (list (dsb (,l ,r) ,s ,(fact l mid r)))
+                (t (error "QRY: unexpected clause: ~a ~a ~a"
+                          ',lft ',mid ',rht))))))))))
 
 (defmacro %match ((g f lft mid rht) &body body) (-match g f lft mid rht body nil))
 (defmacro match ((g f lft mid rht) &body body) (-match g f lft mid rht body t))
+
+(defmacro collect-while ((&key (init (list)) (test 'not)) &body body)
+  (grph::awg (res)
+    `(concatenate 'list ,init
+      (loop for ,res = (progn ,@body)
+            until (,test ,res)
+            if ,res collect ,res))))
+
+(defmacro qry-collect-while ((g &key (init `(list))) &rest rest)
+  (declare (symbol g))
+  (when (member :using rest) (error "QRY: :using not allowed in qry-while."))
+  `(collect-while (:init ,init)
+    (qry ,g ,@rest)))
 

@@ -88,9 +88,6 @@
     (if source (rec source nil) nil)))
 
 (defun ungroup (source &aux (res (list)))
-  ; (print source)
-  ; (loop for s in source do (print s))
-  (loop for s in source
-        do (loop for k in s do (push k res)))
+  (loop for s in source do (loop for k in s do (push k res)))
   (reverse res))
 
