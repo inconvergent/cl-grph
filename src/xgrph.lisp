@@ -6,7 +6,7 @@
   (fset:empty-seq d))
 
 (defmacro @vert (dim s i)
-  (declare (grph:pn dim))
+  (declare (grph:pn dim) (symbol s))
   "get vert i."
   (grph::awg (k)
     `(let ((,k (* ,dim ,i)))
@@ -22,7 +22,7 @@
 
 
 (defmacro @verts (dim s l)
-  (declare (grph:pn dim))
+  (declare (grph:pn dim) (symbol s))
   "get verts in l."
   (grph::awg (a i c h l*)
     `(let ((,l* ,l))
@@ -39,7 +39,7 @@
 (defmacro vert! (dim s &rest rest
                        &aux (gs (veq::-gensyms :pos dim))
                             (n (gensym "N")))
-  (declare (grph:pn dim))
+  (declare (grph:pn dim) (symbol s))
   "add vert."
   `(let ((,n (fset:size ,s)))
      (declare (grph:pn ,n))
@@ -51,7 +51,7 @@
 (defmacro 3vert! (&rest rest) `(vert! 3 ,@rest))
 
 (defmacro verts! (dim s path)
-  (declare (grph:pn dim))
+  (declare (grph:pn dim) (symbol s))
   "add verts."
   (grph::awg (p res)
     `(let ((,p ,path) (,res (list)))
@@ -68,9 +68,9 @@
 (defmacro 3verts! (&rest rest) `(verts! 3 ,@rest))
 
 
-; TODO: both dirs?
+; TODO: mode for both dirs?
 (defmacro path! (dim g s path &optional props)
-  (declare (grph:pn dim))
+  (declare (grph:pn dim) (symbol g s))
   "add path with optional :prop."
   (grph::awg (i j res props*)
     `(let ((,props* ,props)
@@ -82,10 +82,11 @@
 (defmacro 2path! (&rest rest) `(path! 2 ,@rest))
 (defmacro 3path! (&rest rest) `(path! 3 ,@rest))
 
-(defmacro move! (dim s i pos &optional (mode :rel)
-                                  &aux (gs (veq::-gensyms :pos dim))
-                                       (gs-new (veq::-gensyms :new dim)))
-  (declare (grph:pn dim))
+(defmacro move! (dim s i pos
+                 &optional (mode :rel)
+                 &aux (gs (veq::-gensyms :pos dim))
+                      (gs-new (veq::-gensyms :new dim)))
+  (declare (grph:pn dim) (symbol s) (keyword mode))
   "move vert i to pos. use mode :rel or :abs."
   (grph::awg (i* ii*)
     (labels ((rel* () (loop for a in gs for b in gs-new for k from 0
@@ -103,10 +104,15 @@
 (defmacro 2move! (&rest rest) `(move! 2 ,@rest))
 (defmacro 3move! (&rest rest) `(move! 3 ,@rest))
 
-(defmacro append! (dim g s i x &optional (mode :rel) props
-                                    &aux (gs (veq::-gensyms :pos dim))
-                                         (gs-new (veq::-gensyms :new dim)))
-  (declare (grph:pn dim))
+(defmacro %append! (dim g s i x
+                    &optional modes props
+                    &aux (gs (veq::-gensyms :pos dim))
+                         (gs-new (veq::-gensyms :new dim))
+                         (modes (grph::valid-modes :append! modes
+                                  '(:<- :-> :<> :abs :rel)))
+                         (dir (grph::select-mode modes '(:-> :<- :<>)))
+                         (mode (grph::select-mode modes '(:rel :abs))))
+  (declare (grph:pn dim) (symbol g s) (type (or list symbol) modes))
   "append edge from vert i to pos x. returns new vert."
   (grph::awg (j)
     `(let ((,j (vert! ,dim ,s
@@ -116,14 +122,19 @@
                              (grph::mvb (,@gs) (@vert ,dim ,s ,i)
                                (values ,@(loop for a in gs and b in gs-new
                                                collect `(+ ,a ,b))))))
-                    (t (error "APPEND! bad mode: ~a, use :rel or :abs."
-                              mode))))))
+                    (t (error "APPEND! bad mode: ~a, use :rel or :abs." mode))))))
       (declare (grph:pn ,j))
-      (grph:add! ,g ,i ,j ,props)
+      ,(case dir (:-> `(grph:add! ,g ,i ,j ,props))
+                 (:<- `(grph:add! ,g ,j ,i ,props))
+                 (:<> `(progn (grph:add! ,g ,i ,j ,props)
+                              (grph:add! ,g ,j ,i ,props)))
+                 (t (error "APPEND!: expected dir :ix or :xi, got: ~a." dir)))
       ,j)))
-(defmacro 2append! (&rest rest) `(append! 2 ,@rest))
-(defmacro 3append! (&rest rest) `(append! 3 ,@rest))
+(defmacro append! (&rest rest) `(%append! 1 ,@rest))
+(defmacro 2append! (&rest rest) `(%append! 2 ,@rest))
+(defmacro 3append! (&rest rest) `(%append! 3 ,@rest))
 
+; TODO: inv
 (defmacro split! (dim g s a b x &optional props)
   (declare (grph:pn dim))
   "delete edge (a b) and add edges (a x) (x b)."
@@ -142,6 +153,5 @@
 (defmacro 2@ (&rest rest) `(@ 2 ,@rest))
 (defmacro 3@ (&rest rest) `(@ 3 ,@rest))
 
-; transform
-; split-edge e x
+; TODO: transform
 

@@ -5,7 +5,7 @@
                 #:empty-map #:do-map #:do-set)
   (:nicknames #:cl-grph)
   (:export
-    #:ext-symbols?  #:pn
+    #:ext-symbols? #:pn
     #:@edges #:@enum #:@in #:@out #:@verts #:@vnum #:@prop #:@mem #:@inv
     #:add #:del #:add! #:del! #:prop #:prop!
     #:itr-edges #:itr-adj #:itr-verts
@@ -15,7 +15,7 @@
     #:stop #:cancel
     #:collect-while
     #:edge-set->path
-    #:grp))
+    #:grp #:distinct #:smallest-first))
 
 (defpackage #:xgrph
   (:use #:common-lisp)
@@ -29,5 +29,7 @@
            #:move! #:2move! #:3move!
            #:path! #:2path! #:3path!
            #:split! #:2split! #:3split!
-           #:append!  #:2append!  #:3append!))
+           #:append! #:2append! #:3append!
+           #:append-inv! #:2append-inv! #:3append-inv!
+           ))
 

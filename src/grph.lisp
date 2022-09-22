@@ -153,7 +153,9 @@ returns: (values g deleted?)"
 
 ; VARIOUS ---------------------------------
 
-(defun grp (g &optional (s :g)) `((,s ,g) ,g))
+(defun grp (val &optional (s :g))
+  (declare (symbol val s))
+  `((,s ,val) ,val))
 ; (grph:grp (grph:@prop g (list ?a ?b) :g))
 
 (defun ingest-facts (g f)

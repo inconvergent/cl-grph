@@ -38,9 +38,9 @@
 ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
 (defun psymb (package &rest args) (values (intern (apply #'mkstr args) package)))
 
-(defun undup (e)
+(defun undup (e &optional (flatten t))
   (declare (optimize speed))
-  (delete-duplicates (awf e)))
+  (delete-duplicates (if flatten (awf e) e)))
 
 ; (defun internal-path-string (path)
 ;   (declare (string path))
@@ -90,4 +90,24 @@
 (defun ungroup (source &aux (res (list)))
   (loop for s in source do (loop for k in s do (push k res)))
   (reverse res))
+
+(defun ensure-list (l)
+  (the list (typecase l (null nil) (list l) (t (list l)))))
+
+(defun select-mode (c valid &aux (c (ensure-list c)))
+  (declare (list valid c))
+  (let ((res (intersection c valid)))
+    (the symbol (cond ((= 1 (length res)) (car res))
+                      (t (car valid))))))
+
+(defun valid-modes (name l valid &aux (l (ensure-list l)))
+  (declare (keyword name) (list valid))
+  (let ((res (mapcar (lambda (s) (psymb :keyword (mkstr s))) l)))
+    (unless (subsetp res valid) (error "MODE: invalid mode for ~a in ~a. use: ~a"
+                                       name l valid))
+    res))
+
+; (defmacro with-prof ((&key (mode :cpu) (mx 50000)) &body body)
+;   `(sb-sprof:with-profiling (:max-samples ,mx :mode ,mode :report :graph)
+;                             (progn ,@body)))
 

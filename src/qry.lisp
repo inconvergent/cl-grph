@@ -18,12 +18,26 @@
   (cond ((or (var? s) (any? s)) t)
         ((or (val? s) (numberp s) (keywordp s)) nil)
         (t (error "FREE?: unexpected clause: ~a." s))))
+(defun bad-or-clause? (qc)
+  (dsb (a . vars) (mapcar #'all-vars qc)
+    (loop for b in vars unless (equal a b)
+          do (return-from bad-or-clause? t))))
 
 (defun symb-sort-fx (a b) (string-lessp (symbol-name a) (symbol-name b)))
 (defun varset-sort (a &optional (fx #'car))
   (sort (copy-tree a) #'symb-sort-fx :key fx))
 (defun all-vars (a) (undup (varset-sort (remove-if-not #'var? (undup (awf a)))
                                         #'identity)))
+
+(defun distinct (&rest rest &aux (n (length rest)))
+  (= n (length (grph::undup rest))))
+
+(defmacro smallest-first (&rest rest &aux (a (car rest)))
+  (declare (symbol a))
+  `(and ,@(loop for b of-type symbol in (cdr rest) collect `(< ,a ,b))))
+(defmacro largest-first (&rest rest &aux (a (car rest)))
+  (declare (symbol a))
+  `(and ,@(loop for b of-type symbol in (cdr rest) collect `(> ,a ,b))))
 
 (defun var-to-val (in w &aux (res (list)))
   (labels
@@ -74,12 +88,15 @@
   res)
 
 
-(defun sort-nots (a)
-  (if (and (listp a) (eq-car? a 'and))
-      (mvb (yes no) (filter-by-predicate (cdr a)
-                       (lambda (p) (and (listp p) (eq-car? p 'not))))
-        `(and ,@yes ,@no))
-      a))
+(defun sort-and-clauses (a)
+  (labels ((do-split (l op)
+             (mvb (yes no) (filter-by-predicate l
+                             (lambda (p) (and (listp p) (eq-car? p op))))
+               `(,@yes ,@no))))
+   (if (and (listp a) (eq-car? a 'and))
+       (let ((l (cdr a)))
+         `(and ,@(do-split (do-split l :exe) 'not)))
+      a)))
 
 
 (defmacro mode (expr)
@@ -96,7 +113,7 @@
     (labels
       ((compile-match-clause (q) `(block ,(apply #'symb (interject q))
                                   (,compile-match-clause ,q)))
-       (compile-next (qc &aux (qc (sort-nots qc)))
+       (compile-next (qc &aux (qc (sort-and-clauses qc)))
          (unless qc (warn "QRY: empty clause in :where: ~a" where))
          (case (car qc) (and (mode (compile-and #1=(cdr qc))))
                         (or (mode (compile-or #1#)))
@@ -104,20 +121,16 @@
                         (t (mode (compile-match-clause qc)))))
        (do-compile-and-or (qc fxname)
          (reduce (lambda (res qc)
-                   (awg (nxt res*)
-                     (mvb (nxt* mode) (compile-next qc)
-                       (if res `(let ((,res* ,res) (,nxt ,nxt*))
+                   (awg (nxt* res*)
+                     (mvb (nxt mode) (compile-next qc)
+                       (if res `(let ((,res* ,res) (,nxt* ,nxt))
                                  (,(if (equal :compile-not mode)
                                        'match-var-not fxname)
-                                       ,res* ,nxt))
-                                nxt*))))
+                                       ,res* ,nxt*))
+                                nxt))))
                  (reverse qc) :initial-value (list)))
-       (bad-or-clause (qc)
-         (dsb (a . vars) (mapcar #'all-vars qc)
-           (loop for b in vars unless (equal a b)
-                 do (return-from bad-or-clause t))))
        (compile-or (qc)
-         (when (bad-or-clause qc) (warn "QRY: bad OR clause: ~a." qc))
+         (when (bad-or-clause? qc) (warn "QRY: bad OR clause: ~a." qc))
          (do-compile-and-or qc 'match-var-or))
        (compile-and (qc) (do-compile-and-or qc 'match-var-and))
        (compile-not (qc)
@@ -125,28 +138,36 @@
 
       `(let (,@in) ,(compile-next where)))))
 
+
 ; TODO: collect-res var, result list var
+; TODO: or-join
 (defmacro qry (g &key using where select in
+                      filter
                       then collect first
-                      (itr (gensym "ITR")))
-  (declare (symbol g) (list select where using in first))
+                      (itr (gensym "ITR"))
+                 &aux (select (ensure-list select))
+                      (in (ensure-list in))
+                      (using (ensure-list using)))
+  (declare (symbol g) (list select where using in first) (symbol itr))
 
   (unless (every #'var^ using)
           (error "QRY: incorrect symb in :using ~a. use eg: ^s." using))
-  (when (not (every #'var? select))
-        (error "QRY: got bad value for :select: ~a." select))
-  (when (not (subsetp select (all-vars where)))
-        (error "QRY: unecpected var in :select: ~a ~%for :where: ~a." select where))
+  (unless (every #'var? select)
+          (error "QRY: got bad value for :select: ~a." select))
   (when (intersection select in)
         (error "QRY: :select ~a and :in ~a can not overlap." select in))
   (when (> (length (remove-if-not #'identity (list then collect first))) 1)
         (error "QRY: use either :then, :first, or :collect."))
+  (when (not (subsetp select (all-vars where)))
+        (warn "QRY: unexpected var in :select: ~a ~%for :where: ~a." select where))
 
   (awg (compile-match-clause f q m s res stop* collect-res)
     (labels
       ((cdar-member (l) `(cdar (member ',l ,s :key #'car :test #'eq)))
-       (select-let (then select)
-         `(let (,@(loop for l in select collect `(,l ,(cdar-member l)))) ,then))
+       (select-with (select)
+         (loop with res = (list) for l in select
+               do (setf res `(,@res for ,l = ,(cdar-member l)))
+               finally (return res)))
        (select-list (select)
          `(list ,@(loop for l in select collect (cdar-member l))))
        (re-intern (g) (intern (subseq (mkstr g) 1) (symbol-package g)))
@@ -154,14 +175,23 @@
        (re-bind-result ()
          `(setf ,@(awf (loop for g in using collect `(,(re-intern g) ,g)))))
        (itr-body ()
-         (cond (first `(let ((,itr 0) (,s (car ,res)))
-                        ,(select-let first select)))
+         (cond (first `(loop named lp
+                             for ,s in ,res with ,itr = 0
+                             ,@(select-with select)
+                             ,@(when filter `(if ,filter))
+                             do (return-from lp ,first)))
                (then `(loop for ,s in ,res for ,itr from 0
-                            do ,(select-let then select)))
+                            ,@(select-with select)
+                            ,@(when filter `(if ,filter))
+                            do ,then))
                (collect `(loop for ,s in ,res for ,itr from 0
-                               collect ,(select-let collect select)))
+                               ,@(select-with select)
+                               ,@(when filter `(if ,filter))
+                               collect ,collect))
                (t `(loop for ,s in ,res for ,itr from 0
-                         collect ,(select-list select))))))
+                         ,@(select-with select)
+                         ,@(when filter `(if ,filter))
+                         collect (list ,@select))))))
       `(macrolet
          ; cancel and ignore all results
         ((cancel (&body body) `(return-from ,',stop* (progn ,@body)))
@@ -236,16 +266,30 @@
 (defmacro %match ((g f lft mid rht) &body body) (-match g f lft mid rht body nil))
 (defmacro match ((g f lft mid rht) &body body) (-match g f lft mid rht body t))
 
-(defmacro collect-while ((&key (init (list)) (test 'not)) &body body)
+(defmacro collect-while ((&key (init '(list)) (test 'not) lim) &body body)
+  (declare (type (or null number) lim))
   (grph::awg (res)
     `(concatenate 'list ,init
-      (loop for ,res = (progn ,@body)
+      (loop ,@(when lim `(repeat ,lim))
+            for ,res = (progn ,@body)
             until (,test ,res)
             if ,res collect ,res))))
 
-(defmacro qry-collect-while ((g &key (init `(list))) &rest rest)
+(defun get-kv (l k &optional d &aux (v (member k (group l 2) :key #'car)))
+  (declare (list l) (keyword k))
+  (if v (cadar v) d))
+
+(defun strip-kvs (l strip &aux (res (list)))
+  (declare (list l strip))
+  (loop for (k v) in (remove-if (lambda (k) (member k strip))
+                                (group l 2) :key #'car)
+        do (push (the keyword k) res) (push v res))
+  (reverse res))
+
+; TODO: itr shadows inner itt
+(defmacro qry-collect-while (g &rest rest)
   (declare (symbol g))
-  (when (member :using rest) (error "QRY: :using not allowed in qry-while."))
-  `(collect-while (:init ,init)
-    (qry ,g ,@rest)))
+  `(collect-while (:init ,(get-kv rest :init '(list))
+                   :lim ,(get-kv rest :lim 'nil))
+    (qry ,g ,@(strip-kvs rest '(:init :lim)))))
 

@@ -17,7 +17,7 @@
 (defun run-tests ()
   (loop with fails = 0
         for f in files
-        do ; (compile-or-fail f)
+        do ;(compile-or-fail f)
            (format t "~&~%starting tests in: ~a~%" (grph::mkstr f))
            (unless (prove:run f :reporter :fiveam)
                    (incf fails))

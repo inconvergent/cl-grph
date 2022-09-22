@@ -90,3 +90,4 @@
                                     ((?A . 0) (?B . :A) (?C . 1))))))
 
 (unless (finalize) (error "error in grph"))
+

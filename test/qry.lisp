@@ -1,15 +1,14 @@
 (in-package #:grph-tests)
 
-(plan 1)
+(plan 3)
 
 
-(defun make-edge-set (
-  &aux (g (grph:grph))
-  (f `((0 :A 1) (0 :C 1) (1 :A 3) (1 :A 2) (1 :A 0) (1 :C 0)
-       (2 :A 1) (3 :C 7) (3 :B 5) (3 :C 5) (3 :B 4) (3 :A 1)
-       (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3) (5 :C 3) (5 :B 4)
-       (5 :E 4) (7 :C 3) (99 :X 77))))
-  ; (mapcar #'print (sort (copy-tree f) #'< :key #'car))
+(defun make-edge-set
+  (&aux (g (grph:grph))
+        (f `((0 :A 1) (0 :C 1) (1 :A 3) (1 :A 2) (1 :A 0) (1 :C 0)
+             (2 :A 1) (3 :C 7) (3 :B 5) (3 :C 5) (3 :B 4) (3 :A 1)
+             (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3) (5 :C 3) (5 :B 4)
+             (5 :E 4) (7 :C 3) (99 :X 77))))
   (grph::ingest-facts g f))
 
 (subtest "qry"
@@ -21,16 +20,13 @@
                                 (not (?x :b ?h))))
         '((1 0) (0 1)))
     (is (grph:qry g :select (?x ?y)
-                    :where (and (?x :a ?y)
-                                (?x :c ?y)))
+                    :where (and (?x :a ?y) (?x :c ?y)))
         '((0 1) (1 0)))
     (is (grph:qry g :select (?z ?x ?y)
-                    :where (and (?x :a ?y)
-                                (?y :b ?z)))
+                    :where (and (?x :a ?y) (?y :b ?z)))
         '((4 1 3) (5 1 3)))
     (is (grph:qry g :select (?x ?y)
-                    :where (and (?x :c ?y)
-                                (not (7 :c ?y))))
+                    :where (and (?x :c ?y) (not (7 :c ?y))))
         '((0 1) (1 0) (3 5) (3 7)))
     (is (grph:qry g :select (?x ?y)
                     :where (and (?x :c ?y)
@@ -47,9 +43,8 @@
                                 (?x :c ?y)
                                 (not (?x :c ?y))))
           nil)
-    (is (grph:qry g :select (?y)
-                    :where (and (_ :a ?y)
-                                (not (_ :b ?y))))
+    (is (grph:qry g :select ?y
+                    :where (and (_ :a ?y) (not (_ :b ?y))))
         '((1) (0) (2)))
     ; (is (grph:qry g :select (?a)
     ;               :where (and (not (_ :b ?y))
@@ -61,27 +56,28 @@
         '((3 4) (3 5) (4 3) (4 5) (5 3) (5 4)
           (3 1) (2 1) (1 3) (1 2) (1 0) (0 1)))
     (is (grph:qry g :select (?x ?y)
-                    :where (and (or (?x :a ?y)
-                                    (?x :b ?y))
+                    :where (and (or (?x :a ?y) (?x :b ?y))
                                 (not (?x :a ?y))))
         '((5 4) (4 5)))
     (is (grph:qry g :select (?x ?y)
-                    :where (and (or (?x :a ?y)
-                                    (?x :b ?y))
+                    :where (and (or (?x :a ?y) (?x :b ?y))
                                 (not (?x :a ?y)))
                     :collect (list :a ?x ?y))
         '((:a 5 4) (:a 4 5)))
     (is (grph:qry g :select (?x ?y)
-                    :where (or (?x :e ?y)
-                               (?x :a ?y)))
+                    :where (or (?x :e ?y) (?x :a ?y)))
         '((0 1) (1 0) (1 2) (1 3)
           (2 1) (3 1) (5 4) (4 5)))
 
+    (is (grph:qry g :select (?x ?y)
+                    :filter (< ?x ?y)
+                    :where (or (?x :e ?y) (?x :a ?y)))
+        '((0 1) (1 2) (1 3) (4 5)))
+
     (is (let ((?x 5))
-          (grph:qry g :select (?y)
-                      :in (?x)
-                      :where (or (?x :e ?y)
-                                 (?x :a ?y))))
+          (grph:qry g :select ?y
+                      :in ?x
+                      :where (or (?x :e ?y) (?x :a ?y))))
         `((4)))
     (is (let ((i 0) (var :xxx))
           (grph:qry g :using (^var) :select (?a ?b)
@@ -95,10 +91,52 @@
           (grph:qry g :using (^var) :select (?a ?b)
                       :where (?a _ ?b)
                       :then (progn (if (> i 3) (grph:stop))
-                                   (push  (list i ?a ?b) ^var)
+                                   (push (list i ?a ?b) ^var)
                                    (incf i)))
           var)
         '((3 5 3) (2 5 4) (1 7 3) (0 99 77)))))
+
+(subtest "qry 2"
+  (let ((g (make-edge-set)))
+    (mapcar (lambda (e) (grph:del! g (first e) (second e)))
+            (remove-if (lambda (a) (apply #'< a))
+                       (grph:qry g :select (?a ?b)
+                                   :where (and (?a _ ?b) (?b _ ?a))
+                                   :collect (list ?a ?b))))
+    (is (grph:qry g :select (?a ?b) :where (?a _ ?b)
+                    :collect (list ?a ?b))
+        '((99 77) (4 5) (3 7) (3 5) (3 4) (1 3) (1 2) (0 1)))
+
+    (let ((gg g))
+      (is (grph:qry g :using ^g :select (?a ?b) :where (?a _ ?b)
+                      :collect (grph:del! ^g ?a ?b))
+          '(t t t t t t t t))
+
+    (is (grph:qry g :select (?a ?b) :where (?a _ ?b)
+                    :collect (list ?a ?b)) '())
+    (is (grph:@edges gg) '((99 77) (4 5) (3 7) (3 5) (3 4) (1 3) (1 2) (0 1)))
+    (is (grph:@edges g) nil))))
+
+(subtest "qry-grph-walk"
+  (let ((g (grph:grph)) (?a 3))
+    (setf g (grph::ingest-facts g
+             `((0 :A 1) (0 :C 1) (1 :A 3) (1 :A 2) (1 :A 0) (1 :C 0)
+               (2 :A 1) (3 :C 7) (3 :B 5) (3 :C 5) (3 :B 4) (3 :A 1)
+               (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3) (5 :C 3) (5 :B 4)
+               (5 :E 4) (7 :C 3) (99 :X 77))))
+    ; this is contrived, but it tests specific behaviour of using combined
+    ; with qry-collect-while which might be useful.
+    (is (grph:qry-collect-while g :lim 10 :init (list ?a)
+                                  :using ^g :in ?a :select ?n
+                                  :where (?a _ ?n)
+                                  :first (when (and ?n (not (= ?n 4)))
+                                               (grph:del! ^g ?a ?n)
+                                               (setf ?a ?n)
+                                               ?n))
+        '(3 7 3 5))
+    (is (grph:@edges g)
+        '((99 77) (5 4) (5 3) (4 5) (4 3) (3 4)
+          (3 1) (2 1) (1 3) (1 2) (1 0) (0 1)))))
 
 (unless (finalize) (error "error in qry."))
 
