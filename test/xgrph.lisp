@@ -1,6 +1,6 @@
 (in-package #:grph-tests)
 
-(plan 2)
+(plan 1)
 
 (veq:fvprogn
 

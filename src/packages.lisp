@@ -11,11 +11,10 @@
     #:itr-edges #:itr-adj #:itr-verts
     #:grph #:prt
     #:compile-query #:match
-    #:qry #:qry-collect-while
-    #:stop #:cancel
-    #:collect-while
+    #:qry #:qry-collect-while #:stop #:cancel #:collect-while
     #:edge-set->path
-    #:grp #:distinct #:smallest-first))
+    #:gather-match
+    #:grp #:distinct #:first< #:first>))
 
 (defpackage #:xgrph
   (:use #:common-lisp)
@@ -30,6 +29,5 @@
            #:path! #:2path! #:3path!
            #:split! #:2split! #:3split!
            #:append! #:2append! #:3append!
-           #:append-inv! #:2append-inv! #:3append-inv!
-           ))
+           #:append-inv! #:2append-inv! #:3append-inv!))
 

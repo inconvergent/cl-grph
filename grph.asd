@@ -13,7 +13,8 @@
                (:file "edge-set" :depends-on ("utils"))
                (:file "macros" :depends-on ("utils"))
                (:file "grph" :depends-on ("macros"))
-               (:file "qry" :depends-on ("grph"))
+               (:file "qry-utils" :depends-on ("grph"))
+               (:file "qry" :depends-on ("qry-utils"))
                (:file "xgrph" :depends-on ("grph" "qry"))
                (:file "docs" :depends-on ("grph" "qry"))))
 

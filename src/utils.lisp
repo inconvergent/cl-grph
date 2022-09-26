@@ -4,10 +4,10 @@
 (deftype pn (&optional (bits 31)) `(unsigned-byte ,bits))
 (defvar *opt* '(optimize (safety 3) (speed 3) debug space))
 
-(defun v? (&optional (silent t))
-  (let ((v (slot-value (asdf:find-system 'grph) 'asdf:version)))
-    (unless silent (format t "~%veq version: ~a~%" v))
-    v))
+(defun v? (&optional (silent t)
+           &aux (v (slot-value (asdf:find-system 'grph) 'asdf:version)))
+  (unless silent (format t "~&GRPH version: ~a~%." v))
+  v)
 (defun d? (f) (describe f))
 (defun i? (f) (inspect f))
 
@@ -79,13 +79,12 @@
 
 ; modified from on lisp by pg
 (defun group (source n)
-  (if (zerop n) (warn "group: zero length"))
+  (when (< n 1) (warn "GROUP: bad length: ~a," n))
   (labels ((rec (source acc)
              (let ((rest (nthcdr n source)))
-               (if (consp rest)
-                   (rec rest (cons (subseq source 0 n) acc))
-                   (nreverse (cons source acc))))))
-    (if source (rec source nil) nil)))
+               (if (consp rest) (rec rest (cons (subseq source 0 n) acc))
+                                (nreverse (cons source acc))))))
+    (when source (rec source nil))))
 
 (defun ungroup (source &aux (res (list)))
   (loop for s in source do (loop for k in s do (push k res)))
@@ -99,15 +98,20 @@
   (let ((res (intersection c valid)))
     (the symbol (cond ((= 1 (length res)) (car res))
                       (t (car valid))))))
-
 (defun valid-modes (name l valid &aux (l (ensure-list l)))
   (declare (keyword name) (list valid))
   (let ((res (mapcar (lambda (s) (psymb :keyword (mkstr s))) l)))
-    (unless (subsetp res valid) (error "MODE: invalid mode for ~a in ~a. use: ~a"
-                                       name l valid))
+    (unless (subsetp res valid)
+            (error "MODE: invalid mode for ~a in ~a. use: ~a." name l valid))
     res))
 
-; (defmacro with-prof ((&key (mode :cpu) (mx 50000)) &body body)
-;   `(sb-sprof:with-profiling (:max-samples ,mx :mode ,mode :report :graph)
-;                             (progn ,@body)))
+(defun get-kv (l k &optional d &aux (v (member k (group l 2) :key #'car)))
+  (declare (list l) (keyword k))
+  (if v (cadar v) d))
+(defun strip-kvs (l strip &aux (res (list)))
+  (declare (list l strip))
+  (loop for (k v) in (remove-if (lambda (k) (member k strip))
+                                (group l 2) :key #'car)
+        do (push (the keyword k) res) (push v res))
+  (reverse res))
 

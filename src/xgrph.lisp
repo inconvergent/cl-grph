@@ -7,7 +7,7 @@
 
 (defmacro @vert (dim s i)
   (declare (grph:pn dim) (symbol s))
-  "get vert i."
+  "get vert i as values."
   (grph::awg (k)
     `(let ((,k (* ,dim ,i)))
       (declare (grph:pn ,k))
@@ -20,10 +20,10 @@
 (defmacro 2@num (&rest rest) `(@num 2 ,@rest))
 (defmacro 3@num (&rest rest) `(@num 3 ,@rest))
 
-
+; prefix with $?
 (defmacro @verts (dim s l)
   (declare (grph:pn dim) (symbol s))
-  "get verts in l."
+  "get verts in l as fvec."
   (grph::awg (a i c h l*)
     `(let ((,l* ,l))
        (declare (list ,l*))
@@ -71,7 +71,7 @@
 ; TODO: mode for both dirs?
 (defmacro path! (dim g s path &optional props)
   (declare (grph:pn dim) (symbol g s))
-  "add path with optional :prop."
+  "add path (with :prop.)"
   (grph::awg (i j res props*)
     `(let ((,props* ,props)
            (,res (verts! ,dim ,s ,path)))
@@ -100,7 +100,7 @@
             ,(case mode
                (:abs `(values ,@(abs*)))
                (:rel `(grph::mvb (,@gs) (@vert ,dim ,s ,i*) (values ,@(rel*))))
-               (t (error "move! bad mode: ~a. use :rel or :abs." mode))))))))
+               (t (error "MOVE!: bad mode ~a. use :rel or :abs." mode))))))))
 (defmacro 2move! (&rest rest) `(move! 2 ,@rest))
 (defmacro 3move! (&rest rest) `(move! 3 ,@rest))
 
@@ -122,7 +122,7 @@
                              (grph::mvb (,@gs) (@vert ,dim ,s ,i)
                                (values ,@(loop for a in gs and b in gs-new
                                                collect `(+ ,a ,b))))))
-                    (t (error "APPEND! bad mode: ~a, use :rel or :abs." mode))))))
+                    (t (error "APPEND!: bad mode: ~a, use :rel or :abs." mode))))))
       (declare (grph:pn ,j))
       ,(case dir (:-> `(grph:add! ,g ,i ,j ,props))
                  (:<- `(grph:add! ,g ,j ,i ,props))

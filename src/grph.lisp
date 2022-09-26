@@ -151,14 +151,14 @@ returns: (values g created?)"
 returns: (values g deleted?)"
   (-del g a b))
 
-; VARIOUS ---------------------------------
 
-(defun grp (val &optional (s :g))
-  (declare (symbol val s))
-  `((,s ,val) ,val))
-; (grph:grp (grph:@prop g (list ?a ?b) :g))
+; VARIOUS ---
+
+(defun grp (val &optional (s :g)) (declare (symbol val s)) `((,s ,val) ,val))
 
 (defun ingest-facts (g f)
+  (declare (list f))
+  ; TODO: handle props properly
   (loop for (l p r) in f
         do (cond ((not (@mem g l r))
                     (add! g l r (list p)))

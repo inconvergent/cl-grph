@@ -5,9 +5,7 @@
 
 (in-package #:grph-tests)
 
-(defparameter files `(#P"test/grph.lisp" #P"test/qry.lisp"
-                       #P"test/xgrph.lisp"
-                       ))
+(defparameter files `(#P"test/grph.lisp" #P"test/qry.lisp" #P"test/xgrph.lisp"))
 
 (defun compile-or-fail (f)
   (format t "~%compiling: ~a~%" (grph::mkstr f))
