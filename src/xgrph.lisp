@@ -2,149 +2,144 @@
 
 (defun pos (&optional (d 0f0))
   (declare (veq:ff d))
-  "initialze xgrph pos."
-  (fset:empty-seq d))
+  "initialze xgrph pos. d is the default fset:seq value."
+  (empty-seq d))
 
 (defmacro @vert (dim s i)
-  (declare (grph:pn dim) (symbol s))
+  (declare (pn dim) (symbol s))
   "get vert i as values."
   (grph::awg (k)
-    `(let ((,k (* ,dim ,i)))
-      (declare (grph:pn ,k))
-      (values ,@(loop for i from 0 below dim
-                      collect `(fset:@ ,s (+ ,k ,i)))))))
+  `(let ((,k (* ,dim ,i)))
+    (declare (pn ,k))
+    (values ,@(loop for i from 0 below dim
+                    collect `(fset:@ ,s (+ ,k ,i)))))))
 (defmacro 2@vert (&rest rest) `(@vert 2 ,@rest))
 (defmacro 3@vert (&rest rest) `(@vert 3 ,@rest))
 
-(defmacro @num (dim s) (declare (grph:pn dim)) `(the grph:pn (/ (fset:size ,s) ,dim)))
+(defmacro @num (dim s) (declare (pn dim)) `(the pn (/ (fset:size ,s) ,dim)))
 (defmacro 2@num (&rest rest) `(@num 2 ,@rest))
 (defmacro 3@num (&rest rest) `(@num 3 ,@rest))
 
 ; prefix with $?
 (defmacro @verts (dim s l)
-  (declare (grph:pn dim) (symbol s))
+  (declare (pn dim) (symbol s))
   "get verts in l as fvec."
   (grph::awg (a i c h l*)
-    `(let ((,l* ,l))
-       (declare (list ,l*))
-       (veq:fvprogn
-         (veq:fwith-arrays (:inds ,l* :itr ,h :cnt ,c
-           :arr ((,a ,dim (veq:f$zero (* ,dim (length ,l*)))))
-           :fxs ((vget (,i) (@vert ,dim ,s ,i)))
-           :exs ((,a ,c (vget ,h))))
-           ,a)))))
+  `(let ((,l* ,l))
+     (declare (list ,l*))
+     (veq:fvprogn
+       (veq:fwith-arrays (:inds ,l* :itr ,h :cnt ,c
+         :arr ((,a ,dim (veq:f$zero (* ,dim (length ,l*)))))
+         :fxs ((vget (,i) (@vert ,dim ,s ,i)))
+         :exs ((,a ,c (vget ,h))))
+         ,a)))))
 (defmacro 2@verts (&rest rest) `(@verts 2 ,@rest))
 (defmacro 3@verts (&rest rest) `(@verts 3 ,@rest))
 
-(defmacro vert! (dim s &rest rest
-                       &aux (gs (veq::-gensyms :pos dim))
-                            (n (gensym "N")))
-  (declare (grph:pn dim) (symbol s))
+(defmacro vert! (dim s &rest rest &aux (gs (veq::-gensyms :pos dim))
+                                       (n (gensym "N")))
+  (declare (pn dim) (symbol s))
   "add vert."
   `(let ((,n (fset:size ,s)))
-     (declare (grph:pn ,n))
-     (grph::mvb (,@gs) (grph::mvc #'values ,@rest)
+     (declare (pn ,n))
+     (mvb (,@gs) (mvc #'values ,@rest)
        (declare (veq:ff ,@gs))
-       (progn (setf ,s (fset:seq (fset:$ ,s) ,@gs))
-              (the grph:pn (/ ,n ,dim))))))
+       (progn (setf ,s (seq (fset:$ ,s) ,@gs))
+              (the pn (/ ,n ,dim))))))
 (defmacro 2vert! (&rest rest) `(vert! 2 ,@rest))
 (defmacro 3vert! (&rest rest) `(vert! 3 ,@rest))
 
 (defmacro verts! (dim s path)
-  (declare (grph:pn dim) (symbol s))
+  (declare (pn dim) (symbol s))
   "add verts."
   (grph::awg (p res)
-    `(let ((,p ,path) (,res (list)))
-      (declare (veq:fvec ,p))
-      (veq:fvprogn
-        (veq:fwith-arrays (:n (the grph:pn (/ (length ,p) ,dim))
-          :arr ((,p ,dim ,p))
-          :fxs ((add ((:va ,dim x))
-                 (declare (veq:ff x))
-                 (push (vert! ,dim ,s x) ,res)))
-          :nxs ((add ,p))))
-        (reverse ,res)))))
+  `(let ((,p ,path) (,res (list)))
+    (declare (veq:fvec ,p))
+    (veq:fvprogn
+      (veq:fwith-arrays (:n (the pn (/ (length ,p) ,dim))
+        :arr ((,p ,dim ,p))
+        :fxs ((add ((:va ,dim x))
+               (declare (veq:ff x))
+               (push (vert! ,dim ,s x) ,res)))
+        :nxs ((add ,p))))
+      (reverse ,res)))))
 (defmacro 2verts! (&rest rest) `(verts! 2 ,@rest))
 (defmacro 3verts! (&rest rest) `(verts! 3 ,@rest))
 
 
 ; TODO: mode for both dirs?
 (defmacro path! (dim g s path &optional props)
-  (declare (grph:pn dim) (symbol g s))
-  "add path (with :prop.)"
+  (declare (pn dim) (symbol g s))
+  "add path (with :prop)."
   (grph::awg (i j res props*)
-    `(let ((,props* ,props)
-           (,res (verts! ,dim ,s ,path)))
-       (declare (list ,res))
-       (loop for ,i in ,res for ,j in (cdr ,res)
-             do (grph:add! ,g ,i ,j ,props*))
-       ,res)))
+  `(let ((,res (verts! ,dim ,s ,path)) (,props* ,props))
+     (declare (list ,res))
+     (loop for ,i in ,res for ,j in (cdr ,res)
+           do (add! ,g ,i ,j ,props*))
+     ,res)))
 (defmacro 2path! (&rest rest) `(path! 2 ,@rest))
 (defmacro 3path! (&rest rest) `(path! 3 ,@rest))
 
-(defmacro move! (dim s i pos
-                 &optional (mode :rel)
-                 &aux (gs (veq::-gensyms :pos dim))
-                      (gs-new (veq::-gensyms :new dim)))
-  (declare (grph:pn dim) (symbol s) (keyword mode))
-  "move vert i to pos. use mode :rel or :abs."
+(defmacro move! (dim s i pos &optional (pos-mode :rel))
+  (declare (pn dim) (symbol s) (keyword pos-mode))
+  "move vert i to pos.
+pos-modes: (:rel :abs)."
   (grph::awg (i* ii*)
-    (labels ((rel* () (loop for a in gs for b in gs-new for k from 0
-                            collect `(setf (fset:@ ,s (+ ,ii* ,k)) (+ ,a ,b))))
-             (abs* () (loop for a in gs-new for k from 0
-                            collect `(setf (fset:@ ,s (+ ,ii* ,k)) ,a))))
-       `(let* ((,i* ,i) (,ii* (* ,dim ,i*)))
-          (declare (grph:pn ,i* ,ii*))
-          (grph::mvb (,@gs-new) ,pos
-            (declare (veq:ff ,@gs-new))
-            ,(case mode
-               (:abs `(values ,@(abs*)))
-               (:rel `(grph::mvb (,@gs) (@vert ,dim ,s ,i*) (values ,@(rel*))))
-               (t (error "MOVE!: bad mode ~a. use :rel or :abs." mode))))))))
+  (let* ((gs-pos (veq::-gensyms :pos dim))
+         (gs-new (veq::-gensyms :new dim))
+         (rel* (loop for a in gs-pos for b in gs-new for k from 0
+                     collect `(setf (fset:@ ,s (+ ,ii* ,k)) (+ ,a ,b))))
+         (abs* (loop for a in gs-new for k from 0
+                     collect `(setf (fset:@ ,s (+ ,ii* ,k)) ,a))))
+     `(let* ((,i* ,i) (,ii* (* ,dim ,i*)))
+        (declare (pn ,i* ,ii*))
+        (mvb (,@gs-new) ,pos
+          (declare (veq:ff ,@gs-new))
+          ,(case pos-mode
+             (:abs `(values ,@abs*))
+             (:rel `(mvb (,@gs-pos) (@vert ,dim ,s ,i*) (values ,@rel*)))
+             (t (error "MOVE!: bad pos-mode ~a. use (:rel :abs)."
+                       pos-mode))))))))
 (defmacro 2move! (&rest rest) `(move! 2 ,@rest))
 (defmacro 3move! (&rest rest) `(move! 3 ,@rest))
 
-(defmacro %append! (dim g s i x
-                    &optional modes props
-                    &aux (gs (veq::-gensyms :pos dim))
-                         (gs-new (veq::-gensyms :new dim))
-                         (modes (grph::valid-modes :append! modes
-                                  '(:<- :-> :<> :abs :rel)))
-                         (dir (grph::select-mode modes '(:-> :<- :<>)))
-                         (mode (grph::select-mode modes '(:rel :abs))))
-  (declare (grph:pn dim) (symbol g s) (type (or list symbol) modes))
-  "append edge from vert i to pos x. returns new vert."
+; use % scheme for all similar fxns?
+(defmacro %append! (dim g s i x &optional modes props)
+  (declare (pn dim) (symbol g s))
+  "append edge from vert i to pos x. returns new vert.
+pos-modes: (:rel :abs)
+dir-modes: (:-> :<- :<>)."
   (grph::awg (j)
-    `(let ((,j (vert! ,dim ,s
-                 ,(case mode
-                    (:abs x)
-                    (:rel `(grph::mvb (,@gs-new) ,x
-                             (grph::mvb (,@gs) (@vert ,dim ,s ,i)
-                               (values ,@(loop for a in gs and b in gs-new
-                                               collect `(+ ,a ,b))))))
-                    (t (error "APPEND!: bad mode: ~a, use :rel or :abs." mode))))))
-      (declare (grph:pn ,j))
-      ,(case dir (:-> `(grph:add! ,g ,i ,j ,props))
-                 (:<- `(grph:add! ,g ,j ,i ,props))
-                 (:<> `(progn (grph:add! ,g ,i ,j ,props)
-                              (grph:add! ,g ,j ,i ,props)))
-                 (t (error "APPEND!: expected dir :ix or :xi, got: ~a." dir)))
-      ,j)))
+  (let* ((modes (grph::valid-modes :append! modes `(,@*dir-mode* ,@*pos-mode*)))
+         (gs-pos (veq::-gensyms :pos dim))
+         (gs-new (veq::-gensyms :new dim))
+         (pm (case (grph::select-mode modes *pos-mode*)
+               (:abs x)
+               (:rel `(mvb (,@gs-new) ,x
+                       (mvb (,@gs-pos) (@vert ,dim ,s ,i)
+                         (values ,@(loop for a in gs-pos and b in gs-new
+                                         collect `(+ ,a ,b))))))))
+         (dm (case (grph::select-mode modes *dir-mode*)
+               (:-> `(add! ,g ,i ,j ,props))
+               (:<- `(add! ,g ,j ,i ,props))
+               (:<> `(progn (add! ,g ,i ,j ,props)
+                            (add! ,g ,j ,i ,props))))))
+    (declare (type (or list symbol) modes))
+    `(let ((,j (vert! ,dim ,s ,pm))) (declare (pn ,j)) ,dm ,j))))
 (defmacro append! (&rest rest) `(%append! 1 ,@rest))
 (defmacro 2append! (&rest rest) `(%append! 2 ,@rest))
 (defmacro 3append! (&rest rest) `(%append! 3 ,@rest))
 
-; TODO: inv
+; TODO: inv mode
 (defmacro split! (dim g s a b x &optional props)
-  (declare (grph:pn dim))
+  (declare (pn dim))
   "delete edge (a b) and add edges (a x) (x b)."
   (grph::awg (v props*)
-    `(let ((,v (xgrph:vert! ,dim ,s ,x))
-           (,props* ,props))
-      (grph:del! ,g ,a ,b)
-      (grph:add! ,g ,a ,v ,props*)
-      (grph:add! ,g ,v ,b ,props*)
-      ,v)))
+  `(let ((,v (vert! ,dim ,s ,x)) (,props* ,props))
+    (del! ,g ,a ,b)
+    (add! ,g ,a ,v ,props*)
+    (add! ,g ,v ,b ,props*)
+    ,v)))
 (defmacro 2split! (&rest rest) `(split! 2 ,@rest))
 (defmacro 3split! (&rest rest) `(split! 3 ,@rest))
 
@@ -154,4 +149,5 @@
 (defmacro 3@ (&rest rest) `(@ 3 ,@rest))
 
 ; TODO: transform
+; TODO: intersect-all
 

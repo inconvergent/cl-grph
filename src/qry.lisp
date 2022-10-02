@@ -1,56 +1,51 @@
 (in-package :grph)
 
-(defun sort-and-clauses (a)
-  ; TODO: possible bug when there are multiple (not ...)
-  ; if order is incorrect
-  ; TODO: same for (or (not ...))?
-  (labels ((do-split (l op)
-             (mvb (yes no) (filter-by-predicate l
-                             (lambda (p) (and (listp p) (eq-car? p op))))
-               `(,@yes ,@no))))
-    (if (and (listp a) (eq-car? a 'and))
-        `(and ,@(do-split (cdr a) 'not))
-        a)))
-
-
-(defmacro compile-qry-where (gather-match &key where in)
+; TODO: features grph-parallel
+(defmacro qry-compile-where (gather-match &key where in)
   (declare (symbol gather-match))
   "compile datalog query. gather-match is the name of the macro used to compile
   the individual clauses."
   (unless (and (every #'var? in) (no-dupes? in))
-          (error "QRY: got bad value for :in: ~a." in))
+          (error "QRY: got bad value for :in ~a." in))
   (labels
-    ((-and (qc) (-and-or qc 'match-var-and))
-     (-or (qc)
-       (when (bad-or-clause? qc)
-         (warn "QRY: bad OR clause: ~a. sub clauses must have the same vars." qc))
-       (-and-or qc 'match-var-or))
-     (-and-or (qc fx)
-       (reduce (lambda (res qc)
-                 (awg (nxt* res*)
-                   (mvb (nxt mode) (-next qc)
-                     (if res `(let ((,res* ,res) (,nxt* ,nxt))
-                               (,(case mode (:not 'match-var-not) (t fx))
-                                ,res* ,nxt*))
-                       nxt))))
-               (reverse qc) :initial-value (list)))
-     (-next (qc &aux (qc (sort-and-clauses qc)))
-       (unless qc (warn "QRY: empty clause in :where: ~a." where))
+    ((gs (c) (gensym (apply #'mkstr (interject c :/))))
+     (-map/or (qc)
+        (let ((res (mapcar (lambda (qc) `(,(gs qc) ,(-next qc))) qc)))
+          `(,(psel 'let) (,@res)
+             (declare (list ,@(mapcar #'first res)))
+             ,(loop with body = (caar res)
+                    for s in (mapcar #'first (cdr res))
+                    do (setf body `(qry-or ,s ,body))
+                    finally (return body)))))
+     (-map/and-not (qc)
+        (let ((res (mapcar (lambda (qc)
+                              (if (eq-car? qc 'not)
+                                `(,(gs qc) ,(-next `(and ,@(cdr qc))) t)
+                                `(,(gs qc) ,(-next qc) nil)))
+                           qc)))
+          `(,(psel 'let) (,@(mapcar (lambda (c) (subseq c 0 2)) res))
+             (declare (list ,@(mapcar #'first res)))
+             ,(loop with body = (caar res)
+                    for s in (mapcar #'first (cdr res))
+                    for not? in (mapcar #'third res)
+                    do (setf body `(,(psel (if not? 'not 'and)) ,s ,body))
+                    finally (return body)))))
+     (-next (qc)
+       (unless qc (error "QRY: empty clause in :where ~a." where))
        (unless (get-all-vars qc) (warn "QRY: clause ~a has no vars." qc))
-       (case (car qc) (and (-and (cdr qc)))
-                      (or (-or (cdr qc)))
-                      (not (values (-next `(and ,@(cdr qc))) :not))
+       (case (car qc) (and (-map/and-not (sort-not-clauses (cdr qc))))
+                      (or (check-or-clause (cdr qc)) (-map/or (cdr qc)))
                       (t `(,gather-match ,qc)))))
+
     (mvb (in where) (shadow-in-vars in where)
       `(let (,@in) ,(-next where)))))
-
 
 (defmacro match ((g f lft mid rht) &body body)
   (declare (symbol g f))
   "execute body with alist f as every bindable var for every fact in the graph
 that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
   (unless (or (bindable? lft) (bindable? mid) (bindable? rht))
-          (warn "MATCH: no bindable vars in: ~a." `(,lft ,mid ,rht)))
+          (error "MATCH: no bindable vars in: ~a." `(,lft ,mid ,rht)))
   (awg (l p r eset has s)
     (labels
       ((hit (pat &rest rest) (equal pat rest))
@@ -59,6 +54,7 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
                           ,@(when (bindable? mid) `((cons ',mid ,p)))
                           ,@(when (bindable? rht) `((cons ',rht ,r))))))
             (declare (list ,f))
+            ; (format t "~& ----> ~{~s ~}" ,f)
             ,@body))
 
        (mem (l r body) `(when (@mem ,g ,l ,r) ,body))
@@ -116,7 +112,7 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
 
 ; TODO: collect-res var, result list var
 ; TODO: or-join
-(defmacro qry (g &key in using select filter where then collect first
+(defmacro qry (g &key in using select when where then collect first
                       (itr (gensym "QRY-ITR")) (proc 'identity) ; TODO: how to do proc?
                  &aux (select (ensure-list select)) (in (ensure-list in))
                       (using (ensure-list using)))
@@ -125,13 +121,13 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
   (unless (and (every #'var^ using) (no-dupes? using))
           (error "QRY: got bad value for :using ~a." using))
   (unless (and (every #'var? select) (no-dupes? select))
-          (error "QRY: got bad value for :select: ~a." select))
+          (error "QRY: got bad value for :select ~a." select))
   (when (intersection select in)
         (error "QRY: :select ~a and :in ~a can not overlap." select in))
   (when (> (length (remove-if-not #'identity `(,then ,collect ,first))) 1)
-        (error "QRY: use either :then, :first, :collect, or neither."))
+        (error "QRY: use either :then, :first, :collect; or neither."))
   (when (not (subsetp select (get-all-vars where)))
-        (warn "QRY: unexpected var in :select ~a, for :where ~a." select where))
+        (warn "QRY: unexpected var in :select ~a,~%for :where ~a." select where))
 
   (awg (qry-gather q hit res stop* qry-final-res lp)
     (labels
@@ -149,22 +145,22 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
                              for ,hit of-type list in ,res
                              with ,itr of-type fixnum = 0
                              ,@(select-with)
-                             ,@(when filter `(if ,filter))
+                             ,@(when when `(if ,when))
                              do (return-from ,lp ,first)))
                (then `(loop for ,hit of-type list in ,res
                             and ,itr of-type fixnum from 0
                             ,@(select-with)
-                            ,@(when filter `(if ,filter))
+                            ,@(when when `(if ,when))
                             do ,then))
                (collect `(loop for ,hit of-type list in ,res
                                for ,itr of-type fixnum from 0
                                ,@(select-with)
-                               ,@(when filter `(if ,filter))
+                               ,@(when when `(if ,when))
                                collect ,collect))
                (t `(loop for ,hit of-type list in ,res
                          and ,itr of-type fixnum from 0
                          ,@(select-with)
-                         ,@(when filter `(if ,filter))
+                         ,@(when when `(if ,when))
                          collect (list ,@select))))))
       `(macrolet
          ; cancel and ignore all results
@@ -172,11 +168,13 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
          ; stop, but keep the results
          (stop (&body body) `(progn ,',(re-bind-result)
                                     (return-from ,',stop* (progn ,@body))))
-         (,qry-gather (,q) `(progn ;(format t "~& clause: ~{~s ~}~%" ',,q)
-                                   (gather-match ,',g ,@,q))))
+         (,qry-gather (,q) `(progn
+                              ; (format t "~& clause: ~{~s ~}~%" ',,q)
+                              (gather-match ,',g ,@,q))))
 
         (let ((,qry-final-res nil)
-              (,res (,proc (compile-qry-where ,qry-gather :where ,where :in ,in)))
+              (,res (,proc (qry-compile-where ,qry-gather
+                             :where ,where :in ,in)))
               ,@(bind-partial))
           (block ,stop* (setf ,qry-final-res ,(itr-body res))
                         ,(re-bind-result)

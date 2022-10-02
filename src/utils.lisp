@@ -1,4 +1,3 @@
-
 (in-package #:grph)
 
 (deftype pn (&optional (bits 31)) `(unsigned-byte ,bits))

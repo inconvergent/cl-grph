@@ -2,33 +2,33 @@
 
 ; COMPILER QRY UTILS ---
 
-(declaim (inline any?  bad-or-clause? bindable?  eq-car? eq-car? free?
-                 get-all-vars has-symchar? interned? symb-sort-fx symlen val?
-                 var^ varset-sort no-dupes?))
-
-(defun has-symchar? (s c &optional (pos :first))
-  (declare (ignorable pos))
-  (let ((name (symbol-name s)))
-    (declare (string name))
-    (eq (char name (case pos (:first 0) (otherwise (1- (length name)))))
-        c)))
+(declaim (inline any? bindable? eq-car? eq-car? free?
+                 get-all-vars has-symchar? interned? symlen val?
+                 var^ varset-sort no-dupes? valid-qry-clause?))
 
 (defun interned? (s)
   (declare (optimize speed))
   (typecase s (symbol (symbol-package s))))
 
+(defun has-symchar? (s c &optional (pos :first))
+  (declare (keyword pos))
+  (let ((name (symbol-name s)))
+    (declare (string name))
+    (eq (char name (case pos (:first 0)
+                             (otherwise (1- (length name)))))
+        c)))
+
 (defun var? (s)
   (declare (optimize speed))
   (and (interned? s) (has-symchar? s #\?)))
 
-(defun var^ (v &aux (v (mkstr v)))
-  (declare (optimize speed))
-  (and (> (length v) 1) (equalp (char v 0) #\^)))
+(defun var^ (s &aux (name (symbol-name s)))
+  (declare (optimize speed) (symbol s) (string name))
+  (and (> (length name) 1) (eq (char name 0) #\^)))
 
-(defun symlen (s)
-  (declare (optimize speed) (symbol s))
-  (length (symbol-name s)))
+(defun symlen (s) (declare (optimize speed) (symbol s)) (length (symbol-name s)))
 
+(defun val? (s) (declare (optimize speed)) (and (symbolp s) (not (interned? s))))
 (defun any? (s)
   (declare (optimize speed))
   (and (interned? s) (= (symlen s) 1) (has-symchar? s #\_)))
@@ -37,42 +37,96 @@
   (declare (optimize speed) (list a) (symbol s))
   (eq (car a) s))
 
-(defun val? (s)
-  (declare (optimize speed))
-  (and (symbolp s) (not (symbol-package s))))
-
 (defun free? (s)
   (declare (optimize speed))
   (cond ((or (var? s) (any? s)) t)
         ((or (val? s) (numberp s) (keywordp s)) nil)
-        (t (error "FREE?: unexpected clause: ~a." s))))
+        (t t)))
 
 (defun bindable? (s)
   (declare (optimize speed))
   (cond ((any? s) nil) (t (free? s))))
 
-(defun symb-sort-fx (a b)
-  (declare (optimize speed) (symbol a b))
-  (string-lessp (symbol-name a) (symbol-name b)))
-
 (defun varset-sort (a &optional (fx #'identity))
-  (declare (optimize speed ) (list a) (function fx))
-  ; copy-list because of potential side-effect on a because of sort.
-  (sort (copy-list a) #'symb-sort-fx :key (the function fx)))
+  (declare (optimize speed (safety 1)) (list a) (function fx))
+  ; copy-list because of side-effect on a because of sort.
+  ; even when doing eg. (varset-sort (union a b))
+  (sort (copy-list a) #'string< :key (the function fx)))
 
 (defun get-all-vars (a)
   (declare (optimize speed) (list a))
   (varset-sort (remove-if-not #'var? (undup a))))
 
-(defun bad-or-clause? (qc)
-  (declare (optimize speed) (cons qc))
-  (dsb (a . vars) (mapcar #'get-all-vars qc)
-    (loop for b in vars unless (equal a b)
-          do (return-from bad-or-clause? t))))
+(defun get-all-bindable (a)
+  (declare (optimize speed) (list a))
+  (varset-sort (remove-if-not #'bindable? (get-all-vars a))))
 
 (defun no-dupes? (l)
   (declare (optimize speed) (list l))
-  (= (length (undup l nil)) (length l)))
+  (= (length (the list (undup l nil))) (length l)))
+
+(defun valid-qry-clause? (s)
+  (declare (optimize speed))
+  (member s '(not and or or-join)))
+
+
+(defmacro collect-while ((&key (init '(list)) (test 'not) (lim 1000)
+                               (cres (gensym "COLLECT-RES"))
+                               (citr (gensym "COLLECT-ITR")))
+                          &body body)
+  (declare (symbol cres))
+  (awg (for-res lp)
+    `(loop named ,lp
+           with ,cres of-type list = ,init
+           for ,for-res = (progn ,@body)
+           for ,citr of-type fixnum from 0 below (the fixnum ,lim)
+           until (,test ,for-res)
+           if ,for-res do (push ,for-res ,cres)
+           finally (return-from ,lp (reverse ,cres)))))
+
+
+(defun sort-not-clauses (qc)
+  (declare (list qc))
+  ; qc should not include the litteral 'and symb
+  (labels
+    ((notp (p) (declare (list p)) (eq-car? p 'not))
+     (var-search (c not*)
+       (declare (list c not*))
+       (loop with not-vars = (get-all-vars not*)
+             for i from (length c) downto 0
+             for vars = (get-all-vars (subseq c 0 i))
+             if (null (intersection vars not-vars))
+             do (return-from var-search i))
+       0)
+     (var-shift (l)
+       (declare (list l))
+       (mvb (not* c) (filter-by-predicate l #'notp)
+         (cond ((null not*) (return-from sort-not-clauses qc))
+               ((> (length not*) 1)
+                  (error "QRY: multiple NOT in AND clause for: ~a.
+use (NOT c1 c2)." qc)))
+
+         ; TODO: should we use get-all-bindable instead of
+         ; get-all-vars in ; other checks?
+         (let ((sub (get-all-bindable not*)))
+           (unless (subsetp sub (get-all-bindable c))
+             (warn "QRY: bindable vars ~a in NOT can not be bound for:~%~a."
+                   sub qc)))
+
+         (let ((i (var-search c not*)))
+           (declare (fixnum i))
+           (concatenate 'list (subseq c 0 i) not* (subseq c i))))))
+    (var-shift qc)))
+
+(defun check-or-clause (qc)
+  (declare (list qc) (cons qc))
+  (when (some (lambda (c) (eq 'not (car c))) qc)
+        (error "QRY: NOT clause is not allowed in OR for:~%~a." qc))
+  (dsb (a . vars) (mapcar #'get-all-vars qc)
+    (loop for b in vars
+          unless (equal a b)
+          do (return-from check-or-clause
+               (warn "QRY: clauses in OR must have the same vars for:~%~a." qc)))))
 
 (defun shadow-in-vars (in where &aux (res (list)))
   "safeguard :in vars.
@@ -93,83 +147,6 @@ because gensyms have no symbol-package. as a result :in vals are not free."
        (cond ((and (var? where) (member where in :test #'eq)) (convert where))
              ((consp where) (cons (rec (car where)) (rec (cdr where))))
              (t where))))
-    ; NOTE rec must be called before we return (reverse res)
+    ; NOTE: rec must be called before we return (reverse res)
     (let ((w* (rec where))) (values (reverse res) w*))))
-
-(defmacro collect-while ((&key (init '(list)) (test 'not) (lim 1000)
-                               (cres (gensym "COLLECT-RES"))
-                               (citr (gensym "COLLECT-ITR")))
-                          &body body)
-  (declare (symbol cres))
-  (awg (for-res lp)
-    `(loop named ,lp
-           with ,cres of-type list = ,init
-           for ,for-res = (progn ,@body)
-           for ,citr of-type fixnum from 0 below (the fixnum ,lim)
-           until (,test ,for-res)
-           if ,for-res do (push ,for-res ,cres)
-           finally (return-from ,lp (reverse ,cres)))))
-
-
-; RUNTIME QRY UTILS ---
-
-(declaim (inline conflicting-intersection
-                 match-var-and match-var-not match-var-or
-                 some-subsets distinct))
-
-(defun conflicting-intersection (aa bb)
-  (declare (optimize speed (safety 1)) (list aa bb))
-  (loop for (ka . va) in aa
-        do (loop for (kb . vb) in bb
-                 if (and (eq ka kb) (not (eq va vb)))
-                 do (return-from conflicting-intersection t))))
-; TODO: in principle this might be faster with some more work
-; (defun same-key (l r)
-;   (declare (optimize speed (safety 0)) (list l r))
-;   (eq (caar l) (caar r))
-; (defun same-val (l r)
-;   (declare (optimize speed (safety 0)) (list l r))
-;   (eq (cdar l) (cdar r)))
-  ; (let ((l aa)
-  ;       (r bb))
-  ;   (declare (list l r))
-  ;   (loop while (and l r)
-  ;        do (cond ((same-key l r)
-  ;                (when (not (same-val l r))
-  ;                  (return-from conflicting-intersection t))
-  ;                    (setf l (cdr l) r (cdr r)))
-  ;              ((string-lessp (symbol-name (caar l)) (symbol-name (caar r)))
-  ;                (setf l (cdr l)))
-  ;              (t (setf r (cdr r))))))
-
-(defun match-var-and (aa bb &aux (res (list)))
-  (declare (optimize speed (safety 1)) (list aa bb))
-  (loop for a in aa
-        do (loop for b in bb
-                 if (not (conflicting-intersection a b))
-                 do (push (varset-sort (union a b :test #'equal) #'car) res)))
-  (remove-duplicates res :test #'equal))
-
-(defun match-var-or (aa bb)
-  (declare (optimize speed) (list aa bb))
-  (union aa bb :test #'equal))
-
-(defun some-subsets (a b)
-  (declare (optimize speed) (list a b))
-  (some (lambda (o) (declare (list o)) (subsetp o a :test #'equal)) b))
-
-(defun match-var-not (orig nxt)
-  (declare (optimize speed) (list orig nxt))
-  (remove-if (lambda (a) (declare (list a)) (some-subsets a nxt)) orig))
-
-; RUNTIME QRY FILTERS
-
-(defun distinct (&rest rest &aux (n (length rest)))
-  (= n (length (undup rest nil))))
-
-(defmacro fx-first (fx &rest rest &aux (a (car rest)))
-  (declare (symbol a))
-  `(and ,@(loop for b of-type symbol in (cdr rest) collect `(,fx ,a ,b))))
-(defmacro first< (&rest rest) `(fx-first < ,@rest))
-(defmacro first> (&rest rest) `(fx-first > ,@rest))
 

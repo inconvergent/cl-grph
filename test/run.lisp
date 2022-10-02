@@ -5,7 +5,11 @@
 
 (in-package #:grph-tests)
 
+(setf lparallel:*kernel* (lparallel:make-kernel 4))
+
 (defparameter files `(#P"test/grph.lisp" #P"test/qry.lisp" #P"test/xgrph.lisp"))
+
+(defun ls (l) (grph:lsort l))
 
 (defun compile-or-fail (f)
   (format t "~%compiling: ~a~%" (grph::mkstr f))
