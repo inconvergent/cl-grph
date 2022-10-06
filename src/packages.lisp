@@ -14,7 +14,7 @@
     #:compile-query #:match
     #:qry #:qry-collect-while #:stop #:cancel #:collect-while
     #:edge-set->path
-    #:gather-match
+    #:gather-match #:ingest-facts
     #:grp #:distinct #:first< #:first> #:lsort))
 
 (defpackage #:xgrph

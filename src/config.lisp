@@ -27,14 +27,16 @@
 ; (init-config (optimize safety (speed 1) debug (space 2))
 ;              (optimize (safety 1) (speed 3) debug space))
 
+; TODO: this does not always seem to work as expected?
 (defun psel (k)
-  (let ((p '((not . p/qry-not) (and . p/qry-and)
-             (let . lparallel:plet)))
-        (s '((not . qry-not) (and . qry-and)
-             (let . let))))
-    (declare (ignorable par sel))
+  (let ((p '((:not . p/qry-not) (:and . p/qry-and)
+             #+:grph-parallel (:let . lparallel:plet)))
+        (s '((:not . qry-not) (:and . qry-and)
+             (:let . let))))
+    (declare (ignorable p s))
     (cdr (assoc k #+:grph-parallel p #-:grph-parallel s))))
 
+(defvar *valid-clauses* '(:and :not :or :or-join :not-join))
 (defvar *dir-mode* '(:-> :<- :<>))
 (defvar *pos-mode* '(:rel :abs))
 

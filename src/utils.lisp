@@ -37,13 +37,18 @@
 ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
 (defun psymb (package &rest args) (values (intern (apply #'mkstr args) package)))
 
+; TODO: rewrite as macro
+(defun lpos (l &optional (i 0) j)
+  (if j (mapcar (lambda (a) (subseq a i j)) l)
+        (mapcar (lambda (a) (nth i a)) l)))
+
 (defun undup (e &optional (flatten t))
   (declare (optimize speed))
-  (delete-duplicates (if flatten (awf e) e)))
+  (remove-duplicates (if flatten (awf e) e)))
 
-; (defun internal-path-string (path)
-;   (declare (string path))
-;   (namestring (asdf:system-relative-pathname :weird path)))
+(defun internal-path-string (path)
+  (declare (string path))
+  (namestring (asdf:system-relative-pathname :grph path)))
 
 (defun -gensyms (name n)
   (declare (symbol name) (fixnum n))

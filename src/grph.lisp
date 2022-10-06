@@ -124,7 +124,7 @@ this terminology is used :
   (declare #.*opt* (grph g) (pn a b) (list props))
   "new edge (a b). optionally set prop, p, (with val).
 returns: (values g created?)"
-  (unless (/= a b) (warn "-ADD incorrect edge: (~a ~a)." a b))
+  (when (= a b) (warn "-ADD incorrect edge: (~a ~a)." a b))
   (if (@mem g a b) (values g nil)
                    (progn (setf g (-add g a b))
                           (values (prop g (list a b) props) t))))
@@ -160,8 +160,9 @@ returns: (values g deleted?)"
   (declare (list f))
   ; TODO: handle props properly
   (loop for (l p r) in f
-        do (cond ((not (@mem g l r))
-                    (add! g l r (list p)))
+        do (cond
+                 ((not (@mem g l r))
+                    (add! g l r (if (not (eq p :_)) (list p))))
                  ((not (@prop g (list l r) p))
                     (prop! g (list l r) (list p)))))
   g)
