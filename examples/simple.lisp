@@ -17,47 +17,54 @@
 ; (setf g (add g 1 2))
 
 (defun get-sample-graph (&aux (g (grph)))
-
   ; add edges
-  (add! g 0 1)
-  (add! g 0 3)
-  (add! g 2 3)
-  (add! g 5 6)
-  (add! g 9 0)
-  (add! g 9 6)
-  (add! g 9 7)
-
-  ; add an edges with property
-  (add! g 3 4 '(:a)) ; corresponds to '((:a t))
-  (add! g 4 3 '((:a "43") (:xx 888)))
-  (add! g 6 0 '((:a "60")))
-  (add! g 8 9 '(:b))
-  (add! g 7 8 '(:b :some-value))
-  ; this wil be ignored since (7 8) is created above
-  (add! g 7 8 '(:nothing-happens :hh)) ; returns nil
+  (print :create)
+  (print ; print all output for the sake of demonstration
+    (veq:lst
+      (add! g 0 1) ; add edge '(0 1). returns '(0 1)
+      (add! g 0 3)
+      (add! g 2 3)
+      (add! g 5 6)
+      (add! g 9 0)
+      (add! g 9 6)
+      (add! g 9 7)
+      ; add edges with property
+      (add! g 3 4 '(:a)) ; '(:a) corresponds to '((:a t))
+      (add! g 4 3 '((:a "43") (:xx 888))) ; add edge with two prop with values
+      (add! g 6 0 '((:a "60") :b)) ; one prop with value and one with no val (t)
+      (add! g 8 9 '(:b))
+      (add! g 7 8 '(:b :some-value)) ; returns '(7 8)
+      ; this wil be ignored since (7 8) is created above
+      (add! g 7 8 '(:nothing-happens :hh)) ; returns nil
+    ))
   g)
 
 
 (defun main ()
-  (let ((g (get-sample-graph)))
-    (print (@edges g))
-    (print (@verts g) )
-    (print (@out g 3) )
-    (print (@in g 3) )
+  (let* ((g (get-sample-graph)) (h g))
+    ; (veq:vpr ...) prints all all values inside
+    (veq:vpr g)
+    (veq:vpr (@edges g)) ; list all edges
+    (veq:vpr (@verts g)) ; list all verts
+    (veq:vpr (@out g 3)) ; outbound verts of 3
+    (veq:vpr (@in g 3)) ; inbounds verts of 3
 
-    (print (@mem g 7 8))
-    (print (@prop g (list 7 8)))
+    (veq:vpr (@mem g 7 8)) ; does edge (7 8) exist?
+    (veq:vpr (@prop g '(7 8))) ; get props of edge (7 8)
 
-    (print (del! g 7 8))
-    (print (@mem g 7 8))
+    (veq:vpr (del! g 7 8)) ; delete edge (7 8)
+    (veq:vpr g)
+    (veq:vpr (@mem g 7 8))
 
-    (print (del! g 2 3))
-    (print (@in g 3))
+    (veq:vpr (del! g 2 3))
+    (veq:vpr (@in g 3)) ; inbound verts of 3
 
-    (print (@prop g '(4 3)))
-    (print (@prop g '(7 8)))
-    (print (@prop g '(4 3) :a))
-    (print (@verts g))
+    (veq:vpr (@prop g '(4 3)))
+    (veq:vpr (@prop g '(7 8)))
+    (veq:vpr (@prop g '(4 3) :a)) ; get value of prop :a on edge '(4 3)
+    (veq:vpr (@verts g))
+    (print g)
+    (print h) ; h still has the initial graph from (get-sample-graph)
 
     ; iteration macros
     (itr-edges (g e) (format t "~&edge: ~a: ~a~%" e (@prop g e)))

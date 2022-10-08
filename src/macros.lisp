@@ -72,8 +72,7 @@
 
 (defmacro add! (g a b &optional props)
   (declare (symbol g))
-  "add edge edge and re-bind.
-returns: (a b) or nil."
+  "add edge edge and re-bind. returns: (a b) or nil."
   (awg (g* created?)
     `(mvb (,g* ,created?) (add ,g ,a ,b ,props)
       (setf ,g ,g*)
@@ -81,8 +80,7 @@ returns: (a b) or nil."
 
 (defmacro del! (g a b)
   (declare (symbol g))
-  "del edge and re-bind.
-returns: deleted?"
+  "del edge and re-bind. returns: deleted?"
   (awg (g* deleted?)
     `(mvb (,g* ,deleted?) (del ,g ,a ,b)
       (setf ,g ,g*)
@@ -91,7 +89,7 @@ returns: deleted?"
 ; TODO: should this return anything else?
 (defmacro prop! (g k props)
   (declare (symbol g))
-  "set prop and re-bind."
+  "set prop and re-bind. returns: nil"
   `(progn (setf ,g (prop ,g ,k ,props))
           nil))
 

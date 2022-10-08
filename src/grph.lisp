@@ -17,7 +17,7 @@
   (:constructor grph (&optional (adj nilmap) (num-edges 0)
                                 (props nilmap) (mid nilmap)))
   (:print-object prt))
-  "create undirected graph instance with no spatial awareness.
+  "create a directed graph instance with no spatial awareness.
 
 assuming the following graph, where all edges are undirected:
 
@@ -50,14 +50,12 @@ this terminology is used :
 
 (defun @prop (g k &optional p)
   (declare (grph g))
-  ; optional second arg
   "get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a."
   (if p (get-multi-rel (props g) k :prop p)
         (get-multi-rel (props g) k)))
 
 (defun @mid (g k &optional p)
   (declare (grph g))
-  ; optional second arg
   "get val of prop, p, for key, k. should be an edge k=(a b)"
   (if p (get-multi-rel (mid g) k :prop p)
         (get-multi-rel (mid g) k)))
@@ -104,10 +102,9 @@ this terminology is used :
                    (set-multi-rel (props g) k p val)
                    (set-multi-rel (mid g) p k))))
     (loop for p* in props
-          do (setf g (typecase p*
+          do (setf g (etypecase p*
                        (cons (dsb (p val) p* (with-prop p val)))
-                       (symbol (with-prop p* t))
-                       (t (error "PROP: unexpected prop: ~a" p*)))))
+                       (symbol (with-prop p* t)))))
     g))
 
 (defun -add (g a b)
@@ -124,7 +121,7 @@ this terminology is used :
   (declare #.*opt* (grph g) (pn a b) (list props))
   "new edge (a b). optionally set prop, p, (with val).
 returns: (values g created?)"
-  (when (= a b) (warn "-ADD incorrect edge: (~a ~a)." a b))
+  (when (= a b) (warn "ADD: incorrect edge: (~a ~a)." a b))
   (if (@mem g a b) (values g nil)
                    (progn (setf g (-add g a b))
                           (values (prop g (list a b) props) t))))
@@ -149,19 +146,21 @@ returns: (values g created?)"
   (declare (grph g) (pn a b))
   "delete edge (a b). deletes associated props.
 returns: (values g deleted?)"
+  (when (= a b) (warn "DEL: incorrect edge: (~a ~a)." a b))
   (-del g a b))
 
 
 ; VARIOUS ---
 
-(defun grp (val &optional (s :g)) (declare (symbol val s)) `((,s ,val) ,val))
+(defun grp (val &optional (s :g))
+  (declare (symbol val s))
+  `((,s ,val) ,val))
 
-(defun ingest-facts (g f)
+(defun ingest-edges (g f)
   (declare (list f))
-  ; TODO: handle props properly
+  "ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9))."
   (loop for (l p r) in f
-        do (cond
-                 ((not (@mem g l r))
+        do (cond ((not (@mem g l r))
                     (add! g l r (if (not (eq p :_)) (list p))))
                  ((not (@prop g (list l r) p))
                     (prop! g (list l r) (list p)))))

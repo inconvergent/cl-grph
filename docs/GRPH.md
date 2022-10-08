@@ -189,8 +189,7 @@ returns: (values g created?)
 #### GRPH:ADD!
 
 ```
-add edge edge and re-bind.
-returns: (a b) or nil.
+add edge edge and re-bind. returns: (a b) or nil.
 
  ; GRPH:ADD!
  ;   [symbol]
@@ -198,8 +197,7 @@ returns: (a b) or nil.
  ; ADD! names a macro:
  ;   Lambda-list: (G A B &OPTIONAL PROPS)
  ;   Documentation:
- ;     add edge edge and re-bind.
- ;     returns: (a b) or nil.
+ ;     add edge edge and re-bind. returns: (a b) or nil.
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
@@ -260,8 +258,7 @@ returns: (values g deleted?)
 #### GRPH:DEL!
 
 ```
-del edge and re-bind.
-returns: deleted?
+del edge and re-bind. returns: deleted?
 
  ; GRPH:DEL!
  ;   [symbol]
@@ -269,8 +266,7 @@ returns: deleted?
  ; DEL! names a macro:
  ;   Lambda-list: (G A B)
  ;   Documentation:
- ;     del edge and re-bind.
- ;     returns: deleted?
+ ;     del edge and re-bind. returns: deleted?
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
@@ -413,7 +409,7 @@ use :pretty to print verbose output to stdout in a readable form.
  ; 
  ; GRPH names the structure-class #<STRUCTURE-CLASS GRPH:GRPH>:
  ;   Documentation:
- ;     create undirected graph instance with no spatial awareness.
+ ;     create a directed graph instance with no spatial awareness.
  ;     
  ;     assuming the following graph, where all edges are undirected:
  ;     
@@ -450,17 +446,19 @@ use :pretty to print verbose output to stdout in a readable form.
  ;       Initform: 0
 ```
 
-#### GRPH:INGEST-FACTS
+#### GRPH:INGEST-EDGES
 
 ```
-:missing:todo:
+ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9)).
 
- ; GRPH:INGEST-FACTS
+ ; GRPH:INGEST-EDGES
  ;   [symbol]
  ; 
- ; INGEST-FACTS names a compiled function:
+ ; INGEST-EDGES names a compiled function:
  ;   Lambda-list: (G F)
  ;   Derived type: (FUNCTION (T LIST) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9)).
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
@@ -603,7 +601,7 @@ set prop, p, of edge or vert, k.
 #### GRPH:PROP!
 
 ```
-set prop and re-bind.
+set prop and re-bind. returns: nil
 
  ; GRPH:PROP!
  ;   [symbol]
@@ -611,7 +609,7 @@ set prop and re-bind.
  ; PROP! names a macro:
  ;   Lambda-list: (G K PROPS)
  ;   Documentation:
- ;     set prop and re-bind.
+ ;     set prop and re-bind. returns: nil
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
@@ -640,7 +638,7 @@ set prop and re-bind.
  ; 
  ; QRY names a macro:
  ;   Lambda-list: (G &KEY IN USING SELECT WHEN WHERE THEN COLLECT FIRST DB
- ;                 (ITR (GENSYM QRY-ITR)) (PROC (QUOTE IDENTITY))
+ ;                 %PAIRS (ITR (GENSYM QRY-ITR)) (PROC (QUOTE IDENTITY))
  ;                 (RES (GENSYM QRY-RES)))
  ;   Source file: /data/x/grph/src/qry.lisp
 ```

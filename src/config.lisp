@@ -36,7 +36,7 @@
     (declare (ignorable p s))
     (cdr (assoc k #+:grph-parallel p #-:grph-parallel s))))
 
-(defvar *valid-clauses* '(:and :not :or :or-join :not-join))
+(defvar *valid-clauses* '(:and :not :or :or-join :not-join :q))
 (defvar *dir-mode* '(:-> :<- :<>))
 (defvar *pos-mode* '(:rel :abs))
 

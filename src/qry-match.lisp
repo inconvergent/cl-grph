@@ -49,11 +49,10 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
           ; NOTE: if props has verts, we need a fixnum/pn test here?
           ((hit pat t nil t)
              `(do-set (,s (or (@ (mid ,g) ,mid) ,nilset))
-                (typecase ,s (list (dsb (,l ,r) ,s
+                (etypecase ,s (list (dsb (,l ,r) ,s
                                      (declare (ignorable ,l ,r))
-                                     ,(fact l mid r)))
-                             (t (error "MATCH: unexpected clause: (~s ~s ~s)."
-                                       ',lft ',mid ',rht))))))))))
+                                     ,(fact l mid r))))))
+          (t (error "MATCH: unexpected clause: (~s ~s ~s)." lft mid rht)))))))
 
 (defmacro gather-match (g l p r)
   (declare (symbol g))

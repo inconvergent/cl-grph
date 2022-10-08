@@ -4,25 +4,22 @@
 ## About
 
 `grph` is an in-memory immutable graph structure with
-[datalog](https://en.wikipedia.org/wiki/Datalog) query language. The data
+[Datalog](https://en.wikipedia.org/wiki/Datalog) query language. The data
 structure and interfaces are generic, but it is primarily intended to
 be used in my generative art experiments.. It builds on several of the ideas
-and issues I encountered when writing the `weir` system which is currently a
-part of [weird](https://github.com/inconvergent/weird).
+and issues I encountered when writing the `weir` system, which is a part of
+[weird](https://github.com/inconvergent/weird).
 
-The main features is that the graph data structure builds on fset in order to
-be immutable. And the separation of graph structure and spatial data.
+The main features is that the graph data structure builds on
+[fset](https://fset.common-lisp.dev/) in order to be immutable. Furthermore, in
+`grph` the edge properties (`props`) is a native part of the graph itself.  The
+graph topology is separated from the spatial data, and the spatial data is also
+immutable. Having a separation between the graph and the spatial information
+makes it easier to work with higher dimensional data.
 
-Having an immutable data structure means that is it possible to have
-conditional transactions. And it makes it easier to do certain kinds of
-animation.
+There are many benefits to having immutable data structures; perhaps the most
+interesting being that it makes it trivial to to create transactions.
 
-Having a separation between the graph and the spatial information makes it
-easier to work with higher dimensional data.
-
-The datalog "dialect" in `grph` is a simplified subset of the query language in
-[Datomic](https://docs.datomic.com/cloud/query/query-data-reference.html).  It
-might be expanded and/or improved in the future. See the examples.
 
 ![Lines](img/lines.png)
 
@@ -31,7 +28,7 @@ might be expanded and/or improved in the future. See the examples.
 
 The `grph` system has two packages:
 
-1. `grph` contains the graph structure, as well as the query interface (datalog
+1. `grph` contains the graph structure, as well as the query interface (Datalog
    compiler).
 2. `xgrph` expands `grph` with some spatial awareness.
 
@@ -40,32 +37,47 @@ See the [docs folder](docs) for auomatically generated docs (incomplete).
 
 ## Examples
 
-Some examples of use are included in the [examples folder](examples).
+The subset of Datalog currently supported in `grph` is the most basic pattern
+matching using `and`, `or`, `not`, `or-join` and `not-join`. Rules/fixed-point
+iteration is not currently supported.
 
-Here is a small example that demonstrates a few datalog queries for a small
-graph:
+Here is a small example that demonstrates a few supported Datalog queries for a
+small graph:
+
+Further examples and explanations are included in the [examples
+folder](examples).
 
 ```lisp
-  (let ((g (grph:ingest-facts (grph:grph)
-             '((0 :A 1) (0 :C 1) (1 :A 3) (1 :A 2) (1 :A 0) (1 :C 0)
-               (2 :A 1) (3 :C 7) (3 :B 5) (3 :C 5) (3 :B 4) (3 :A 1)
-               (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3) (5 :C 3) (5 :B 4)
-               (5 :E 4) (7 :C 3) (99 :X 77)))))
+(in-package :grph)
 
-    (print (grph:qry g :select (?x ?y)
-                       :where (and (?x :a ?y) (?x :c ?y))))
-    ;> '((1 0) (0 1))
+(let ((g (ingest-edges (grph)
+         '((0 :A 1) (0 :C 1) (1 :A 0) (1 :A 2) (1 :A 3) (1 :C 0)
+           (2 :A 1) (3 :A 1) (3 :B 4) (3 :B 5) (3 :C 5) (3 :C 7)
+           (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3) (5 :B 4) (5 :C 3)
+           (7 :C 3)))))
 
-    (print (grph:qry g :select (?x ?y)
-                       :where (and (?x :c ?y)
-                                   (not (or (?x :a 1) (?x :a 3))))))
-    ;> '((7 3) (5 3))
+(veq:vpr (qry g :select (?x ?y)
+                :where (and (?x :a ?y) (?x :c ?y))))
+;> '((1 0) (0 1))
 
-    (print (grph:qry g :select ?r
-                       :where (or-join ?r (and (?r :a ?a) (?a :b 5))
-                                          (?r :c 0)
-                                          (?r :e 5))))
-    ;> '((4) (1)))
+(veq:vpr (qry g :select (?x ?y)
+                :where (and (?x :c ?y)
+                            (not (or (?x :a 1) (?x :a 3))))))
+;> '((7 3) (5 3))
+
+(let ((?x 5))
+  (veq:vpr (qry g :in ?x ; bind ?x to the "outside" value: 5
+                  :select ?y
+                  :where (or (?x :b ?y)
+                             (?x :a ?y)))))
+;> '((3) (4))
+
+(veq:vpr (qry g :select ?r
+                :where (or-join ?r
+                         (and (?r :a ?a) (?a :b 5))
+                         (?r :c 0)
+                         (?r :e 5)))))
+;> '((4) (1)))
 ```
 
 
@@ -85,7 +97,7 @@ graph:
 
 ## Tests
 
-Tests can be executed using: (asdf:test-system :grph). Or by executing
+Tests can be executed with `(asdf:test-system :grph)`. Or by executing
 `./run-tests.sh`.
 
 ## Note

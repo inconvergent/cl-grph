@@ -72,11 +72,17 @@
 
 (defun get-join-binds (qc)
   (declare (list qc))
-  (ensure-list (cadr qc)))
+  (let ((res (ensure-list (cadr qc))))
+    (unless (every #'var? res) (error "QRY: bad bind var in: ~a" qc))
+    res))
 
 (defun qry/intern-clause-symbs (qc)
   (labels ((kv (s) (intern (string-upcase (symbol-name s)) :keyword)))
-    (cond ((and (symbolp qc) (member (kv qc) *valid-clauses*)) (kv qc))
+    (cond
+          ((and (symbolp qc) (member (kv qc) *valid-clauses*)) (kv qc))
+          ((and (listp qc)
+                (symbolp (car qc))
+                (eq (kv (car qc)) :q)) `(:q ,@(cdr qc)))
           ; ((any? s) :_) ; why does this not work?
           ((atom qc) qc)
           ((consp qc) (cons (qry/intern-clause-symbs (car qc))

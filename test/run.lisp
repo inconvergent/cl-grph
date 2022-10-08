@@ -37,7 +37,7 @@
              (2 :A 1) (3 :C 7) (3 :B 5) (3 :C 5) (3 :B 4) (3 :A 1)
              (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3) (5 :C 3) (5 :B 4)
              (5 :E 4) (7 :C 3) (99 :X 77))))
-  (grph::ingest-facts g f))
+  (grph:ingest-edges g f))
 
 (defun mk-grph-main ()
   (let ((g (grph:grph))
