@@ -91,3 +91,7 @@
                (declare (list a))
                (some-subsets a (if select (select-vars not* select) not*))) orig))
 
+(defun qry-filter (a b fx)
+  (declare (optimize speed (safety 0)) (list a) (ignore b) (function fx))
+  (remove-if-not fx a))
+

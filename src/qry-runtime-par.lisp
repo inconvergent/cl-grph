@@ -24,6 +24,10 @@
               collect (union a b :test #'equal)))
       aa)))
 
+(defun p/qry-filter (a b fx)
+  (declare (optimize speed (safety 0)) (list a) (ignore b) (function fx))
+  (lparallel:premove-if-not fx a))
+
 ; TODO: parallel dedupe-matches?
 ; TODO: parallel select-vars?
 ; TODO: parallel qry-or?

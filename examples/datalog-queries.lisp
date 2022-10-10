@@ -48,7 +48,9 @@
     ; here are some examples:
 
     ; get every edge (?x ?y) with prop :a and :c
-    (veq:vpr (qry g :select (?x ?y)
+    ; :db t will output the compiled query (for debugging). it has no effect on
+    ; the result
+    (veq:vpr (qry g :select (?x ?y) :db t
                     :where (and (?x :a ?y) (?x :c ?y))))
     ; '((1 0) (0 1))
 
@@ -65,15 +67,22 @@
     ;   ?r -:c-> 0; or
     ;   ?r -:e-> 5
     (veq:vpr (qry g :select ?r
-                    :where (or-join ?r (and (?r :a ?a) (?a :b 5))
-                                       (?r :c 0)
-                                       (?r :e 5))))
+                    :where (or-join ?r
+                             (and (?r :a ?a) (?a :b 5))
+                             (?r :c 0)
+                             (?r :e 5))))
     ; '((4) (1))
 
     ; every edge (?x ?y) with prop :e or :a, when ?x index is less than ?y index
     (veq:vpr (qry g :select (?x ?y)
                     :where (or (?x :e ?y) (?x :a ?y))
                     :when (< ?x ?y))) ; filters the final result only
+    ; '((0 1) (1 2) (1 3) (4 5))
+
+    ; the same using a % filter instead
+    (veq:vpr (qry g :select (?x ?y)
+                    :where (and (or (?x :e ?y) (?x :a ?y))
+                                (% < ?x ?y))))
     ; '((0 1) (1 2) (1 3) (4 5))
 
     ; get every vert ?y where
@@ -95,10 +104,9 @@
     ; '((7 88 3 4) (7 88 4 3) (9 88 4 5) (9 88 5 4)
     ;   (4 88 3 1) (3 88 2 1) (4 88 1 3) (3 88 1 2))
 
-    ; print every 3-path (?a ?b ?c).
+    ; print every 3-path (?a ?b ?c), when ?a is not equal to ?c.
     (qry g :select (?a ?b ?c)
-           :where (and (?a _ ?b) (?b _ ?c))
-           :when (/= ?a ?b ?c) ; filters the final result only
+           :where (and (?a _ ?b) (?b _ ?c) (% /= ?a ?c))
            :then (print (list :3-path ?a ?b ?c))) ; returns nil
     ; (:3-PATH 9 7 3)
     ; (:3-PATH 7 3 5)
@@ -111,14 +119,20 @@
     ; verts ?b with in/out-bound edges. the inner-most query selects all
     ; middle vertices in all 3-paths (assuming no back-tracking.) this amounts
     ; to all vertices that do not dead-end.
-    ; this isn't very nice, but i have yet to find a better alternative
     (veq:vpr (qry g :select ?b
-                  :where (and (or (?b _ _) (_ _ ?b))
-                              (not-join ?b
-                                ; nested query
-                                (q :select (?a ?b ?c)
-                                   :where (and (?a _ ?b) (?b _ ?c))
-                                   :when (/= ?a ?b ?c))))))
+                    :where (and (or (?b _ _) (_ _ ?b))
+                                (not-join ?b
+                                  (q :select (?a ?b ?c) ; nested query
+                                     :where (and (?a _ ?b) (?b _ ?c))
+                                     :when (/= ?a ?c))))))
+    ; ((9) (2) (0))
+
+    ; and a more elegant version of the same query, with no nesting
+    (veq:vpr (qry g :select ?b
+                    :where (and (or (?b _ _) (_ _ ?b))
+                                (not-join ?b (?a _ ?b)
+                                             (?b _ ?c)
+                                             (% /= ?a ?c)))))
     ; ((9) (2) (0))
     ))
 

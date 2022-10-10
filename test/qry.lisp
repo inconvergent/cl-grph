@@ -1,6 +1,36 @@
 (in-package #:grph-tests)
 
-(plan 2)
+(plan 3)
+
+(subtest "qry preproc"
+  (is (grph::qry/preproc/kv
+        '(and (not (?b _ _))
+              (not (?c _ _))
+              (not-join (?a ?b) (?c _ _))
+              (not-join ?a (?c _ _))
+              (% #'/= ?c)
+              (?a _ ?b)
+              (and (and (?a _ _) (or (_ ?a ?c) (_ _ 2))))
+              (% #'/= ?b )
+              (or-join ?a (?a _ ?b))
+              (or-join (?a ?c) (?a _ ?b) (and (?xx ?h ?uu)))
+              (?c _ ?b)
+              (?a _ ?s)
+              (or (?a _ ?b) (?c _ _))))
+      '(:AND (:NOT (:FACT ?B _ _)) (:NOT (:FACT ?C _ _))
+             (:NOT-JOIN (?A ?B) (:FACT ?C _ _))
+             (:NOT-JOIN (?A) (:FACT ?C _ _))
+             (:% #'/= ?C) (:FACT ?A _ ?B)
+             (:AND (:AND (:FACT ?A _ _)
+                         (:OR (:FACT _ ?A ?C) (:FACT _ _ 2))))
+             (:% #'/= ?B)
+             (:OR-JOIN (?A) (:FACT ?A _ ?B))
+             (:OR-JOIN (?A ?C) (:FACT ?A _ ?B)
+                       (:AND (:FACT ?XX ?H ?UU)))
+             (:FACT ?C _ ?B)
+             (:FACT ?A _ ?S)
+             (:OR (:FACT ?A _ ?B)
+                  (:FACT ?C _ _)))))
 
 (subtest "qry basic"
   (let ((g (make-edge-set)))
@@ -84,7 +114,15 @@
                         :where (and (?r _ _)
                                     (not-join (?r) (and (?r :a ?a)
                                                         (?a :b 5))))))
-        (ls '((99) (7) (5) (4) (3) (2) (0))))))
+        (ls '((99) (7) (5) (4) (3) (2) (0))))
+
+    (is (ls (grph:qry g :select ?b
+                  :where (and (or (?b _ _) (_ _ ?b))
+                              (not-join ?b
+                                (?a _ ?b)
+                                (?b _ ?c)
+                                (% /= ?a ?c)))))
+        (ls '((0) (2) (7) (77) (99))))))
 
 (subtest "qry 2"
   (let ((g (grph:grph)))

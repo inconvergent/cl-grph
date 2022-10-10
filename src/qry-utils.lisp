@@ -44,6 +44,10 @@
   (declare (optimize speed) (list p))
   (or (eq-car? p :not) (eq-car? p :not-join)))
 
+(defun fx? (p)
+  (declare (optimize speed) (list p))
+  (eq-car? p :%))
+
 (defun free? (s)
   (declare (optimize speed))
   (cond ((or (var? s) (any? s)) t)
@@ -75,16 +79,4 @@
   (let ((res (ensure-list (cadr qc))))
     (unless (every #'var? res) (error "QRY: bad bind var in: ~a" qc))
     res))
-
-(defun qry/intern-clause-symbs (qc)
-  (labels ((kv (s) (intern (string-upcase (symbol-name s)) :keyword)))
-    (cond
-          ((and (symbolp qc) (member (kv qc) *valid-clauses*)) (kv qc))
-          ((and (listp qc)
-                (symbolp (car qc))
-                (eq (kv (car qc)) :q)) `(:q ,@(cdr qc)))
-          ; ((any? s) :_) ; why does this not work?
-          ((atom qc) qc)
-          ((consp qc) (cons (qry/intern-clause-symbs (car qc))
-                            (qry/intern-clause-symbs (cdr qc)))))))
 

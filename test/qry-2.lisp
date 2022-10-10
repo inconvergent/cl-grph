@@ -3,9 +3,7 @@
 (plan 4)
 
 (subtest  "qry nested"
-
   (let ((g (make-edge-set)))
-
     (is (ls (grph:qry g :select (?a)
                         :where (and (?a _ _)
                                     (q :select ?a
