@@ -637,8 +637,8 @@ set prop and re-bind. returns: nil
  ;   [symbol]
  ; 
  ; QRY names a macro:
- ;   Lambda-list: (G &KEY IN USING SELECT WHEN WHERE THEN COLLECT FIRST DB
- ;                 %PAIRS (ITR (GENSYM QRY-ITR)) (PROC (QUOTE IDENTITY))
+ ;   Lambda-list: (G &KEY DB IN USING SELECT WHEN WHERE THEN COLLECT FIRST
+ ;                 PAIRS (ITR (GENSYM QRY-ITR)) (PROC (QUOTE IDENTITY))
  ;                 (RES (GENSYM QRY-RES)))
  ;   Source file: /data/x/grph/src/qry.lisp
 ```
@@ -654,6 +654,27 @@ set prop and re-bind. returns: nil
  ; QRY-COLLECT-WHILE names a macro:
  ;   Lambda-list: (G &REST REST)
  ;   Source file: /data/x/grph/src/qry.lisp
+```
+
+#### GRPH:RQRY
+
+```
+example rule:
+  ((*ancestor (?x ?y) (?x :a ?y))
+   (*ancestor (?x ?y) (and (?x :a ?z)
+                           (*ancestor ?z ?y))))
+
+ ; GRPH:RQRY
+ ;   [symbol]
+ ; 
+ ; RQRY names a macro:
+ ;   Lambda-list: (G &KEY LIM RULES THEN)
+ ;   Documentation:
+ ;     example rule:
+ ;       ((*ancestor (?x ?y) (?x :a ?y))
+ ;        (*ancestor (?x ?y) (and (?x :a ?z)
+ ;                                (*ancestor ?z ?y))))
+ ;   Source file: /data/x/grph/src/qry-rules.lisp
 ```
 
 #### GRPH:STOP

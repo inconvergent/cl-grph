@@ -13,6 +13,7 @@
     #:grph #:prt
     #:compile-query #:match
     #:qry #:qry-collect-while #:stop #:cancel #:collect-while
+    #:rqry
     #:edge-set->path
     #:gather-match #:ingest-edges
     #:grp #:distinct #:first< #:first> #:lsort))

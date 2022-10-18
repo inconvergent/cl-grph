@@ -7,16 +7,14 @@
 
 #+:grph-parallel (setf lparallel:*kernel* (lparallel:make-kernel 4))
 
-(defparameter files `(#P"test/grph.lisp"
-                       #P"test/qry.lisp"
-                       #P"test/qry-2.lisp"
-                       #P"test/xgrph.lisp"))
+(defparameter files `(#P"test/grph.lisp" #P"test/qry.lisp"
+                      #P"test/qry-2.lisp" #P"test/qry-3.lisp"
+                      #P"test/xgrph.lisp"))
 
-
-(defun compile-or-fail (f)
-  (format t "~%compiling: ~a~%" (grph::mkstr f))
-  (with-open-stream (*standard-output* (make-broadcast-stream))
-    (compile-file f)))
+; (defun compile-or-fail (f)
+;   (format t "~%compiling: ~a~%" (grph::mkstr f))
+;   (with-open-stream (*standard-output* (make-broadcast-stream))
+;     (compile-file f)))
 
 (defun run-tests ()
   (loop with fails = 0
@@ -29,7 +27,20 @@
         finally (return (unless (< fails 1)
                           (sb-ext:quit :unix-status 7)))))
 
-(defun ls (l) (grph:lsort l))
+(defun lsort* (l &aux (l (copy-list l)))
+  (declare (optimize speed) (list l))
+  "radix sort list of lists (of numbers or symbols).
+inefficient. use for tests only."
+  (loop for i of-type fixnum from (1- (length (the list (first l)))) downto 0
+        do (labels ((srt (a b)
+                      (funcall (the function (etypecase a (symbol #'string<)
+                                                          (number #'<)))
+                               a b))
+                    (p (a b) (srt (nth i a) (nth i b))))
+                   (setf l (stable-sort (the list l) #'p))))
+  l)
+(defun ls (l) (lsort* l))
+(defun mapls (&rest rest) (mapcar #'lsort* rest))
 
 (defun make-edge-set
   (&aux (g (grph:grph))
@@ -71,4 +82,23 @@
     (grph:add! g 9 0 '(:a))
     (grph:prop! g '(0 1) '((:a "aaa")))
     g))
+
+(defun make-rules-edge-set-1 ()
+  (let ((g (grph:grph))
+        (f `((0 :a 1) (0 :a 2) (1 :a 3)
+             (3 :a 2) (3 :a 4) (3 :a 0))))
+  (grph:ingest-edges g f)))
+
+(defun make-rules-edge-set-2 ()
+  (let ((g (grph:grph))
+        (f `((0 :b 1) (1 :b 3) (3 :b 0) (1 :e 4) (4 :e 6))))
+  (grph:ingest-edges g f)))
+
+(defun make-rules-edge-set-3 ()
+  (let ((g (grph:grph))
+        (f `((0 :a 3) (3 :a 2) (2 :a 0)
+             (0 :b 1) (1 :b 3) (3 :b 0)
+             (3 :c 5) (5 :c 2)
+             (1 :e 4) (4 :e 6))))
+  (grph:ingest-edges g f)))
 

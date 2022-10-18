@@ -45,6 +45,8 @@
     ;  - (or f1 f2 ...)
     ;  - (and f1 ... [(or fo1) ...] [(not fn1 ...)])
 
+    ; where [] means the clause is optional
+
     ; here are some examples:
 
     ; get every edge (?x ?y) with prop :a and :c

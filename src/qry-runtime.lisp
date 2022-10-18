@@ -38,9 +38,10 @@
 (defun select-vars (ll select)
   (declare (optimize speed (safety 1)) (list ll))
   ; (unless select (return-from select-vars ll))
-  (labels ((row-select (l) (remove-if-not
-                             (lambda (s) (member (the symbol (car s)) select :test #'eq))
-                             l))
+  (labels ((row-select (l)
+             (remove-if-not (lambda (s) (member (the symbol (car s))
+                                          select :test #'eq))
+                            l))
            (select (ll) (loop for l in ll
                               for s = (row-select l)
                               if s collect s)))
@@ -69,15 +70,11 @@
 
 (defun qry-or (aa bb &optional select)
   (declare (optimize speed (safety 0)) (list aa bb))
-  (labels ((row-select (l) (remove-if-not (lambda (s) (member s select)) l))
-           (select (ll) (loop for l in ll
-                              for s = (row-select (car s))
-                              if s collect s)))
-    ; this creates duplicates in (select x), but we need dedupe eithe way
-    (dedupe-matches
-      (if select
-          (union (select-vars aa select) (select-vars bb select) :test #'equal)
-          (union aa bb :test #'equal)))))
+  ; this creates duplicates in (select x), but we need dedupe eithe way
+  (dedupe-matches
+    (if select
+        (union (select-vars aa select) (select-vars bb select) :test #'equal)
+        (union aa bb :test #'equal))))
 
 (defun some-subsets (a b)
   (declare (optimize speed (safety 0)) (list a b))
@@ -94,4 +91,28 @@
 (defun qry-filter (a b fx)
   (declare (optimize speed (safety 0)) (list a) (ignore b) (function fx))
   (remove-if-not fx a))
+
+
+(defun rules/prev-matches (var &rest pairs)
+  (declare (list var))
+  "get the hits from the last iteration"
+  ; TODO: drop _ pairs
+  (mvb (pairs filters)
+       (filter-by-predicate pairs (lambda (p) (or (var? p) (any? p))) :key #'cdr)
+    (labels ((filter-match-all (v)
+              (every (lambda (f) (find f v :test #'equal)) filters))
+             (repl (f) (mapcar (lambda (p &aux (lft (car p)) (rht (cdr p)))
+                                 (declare (symbol lft rht))
+                                 `(,rht . ,(get-var lft f)))
+                               pairs)))
+      (when filters (setf var (remove-if-not #'filter-match-all var)))
+      (mapcar #'repl var))))
+
+(defun rules/post-proc (l &rest args)
+  (declare (list l args))
+  "strip first nil if present, select args from every row."
+  (mapcar (lambda (f)
+            (declare (list f))
+            (mapcar (lambda (a) (declare (symbol a)) (get-var a f)) args))
+          l))
 

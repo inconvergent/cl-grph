@@ -42,6 +42,8 @@
   (if j (mapcar (lambda (a) (subseq a i j)) l)
         (mapcar (lambda (a) (nth i a)) l)))
 
+(defun mapqt (l) (mapcar (lambda (s) `(quote ,s)) l))
+
 (defun undup (e &optional (flatten t))
   (declare (optimize speed))
   (remove-duplicates (if flatten (awf e) e)))
@@ -57,13 +59,23 @@
         for x across "XYZWUVPQR"
         collect (gensym (format nil "~a-~a-" name x))))
 
-(defun filter-by-predicate (l fx)
-  (declare (list l) (function fx))
+(defun filter-by-predicate (l fx &key (key #'identity))
+  (declare (list l) (function fx key))
   "split l into (values yes no) according to fx"
   (loop for x in l
-        if (funcall fx x) collect x into yes
+        if (funcall fx (funcall key x)) collect x into yes
         else collect x into no
         finally (return (values yes no))))
+
+(defun tree-find-all (root fx &optional (res (list)))
+  (declare (optimize speed) (function fx) (list res))
+  (cond ((funcall fx root) (return-from tree-find-all (cons root res)))
+        ((atom root) nil)
+        (t (let ((l (tree-find-all (car root) fx res))
+                 (r (tree-find-all (cdr root) fx res)))
+             (when l (setf res `(,@l ,@res)))
+             (when r (setf res `(,@r ,@res))))
+           res)))
 
 (defun split-string (x s &key prune)
   (declare (character x) (string s) (boolean prune))

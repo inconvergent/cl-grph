@@ -1,6 +1,6 @@
 (asdf:defsystem #:grph
   :description "graph thing"
-  :version "0.7.0"
+  :version "0.8.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :licence "MIT"
   :in-order-to ((asdf:test-op (asdf:test-op #:grph/tests)))
@@ -16,10 +16,18 @@
                (:file "qry-utils" :depends-on ("grph"))
                (:file "qry-match" :depends-on ("qry-utils"))
                (:file "qry-runtime" :depends-on ("qry-match"))
-               #+:grph-parallel (:file "qry-runtime-par"
-                                 :depends-on ("qry-runtime"))
-               (:file "qry" :depends-on ("qry-runtime"
-                                         #+:grph-parallel "qry-runtime-par"))
+
+               ; parallel
+               #+:grph-parallel
+               (:file "qry-runtime-par" :depends-on ("qry-runtime"))
+               #+:grph-parallel
+               (:file "qry" :depends-on ("qry-runtime-par"))
+
+               ; serial
+               #-:grph-parallel
+               (:file "qry" :depends-on ("qry-runtime"))
+
+               (:file "qry-rules" :depends-on ("qry"))
                (:file "xgrph" :depends-on ("qry"))
                (:file "docs" :depends-on ("xgrph"))))
 

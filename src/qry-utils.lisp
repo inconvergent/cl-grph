@@ -1,9 +1,11 @@
 (in-package :grph)
 
-(declaim (inline any? bindable? eq-car? eq-car? free? not? var? ^var? val?
+(declaim (inline any? bindable? eq-car? eq-car? free? not? var? ^var? val? fx?
                  has-symchar? interned? get-var get-all-vars symlen no-dupes?))
 
-; NOTE: this can be simplified after using preprocssing
+(defun symlen (s)
+  (declare (optimize speed) (symbol s))
+  (length (symbol-name s)))
 
 (defun interned? (s)
   (declare (optimize speed))
@@ -21,11 +23,9 @@
   (declare (optimize speed))
   (and (interned? s) (has-symchar? s #\?)))
 
-(defun ^var? (s &aux (name (symbol-name s)))
-  (declare (optimize speed) (symbol s) (string name))
-  (and (> (length name) 1) (eq (char name 0) #\^)))
-
-(defun symlen (s) (declare (optimize speed) (symbol s)) (length (symbol-name s)))
+(defun ^var? (s)
+  (declare (optimize speed) (symbol s))
+  (and (> (symlen s) 1) (has-symchar? s #\^)))
 
 (defun val? (s) (declare (optimize speed))
   (or (keywordp s)
@@ -58,6 +58,13 @@
   (declare (optimize speed))
   (cond ((any? s) nil) (t (free? s))))
 
+(defun no-dupes? (l)
+  (declare (optimize speed) (list l))
+  (= (length (the list (undup l nil))) (length l))) ; undup use is ok
+
+(defun rule-name? (n)
+  (and (symbolp n) (has-symchar? n #\*) (> (symlen n) 1)))
+
 (defun get-var (s l)
   (declare (optimize speed) (symbol s) (list l))
   (cdr (find s l :key #'car :test #'eq)))
@@ -69,10 +76,6 @@
 (defun get-bindable (a)
   (declare (optimize speed) (list a))
   (remove-if-not #'bindable? (get-all-vars a)))
-
-(defun no-dupes? (l)
-  (declare (optimize speed) (list l))
-  (= (length (the list (undup l nil))) (length l))) ; undup use is ok
 
 (defun get-join-binds (qc)
   (declare (list qc))

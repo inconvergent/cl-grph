@@ -1,5 +1,8 @@
 (in-package :grph)
 
+; pretty silly parallel versions of some reducers etc. still a lot faster than
+; the serial code in many cases
+
 (defun p/some-subsets (a b)
   (declare (optimize speed (safety 0)) (list a b))
   (lparallel:psome (lambda (o)
@@ -28,6 +31,23 @@
   (declare (optimize speed (safety 0)) (list a) (ignore b) (function fx))
   (lparallel:premove-if-not fx a))
 
+
+(defun p/union (aa bb)
+  (declare (optimize speed (safety 0)) (list aa bb))
+  (when (< (length aa) (length bb)) (rotatef aa bb))
+  (concatenate 'list aa
+     (lparallel:premove-if
+       (lambda (b) (member b aa :test #'equal))
+       bb)))
+
+(defun p/qry-or (aa bb &optional select)
+  (declare (optimize speed (safety 0)) (list aa bb select))
+  ; this creates duplicates in (select x), but we need dedupe either way
+  (dedupe-matches
+    (if select
+        (p/union (select-vars aa select) (select-vars bb select) :test #'equal)
+        (p/union aa bb :test #'equal))))
+
 ; TODO: parallel dedupe-matches?
 ; TODO: parallel select-vars?
-; TODO: parallel qry-or?
+
