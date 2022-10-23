@@ -9,14 +9,14 @@
         '((9 0) (8 9) (7 8) (6 0) (5 6) (4 3) (3 4) (2 3) (0 3) (0 1)))
     (is (grph:@verts g) '(9 8 7 6 5 4 2 3 1 0))
     (is (grph:@out g 3) '(4))
-    (is (grph:@in g 3) '(2 0))
+    (is (grph:@in g 3) '(4 2 0))
 
     (is (grph:@mem g 7 8) t)
-    (is (grph:@prop g (list 7 8)) (fset:map (:c t)) :test #'equalp)
+    (is (grph:@prop g (list 7 8)) (fset:map (:c t ) (:b t)) :test #'equalp)
     (grph:del! g 7 8)
     (is (grph:@mem g 7 8) nil)
     (grph:del! g 2 3)
-    (is (grph:@in g 3) '(0))
+    (is (grph:@in g 3) '(4 0))
 
     (is (grph:@prop g (list 4 3)) (fset:map (:a "43")) :test #'equalp)
     (is (grph:@prop g (list 4 3) :a) "43")

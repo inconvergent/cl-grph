@@ -1,7 +1,7 @@
 #### GRPH:\*DIR-MODE\*
 
 ```
-:missing:todo:
+valid edge direction modes.
 
  ; GRPH:*DIR-MODE*
  ;   [symbol]
@@ -13,13 +13,30 @@
 #### GRPH:\*POS-MODE\*
 
 ```
-:missing:todo:
+valid spatial modes.
 
  ; GRPH:*POS-MODE*
  ;   [symbol]
  ; 
  ; *POS-MODE* names a special variable:
  ;   Value: (:REL :ABS)
+```
+
+#### GRPH:@BOTH
+
+```
+list all verts of a that are bi-directional.
+
+ ; GRPH:@BOTH
+ ;   [symbol]
+ ; 
+ ; @BOTH names a compiled function:
+ ;   Lambda-list: (G A &AUX (RES (LIST)))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 31))
+ ;                  (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     list all verts of a that are bi-directional.
+ ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
 #### GRPH:@EDGES
@@ -35,6 +52,23 @@ list of lists of all edges.
  ;   Derived type: (FUNCTION (GRPH:GRPH) (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list of lists of all edges.
+ ;   Source file: /data/x/grph/src/grph.lisp
+```
+
+#### GRPH:@EITHER
+
+```
+list both inbound and outbond verts of a.
+
+ ; GRPH:@EITHER
+ ;   [symbol]
+ ; 
+ ; @EITHER names a compiled function:
+ ;   Lambda-list: (G A &AUX (RES (LIST)))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 31))
+ ;                  (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     list both inbound and outbond verts of a.
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
@@ -148,6 +182,23 @@ list of all connected verts.
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
+#### GRPH:@VMAX
+
+```
+get highest vertex index.
+
+ ; GRPH:@VMAX
+ ;   [symbol]
+ ; 
+ ; @VMAX names a compiled function:
+ ;   Lambda-list: (G &AUX (RES 0))
+ ;   Derived type: (FUNCTION (GRPH:GRPH)
+ ;                  (VALUES (UNSIGNED-BYTE 31) &OPTIONAL))
+ ;   Documentation:
+ ;     get highest vertex index.
+ ;   Source file: /data/x/grph/src/grph.lisp
+```
+
 #### GRPH:@VNUM
 
 ```
@@ -201,6 +252,19 @@ add edge edge and re-bind. returns: (a b) or nil.
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
+#### GRPH:ANY-EDGE
+
+```
+:missing:todo:
+
+ ; GRPH:ANY-EDGE
+ ;   [symbol]
+ ; 
+ ; ANY-EDGE names a macro:
+ ;   Lambda-list: (G ?P)
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
 #### GRPH:CANCEL
 
 ```
@@ -233,6 +297,19 @@ add edge edge and re-bind. returns: (a b) or nil.
 
  ; GRPH:COMPILE-QUERY
  ;   [symbol]
+```
+
+#### GRPH:DEAD-ENDS
+
+```
+:missing:todo:
+
+ ; GRPH:DEAD-ENDS
+ ;   [symbol]
+ ; 
+ ; DEAD-ENDS names a macro:
+ ;   Lambda-list: (G ?P)
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:DEL
@@ -273,7 +350,7 @@ del edge and re-bind. returns: deleted?
 #### GRPH:DISTINCT
 
 ```
-:missing:todo:
+t if values in rest are distinct.
 
  ; GRPH:DISTINCT
  ;   [symbol]
@@ -281,7 +358,8 @@ del edge and re-bind. returns: deleted?
  ; DISTINCT names a compiled function:
  ;   Lambda-list: (&REST REST &AUX (N (LENGTH REST)))
  ;   Derived type: (FUNCTION * (VALUES BOOLEAN &OPTIONAL))
- ;   Inline proclamation: INLINE (inline expansion available)
+ ;   Documentation:
+ ;     t if values in rest are distinct.
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
@@ -335,29 +413,46 @@ use :pretty to print verbose output to stdout in a readable form.
  ;   Source file: /data/x/grph/src/docs.lisp
 ```
 
-#### GRPH:FIRST<
+#### GRPH:FILAMENT-ENDS
 
 ```
 :missing:todo:
+
+ ; GRPH:FILAMENT-ENDS
+ ;   [symbol]
+ ; 
+ ; FILAMENT-ENDS names a macro:
+ ;   Lambda-list: (G ?P)
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
+#### GRPH:FIRST<
+
+```
+equvialent to (and (< r1 r2) (< r1 r3) ...). r1 is evaluated only once.
 
  ; GRPH:FIRST<
  ;   [symbol]
  ; 
  ; FIRST< names a macro:
  ;   Lambda-list: (&REST REST)
+ ;   Documentation:
+ ;     equvialent to (and (< r1 r2) (< r1 r3) ...). r1 is evaluated only once.
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
 #### GRPH:FIRST>
 
 ```
-:missing:todo:
+equvialent to (and (> r1 r2) (> r1 r3) ...). r1 is evaluated only once.
 
  ; GRPH:FIRST>
  ;   [symbol]
  ; 
  ; FIRST> names a macro:
  ;   Lambda-list: (&REST REST)
+ ;   Documentation:
+ ;     equvialent to (and (> r1 r2) (> r1 r3) ...). r1 is evaluated only once.
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
@@ -377,7 +472,11 @@ use :pretty to print verbose output to stdout in a readable form.
 #### GRPH:GRP
 
 ```
-:missing:todo:
+for val = :black and s = :color, creates list of two props
+((:color :black) :black). this is useful for making both :colour and :black
+filterable via @prop or in queries.
+
+eg: (add! g a b (grp :black :color))
 
  ; GRPH:GRP
  ;   [symbol]
@@ -386,6 +485,12 @@ use :pretty to print verbose output to stdout in a readable form.
  ;   Lambda-list: (VAL &OPTIONAL (S G))
  ;   Derived type: (FUNCTION (SYMBOL &OPTIONAL SYMBOL)
  ;                  (VALUES CONS &OPTIONAL))
+ ;   Documentation:
+ ;     for val = :black and s = :color, creates list of two props
+ ;     ((:color :black) :black). this is useful for making both :colour and :black
+ ;     filterable via @prop or in queries.
+ ;     
+ ;     eg: (add! g a b (grp :black :color))
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
@@ -465,7 +570,7 @@ ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9)).
 #### GRPH:ITR-ADJ
 
 ```
-iterate all outboud verts, b, of a.
+iterate all adjacent verts, b, of a. use modes (:-> :<- :>< :<>).
 
  ; GRPH:ITR-ADJ
  ;   [symbol]
@@ -473,7 +578,7 @@ iterate all outboud verts, b, of a.
  ; ITR-ADJ names a macro:
  ;   Lambda-list: ((G A B &OPTIONAL (MODE OUT)) &BODY BODY)
  ;   Documentation:
- ;     iterate all outboud verts, b, of a.
+ ;     iterate all adjacent verts, b, of a. use modes (:-> :<- :>< :<>).
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
@@ -541,6 +646,19 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
  ;   Source file: /data/x/grph/src/qry-match.lisp
 ```
 
+#### GRPH:MULTI-ISECTS
+
+```
+:missing:todo:
+
+ ; GRPH:MULTI-ISECTS
+ ;   [symbol]
+ ; 
+ ; MULTI-ISECTS names a macro:
+ ;   Lambda-list: (G ?P)
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
 #### GRPH:MVB
 
 ```
@@ -580,39 +698,6 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
  ;   Expansion: (UNSIGNED-BYTE 31)
 ```
 
-#### GRPH:PROP
-
-```
-set prop, p, of edge or vert, k.
-
- ; GRPH:PROP
- ;   [symbol]
- ; 
- ; PROP names a compiled function:
- ;   Lambda-list: (G K PROPS)
- ;   Derived type: (FUNCTION (GRPH:GRPH LIST LIST)
- ;                  (VALUES GRPH:GRPH &OPTIONAL))
- ;   Documentation:
- ;     set prop, p, of edge or vert, k.
- ;   Inline proclamation: INLINE (inline expansion available)
- ;   Source file: /data/x/grph/src/grph.lisp
-```
-
-#### GRPH:PROP!
-
-```
-set prop and re-bind. returns: nil
-
- ; GRPH:PROP!
- ;   [symbol]
- ; 
- ; PROP! names a macro:
- ;   Lambda-list: (G K PROPS)
- ;   Documentation:
- ;     set prop and re-bind. returns: nil
- ;   Source file: /data/x/grph/src/macros.lisp
-```
-
 #### GRPH:PRT
 
 ```
@@ -631,7 +716,27 @@ set prop and re-bind. returns: nil
 #### GRPH:QRY
 
 ```
-:missing:todo:
+evaluate a trivial datalog query against g.
+
+:ex
+  (qry g :select (?x ?y)
+         :where (and (?x :c ?y) (not (or (?x :a 1)
+                                         (?x :a 3)))))
+will return tuples (?x ?y) matching the query.
+other alternatives are (selected vars are available when using these keywords):
+ - :pairs T; same as the default, but return the full result pairs
+ - :collect [this]; same as default, but collect this instead of just the selected vars
+ - :then [this]; execute this code, returns nil
+ - :first [this]; execut this, but for the first match only.
+
+other modifiers:
+ - :in [vars]; use values of vars bound outside the query.
+ - :using [vars]; mutate the graph for every returned tuple, see examples
+ - :res [symb]; bind query result to symb inside :collect, :then, :first
+ - :itr [symb]; counter available inside :collect, :then, :first
+ - :db T; print some useful debug info about the compiled query.
+
+see examples for more usage.
 
  ; GRPH:QRY
  ;   [symbol]
@@ -640,6 +745,28 @@ set prop and re-bind. returns: nil
  ;   Lambda-list: (G &KEY DB IN USING SELECT WHEN WHERE THEN COLLECT FIRST
  ;                 PAIRS (ITR (GENSYM QRY-ITR)) (PROC (QUOTE IDENTITY))
  ;                 (RES (GENSYM QRY-RES)))
+ ;   Documentation:
+ ;     evaluate a trivial datalog query against g.
+ ;     
+ ;     :ex
+ ;       (qry g :select (?x ?y)
+ ;              :where (and (?x :c ?y) (not (or (?x :a 1)
+ ;                                              (?x :a 3)))))
+ ;     will return tuples (?x ?y) matching the query.
+ ;     other alternatives are (selected vars are available when using these keywords):
+ ;      - :pairs T; same as the default, but return the full result pairs
+ ;      - :collect [this]; same as default, but collect this instead of just the selected vars
+ ;      - :then [this]; execute this code, returns nil
+ ;      - :first [this]; execut this, but for the first match only.
+ ;     
+ ;     other modifiers:
+ ;      - :in [vars]; use values of vars bound outside the query.
+ ;      - :using [vars]; mutate the graph for every returned tuple, see examples
+ ;      - :res [symb]; bind query result to symb inside :collect, :then, :first
+ ;      - :itr [symb]; counter available inside :collect, :then, :first
+ ;      - :db T; print some useful debug info about the compiled query.
+ ;     
+ ;     see examples for more usage.
  ;   Source file: /data/x/grph/src/qry.lisp
 ```
 
@@ -659,21 +786,45 @@ set prop and re-bind. returns: nil
 #### GRPH:RQRY
 
 ```
-example rule:
-  ((*ancestor (?x ?y) (?x :a ?y))
-   (*ancestor (?x ?y) (and (?x :a ?z)
-                           (*ancestor ?z ?y))))
+evaluate simple datalog programs top-down. all rule names (with * prefix)
+are bound as variables that can be used in :then.
+
+ex:
+  (rqry g :rules ((*st-reach (?x ?y) (?x _ ?y)) ; trivial
+                  (*st-reach (?x ?y) (and (?x _ ?z) (*st-reach ?z ?y))) ; linear
+                  (*li-reach (?x ?u) (and (*st-reach ?x _) (?x ?u _))) ; simple
+                  (*ans-a (?y) (*st-reach 4 ?y)) ; simple (w/filter)
+                  (*ans-b (?u) (*li-reach 1 ?u))) ; simple (w/filter)
+          :then (print (list *st-reach *li-reach *ans-a *ans-b))
+
+note the difference between rule types:
+ - trivial rules contain only queries that can be passed directly to qry
+ - simple rules reference earlier rules, but not themselves
+ - linear rules have (only) one self-reference (references to earlier
+  rules are allowed.)
 
  ; GRPH:RQRY
  ;   [symbol]
  ; 
  ; RQRY names a macro:
- ;   Lambda-list: (G &KEY LIM RULES THEN)
+ ;   Lambda-list: (G &KEY (LIM 1000) RULES THEN)
  ;   Documentation:
- ;     example rule:
- ;       ((*ancestor (?x ?y) (?x :a ?y))
- ;        (*ancestor (?x ?y) (and (?x :a ?z)
- ;                                (*ancestor ?z ?y))))
+ ;     evaluate simple datalog programs top-down. all rule names (with * prefix)
+ ;     are bound as variables that can be used in :then.
+ ;     
+ ;     ex:
+ ;       (rqry g :rules ((*st-reach (?x ?y) (?x _ ?y)) ; trivial
+ ;                       (*st-reach (?x ?y) (and (?x _ ?z) (*st-reach ?z ?y))) ; linear
+ ;                       (*li-reach (?x ?u) (and (*st-reach ?x _) (?x ?u _))) ; simple
+ ;                       (*ans-a (?y) (*st-reach 4 ?y)) ; simple (w/filter)
+ ;                       (*ans-b (?u) (*li-reach 1 ?u))) ; simple (w/filter)
+ ;               :then (print (list *st-reach *li-reach *ans-a *ans-b))
+ ;     
+ ;     note the difference between rule types:
+ ;      - trivial rules contain only queries that can be passed directly to qry
+ ;      - simple rules reference earlier rules, but not themselves
+ ;      - linear rules have (only) one self-reference (references to earlier
+ ;       rules are allowed.)
  ;   Source file: /data/x/grph/src/qry-rules.lisp
 ```
 
@@ -684,5 +835,20 @@ example rule:
 
  ; GRPH:STOP
  ;   [symbol]
+```
+
+#### GRPH:WALK-GRPH
+
+```
+walk the grph and return tuples: ((path closed?) ...)
+
+ ; GRPH:WALK-GRPH
+ ;   [symbol]
+ ; 
+ ; WALK-GRPH names a macro:
+ ;   Lambda-list: (G PROP &KEY (LIM 100000))
+ ;   Documentation:
+ ;     walk the grph and return tuples: ((path closed?) ...)
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 

@@ -21,3 +21,5 @@ sbcl --quit \
      --eval '(handler-case (asdf:test-system :grph)
                            (error (c) (print c) (sb-ext:quit :unix-status 5)))'
 
+touch ./grph.asd
+

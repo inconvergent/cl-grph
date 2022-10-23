@@ -1,20 +1,23 @@
 (in-package :grph)
 
-(declaim (inline
-           conflict distinct
-           some-subsets p/some-subsets))
+; (declaim (inline conflict distinct some-subsets p/some-subsets))
 
 ; RUNTIME QRY FXS AND REDUCERS (AND/NOT/FILTERS/SORT/...) ----------------
 
 (defun distinct (&rest rest &aux (n (length rest)))
   (declare (optimize speed) (pn n))
+  "t if values in rest are distinct."
   (= n (length (the list (undup rest nil))))) ; undup use is ok
 
-(defmacro fx-first (fx &rest rest &aux (a (car rest)))
-  (declare (symbol a))
-  `(and ,@(loop for b of-type symbol in (cdr rest) collect `(,fx ,a ,b))))
-(defmacro first< (&rest rest) `(fx-first < ,@rest))
-(defmacro first> (&rest rest) `(fx-first > ,@rest))
+(defmacro fx-first (f a &rest rest)
+  "equvialent to (and (f r1 r2) (f r1 r3) ...). r1 is evaluated only once."
+  (awg (a*) `(let ((,a* ,a)) (and ,@(loop for b in rest collect `(,f ,a* ,b))))))
+(defmacro first< (&rest rest)
+  "equvialent to (and (< r1 r2) (< r1 r3) ...). r1 is evaluated only once."
+  `(fx-first < ,@rest))
+(defmacro first> (&rest rest)
+  "equvialent to (and (> r1 r2) (> r1 r3) ...). r1 is evaluated only once."
+  `(fx-first > ,@rest))
 
 (defun lsort (l &optional (fx #'<) &aux (l (copy-list l)))
   (declare (optimize speed) (list l) (function fx))
@@ -28,15 +31,17 @@
 
 (defun dedupe-matches (l)
   (declare (optimize speed (safety 1)) (list l))
+  "remove duplicates in l."
   (labels ((srt-varset (a)
              (declare (list a))
              (sort (copy-list a) #'string< :key #'car)))
     (remove-duplicates (mapcar #'srt-varset l) :test #'equal)))
 
-; NOIE: optional dedupe?
-; NOTE: it is possible to do nothing if select is nil (if we know we dont need)
 (defun select-vars (ll select)
   (declare (optimize speed (safety 1)) (list ll))
+  "select only pairs with key from select for every element in ll."
+  ; NOTE: optional dedupe?
+  ; NOTE: it is possible to do nothing if select is nil (if we know we dont need)
   ; (unless select (return-from select-vars ll))
   (labels ((row-select (l)
              (remove-if-not (lambda (s) (member (the symbol (car s))
@@ -49,14 +54,17 @@
 
 (defun conflict (aa bb)
   (declare (optimize speed (safety 0)) (list aa bb))
+  "T if any pair in aa and bb has conflicting values.
+eg: (?a . 1) and (?a . 2)."
   (loop for a in aa
         while (not c)
         for c = (let ((f (find (car a) bb :key #'car :test #'eq)))
-                  (when (and f (not (eq (cdr a) (cdr f)))) t))
+                  (when (and f (not (eq (cdr a) (cdr f)))) t)) ; is eq use ok?
         finally (return c)))
 
-(defun qry-and (aa bb)
-  (declare (optimize speed (safety 0)) (list aa bb))
+(defun qry-and (aa bb &rest rest)
+  (declare (optimize speed (safety 0)) (list aa bb) (ignore rest))
+  "intersection of aa and bb."
   (when (< (length aa) (length bb)) (rotatef aa bb))
   (dedupe-matches
     (mapcan (lambda (a)
@@ -70,7 +78,7 @@
 
 (defun qry-or (aa bb &optional select)
   (declare (optimize speed (safety 0)) (list aa bb))
-  ; this creates duplicates in (select x), but we need dedupe eithe way
+  "union of aa and bb."
   (dedupe-matches
     (if select
         (union (select-vars aa select) (select-vars bb select) :test #'equal)
@@ -78,28 +86,32 @@
 
 (defun some-subsets (a b)
   (declare (optimize speed (safety 0)) (list a b))
+  "t if a contains any subsets of b."
   (some (lambda (o)
           (declare (list o))
           (subsetp o a :test #'equal)) b))
 
 (defun qry-not (orig not* &optional select)
   (declare (optimize speed (safety 0)) (list orig not*))
+  "subtract not* from orig."
   (remove-if (lambda (a)
                (declare (list a))
                (some-subsets a (if select (select-vars not* select) not*))) orig))
 
 (defun qry-filter (a b fx)
   (declare (optimize speed (safety 0)) (list a) (ignore b) (function fx))
+  "used for % filter clauses."
   (remove-if-not fx a))
 
 
 (defun rules/prev-matches (var &rest pairs)
-  (declare (list var))
-  "get the hits from the last iteration"
-  ; TODO: drop _ pairs
+  (declare (optimize speed (safety 1)) (list var))
+  "get the hits from the last iteration for linear rules."
+  ; TODO: drop _ pairs!!!
   (mvb (pairs filters)
        (filter-by-predicate pairs (lambda (p) (or (var? p) (any? p))) :key #'cdr)
     (labels ((filter-match-all (v)
+              (declare (list v))
               (every (lambda (f) (find f v :test #'equal)) filters))
              (repl (f) (mapcar (lambda (p &aux (lft (car p)) (rht (cdr p)))
                                  (declare (symbol lft rht))
@@ -109,7 +121,7 @@
       (mapcar #'repl var))))
 
 (defun rules/post-proc (l &rest args)
-  (declare (list l args))
+  (declare (optimize speed (safety 1)) (list l args))
   "strip first nil if present, select args from every row."
   (mapcar (lambda (f)
             (declare (list f))

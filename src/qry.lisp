@@ -1,11 +1,9 @@
 (in-package :grph)
 
 
-(defun qry/check/proc/and (qc)
+(defun qry/check/proc/and (qc &aux (qc (cdr qc)))
   "push not to the right (according to bindable vars), so not is executed
-as soon as possible.
-
-NOTE: qc should not include the litteral :and symb."
+as soon as possible."
   (declare (list qc))
   (labels
     ((not-bindables (n &aux (s (car n)))
@@ -47,10 +45,10 @@ NOTE: qc should not include the litteral :and symb."
   (when (some #'not? qc)
         (error "QRY: NOT/NOT-JOIN clause is not allowed in OR for:~%~{~s ~}." qc))
   (when (some #'fx? qc)
-        (error "QRY: % clause is not allowed in OR/OR-JOIN for:~%~{~s ~}." qc)))
+        (error "QRY: % clause is not allowed in OR/OR-JOIN for:~%~{~s ~}." qc))
+  qc)
 
-(defun qry/check/or (qc)
-  (declare (list qc) (cons qc))
+(defun qry/check/or (qc &aux (qc (cdr qc)))
   (qry/check/or/not qc)
   (dsb (a . vars) (mapcar #'get-all-vars qc)
     (loop for b in vars
@@ -107,28 +105,10 @@ because gensyms have no symbol-package. as a result :in vals are not free."
       (values (reverse res) where))))
 
 
-(defun psel (k)
-  #+:grph-parallel
-  (ecase k (:not 'p/qry-not)
-           (:and 'p/qry-and)
-           (:or 'p/qry-or)
-           (:let 'lparallel:plet)
-           (:% 'p/qry-filter))
-  #-:grph-parallel
-  (ecase k (:not 'qry-not)
-           (:and 'qry-and)
-           (:or 'qry-or)
-           (:let 'let)
-           (:% 'qry-filter)))
-
-
-(defmacro qry/compile-where (gather-match where in &key db)
-  (declare (symbol gather-match))
-  "compile datalog query. gather-match is the name of the macro used to compile
-  the individual clauses."
-
+(defmacro qry/compile-where (where in &key db)
+  "compile datalog query."
   (unless (and (every #'var? in) (no-dupes? in))
-          (error "QRY: got bad value for :in ~s." in))
+          (error "QRY: duplicate/bad value for :in ~s." in))
   (labels
     ((gs (c) (gensym (mkstr (car c) :-)))
      (join-vars (clause qc &aux (jarg (get-join-binds qc)))
@@ -137,42 +117,32 @@ because gensyms have no symbol-package. as a result :in vals are not free."
        jarg)
      (next (qc &aux (c (car qc)))
        (unless qc (warn "QRY: empty clause in :where ~s." where))
-       (unless (get-all-vars qc) (warn "QRY: clause ~s has no vars." qc))
-       (ecase c (:fact `(,gather-match ,(cdr qc)))
-                (:and (next/map/and
-                        (qry/check/proc/and (cdr qc))))
-                (:or (qry/check/or (cdr qc))
+       (unless (get-all-vars qc) (warn "QRY: no vars in ~s" qc))
+       (ecase c (:fact `(fact ,(cdr qc)))
+                (:q `(q ,@(cdr qc)))
+                (:f `(progn ,@(cdr qc)))
+                (:and (next/map/and (qry/check/proc/and qc)))
+                (:or (qry/check/or qc)
                      (next/map/or (cdr qc)))
                 (:or-join (qry/check/or/not (cdr qc))
-                          (next/map/or (cddr qc) (join-vars :or-join qc)))
-                (:q `(q ,@(cdr qc)))
-                (:f `(progn ,@(cdr qc)))))
-     (filter (qc)
-       ; TODO: (% ?var fx ...) for bind to ?var
-       (unless (symbolp (second qc)) (error "QRY: bad % filter: ~s " qc))
+                          (next/map/or (cddr qc) (join-vars :or-join qc)))))
+     (filter (qc) ; TODO: (% ?var fx ...) for bind to ?var
        (awg (f-)
-         `(lambda (,f-)
-          (,(second qc)
-           ,@(mapcar (lambda (s)
-                       (if (var? s) `(get-var ',s ,f-) s))
-                     (subseq qc 2))))))
+         (etypecase (second qc) ; cons (% (= ?a ...)), symbol: (% = ?a ...)
+           (cons `(lambda (,f-) (,(caadr qc) ,@(rec/get-var f- (cdadr qc)))))
+           (symbol `(lambda (,f-) (,(cadr qc) ,@(rec/get-var f- (cddr qc))))))))
 
-     ; TODO: next next/map is very confusing. try to refactor?
+     ; TODO: next next/map is still confusing. try to refactor?
      (next/map (qc)
        (mapcar
          (lambda (qc &aux (c (car qc)) (gs (gs qc)))
            (ecase c
-             (:fact `(,gs ,(next qc) :and nil))
-             (:and `(,gs ,(next qc) :and nil))
-             (:not `(,gs ,(next `(:and ,@(cdr qc))) :not nil))
-             (:or `(,gs ,(next qc) :or nil))
-             (:or-join `(,gs ,(next `(:or-join ,@(cdr qc))) :and nil))
-             (:not-join `(,gs ,(next `(:and ,@(cddr qc)))
-                              :not ((list ,@(mapcar (lambda (s) `(quote ,s))
-                                                    (get-join-binds qc))))))
-             (:q `(,gs (q ,@(cdr qc)) :and nil))
+             ((:fact :and :f :q ) `(,gs ,(next qc) :and nil))
+             (( :or :or-join) `(,gs ,(next qc) :and nil))
              (:% `(,gs nil :% (,(filter qc))))
-             (:f `(,gs ,(second qc) :and nil))))
+             (:not `(,gs ,(next `(:and ,@(cdr qc))) :not nil))
+             (:not-join `(,gs ,(next `(:and ,@(cddr qc)))
+                              :not ((list ,@(mapqt (get-join-binds qc))))))))
          qc))
      (next/map/or (qc &optional jarg &aux (res (next/map qc)))
        (res/inner res (loop with body = (caar res)
@@ -181,10 +151,8 @@ because gensyms have no symbol-package. as a result :in vals are not free."
                             finally (return body))))
      (next/map/and (qc &aux (res (next/map qc)))
        (res/inner res (loop with body = (caar res)
-                            for s in (lpos (cdr res))
-                            for (clause join-vars) in (lpos (cdr res) 2 4)
-                            for fx = (psel clause)
-                            do (setf body `(,fx ,body ,s ,@join-vars))
+                            for (s nil clause join-vars) in (cdr res)
+                            do (setf body `(,(psel clause) ,body ,s ,@join-vars))
                             finally (return body))))
      (res/inner (res inner)
        (if (= (length res) 1) (cadar res)
@@ -193,7 +161,7 @@ because gensyms have no symbol-package. as a result :in vals are not free."
               ,inner))))
     (mvb (in where) (qry/preproc in where)
       (let ((res (next where))
-            (s "~&--- compiled: ~s~%    with :in ~s~%>>>>>>>>~%~s~%<<<<<<<<~%"))
+            (s "~&--- compiled:~%~s~%~@[    with :in ~s~%~]>>>~%~s~%<<<~%"))
         (when db (format t s where in res))
         `(let (,@in) ,res)))))
 
@@ -207,26 +175,46 @@ because gensyms have no symbol-package. as a result :in vals are not free."
                  &aux (select (ensure-list select))
                       (in (ensure-list in))
                       (using (ensure-list using)))
-  (declare (symbol g) (list select where using in first)
+  (declare (symbol g) (list select where using in)
            (symbol itr res) (boolean pairs))
+  "evaluate a trivial datalog query against g.
 
-  (unless where (error "QRY: missing :where."))
-  (unless select (error "QRY: missing :select."))
+:ex
+  (qry g :select (?x ?y)
+         :where (and (?x :c ?y) (not (or (?x :a 1)
+                                         (?x :a 3)))))
+will return tuples (?x ?y) matching the query.
+other alternatives are (selected vars are available when using these keywords):
+ - :pairs T; same as the default, but return the full result pairs
+ - :collect [this]; same as default, but collect this instead of just the selected vars
+ - :then [this]; execute this code, returns nil
+ - :first [this]; execut this, but for the first match only.
+
+other modifiers:
+ - :in [vars]; use values of vars bound outside the query.
+ - :using [vars]; mutate the graph for every returned tuple, see examples
+ - :res [symb]; bind query result to symb inside :collect, :then, :first
+ - :itr [symb]; counter available inside :collect, :then, :first
+ - :db T; print some useful debug info about the compiled query.
+
+see examples for more usage."
+
+  (when (not (and select where)) (return-from qry nil))
   (when (and pairs using)
-    (error "QRY: :pairs can not be combined with :using."))
+        (error "QRY: :pairs can not be combined with :using."))
   (unless (and (every #'var? select) (no-dupes? select))
           (error "QRY: got bad value for :select ~s." select))
-  (when (intersection select in)
-        (error "QRY: :select ~s and :in ~s can not overlap." select in))
-  (when (> (length (remove-if-not #'identity `(,pairs ,then ,collect ,first))) 1)
-        (error "QRY: use either :pairs :then, :first, :collect; or neither."))
+  (unless (not (intersection select in))
+          (error "QRY: :select ~s and :in ~s can not overlap." select in))
+  (unless (at-most 1 pairs then collect first)
+          (error "QRY: use either :pairs :then, :first, :collect; or neither."))
   (unless (and (every #'^var? using) (no-dupes? using))
-          (error "QRY: got bad value for :using ~s." using))
+          (error "QRY: got bad value for :using ~s. vars need ^ prefix." using))
   (unless (subsetp select (get-all-vars where))
           (warn "QRY: unexpected var in :select ~s,~%for :where ~s."
                 select where))
 
-  (awg (qry-gather q hit stop* qry-final-res lp)
+  (awg (q hit stop* qry-final-res lp)
     (labels
       ((select-with ()
          (loop with selres = (list) for s in select
@@ -255,15 +243,14 @@ because gensyms have no symbol-package. as a result :in vals are not free."
          ; stop, but keep the results
          (stop (&body body) `(progn ,',(re-bind-result)
                                     (return-from ,',stop* (progn ,@body))))
-         (,qry-gather (,q) () `(gather-match ,',g ,@,q))
+         (fact (,q) `(gather-match ,',g ,@,q))
          ; NOTE: nested queries, requires :pairs
          ; MAYBE: (qq) allow g, for querying different graph?
          (q (&rest rest) `(qry ,',g :pairs t :db ,,db ,@rest)))
 
         ; NOTE: is it possible to move select vars into qry-compile-where?
         (let ((,qry-final-res nil)
-              (,res (,proc (select-vars (qry/compile-where ,qry-gather
-                                          ,where ,in :db ,db)
+              (,res (,proc (select-vars (qry/compile-where ,where ,in :db ,db)
                                         ',select)))
                ,@(bind-partial))
           (block ,stop* (setf ,qry-final-res ,(itr-body))
@@ -277,13 +264,14 @@ because gensyms have no symbol-package. as a result :in vals are not free."
                           &body body)
   (declare (symbol cres))
   (awg (for-res lp)
-    `(loop named ,lp
-           with ,cres of-type list = ,init
-           for ,for-res = (progn ,@body)
-           for ,citr of-type fixnum from 0 below (the fixnum ,lim)
-           until (,test ,for-res)
-           if ,for-res do (push ,for-res ,cres)
-           finally (return-from ,lp (reverse ,cres)))))
+    `(macrolet ((cstop (&body body) `(return-from ,',lp (progn ,@body))))
+      (loop named ,lp
+            with ,cres of-type list = ,init
+            for ,for-res = (progn ,@body)
+            for ,citr of-type fixnum from 0 below (the fixnum ,lim)
+            until (,test ,for-res)
+            if ,for-res do (push ,for-res ,cres)
+            finally (return-from ,lp (reverse ,cres))))))
 
 (defmacro qry-collect-while (g &rest rest)
   (declare (symbol g))

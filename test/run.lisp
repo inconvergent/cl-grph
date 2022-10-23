@@ -7,16 +7,11 @@
 
 #+:grph-parallel (setf lparallel:*kernel* (lparallel:make-kernel 4))
 
-(defparameter files `(#P"test/grph.lisp" #P"test/qry.lisp"
-                      #P"test/qry-2.lisp" #P"test/qry-3.lisp"
-                      #P"test/xgrph.lisp"))
-
 ; (defun compile-or-fail (f)
 ;   (format t "~%compiling: ~a~%" (grph::mkstr f))
 ;   (with-open-stream (*standard-output* (make-broadcast-stream))
 ;     (compile-file f)))
-
-(defun run-tests ()
+(defun -run-tests (files)
   (loop with fails = 0
         for f in files
         do ;(compile-or-fail f)
@@ -26,6 +21,17 @@
            (format t "~&done: ~a~%" (grph::mkstr f))
         finally (return (unless (< fails 1)
                           (sb-ext:quit :unix-status 7)))))
+
+(defun run-tests ()
+  (-run-tests '(#P"test/grph.lisp" #P"test/qry.lisp"
+                #P"test/qry-2.lisp" #P"test/qry-3.lisp"
+                #P"test/xgrph.lisp"
+                #P"test/grph-walk.lisp"
+                )))
+(defun p/run-tests ()
+  (-run-tests '(#P"test/grph.lisp" #P"test/qry.lisp"
+                #P"test/qry-2.lisp" #P"test/qry-3.lisp"
+                #P"test/xgrph.lisp")))
 
 (defun lsort* (l &aux (l (copy-list l)))
   (declare (optimize speed) (list l))
@@ -71,7 +77,7 @@ inefficient. use for tests only."
     (grph:add! g 0 1 '(:a))
     (grph:add! g 0 3 '(:a))
     (grph:add! g 2 3 '((:a "bbbbb")))
-    (grph:prop! g '(2 3) '((:b "ccccc")))
+    (grph:add! g 2 3 '((:b "ccccc")))
     (grph:add! g 3 4 '(:a))
     (grph:add! g 4 3 '(:a))
     (grph:add! g 7 8 '((:a "7778888")))
@@ -80,7 +86,7 @@ inefficient. use for tests only."
     (grph:add! g 33 0 '(:b))
     (grph:add! g 8 9 '(:b))
     (grph:add! g 9 0 '(:a))
-    (grph:prop! g '(0 1) '((:a "aaa")))
+    (grph:add! g 0 1 '((:a "aaa")))
     g))
 
 (defun make-rules-edge-set-1 ()

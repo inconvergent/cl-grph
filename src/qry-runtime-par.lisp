@@ -16,8 +16,8 @@
                           (p/some-subsets a (if select (select-vars not* select) not*)))
                         orig))
 
-(defun p/qry-and (aa bb)
-  (declare (optimize speed (safety 0)) (list aa bb))
+(defun p/qry-and (aa bb &rest rest)
+  (declare (optimize speed (safety 0)) (list aa bb) (ignore rest))
   (when (< (length aa) (length bb)) (rotatef aa bb))
   (dedupe-matches
     (lparallel:pmapcan

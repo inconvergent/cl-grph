@@ -12,7 +12,6 @@
   (declare (notinline grph-num-edges))
   (format s "<@grph: (verts: ~a, edges: ~a)>" (@vnum o) (@enum o)))
 
-; TODO: ignore incorrect edge?
 (defstruct (grph
   (:constructor grph (&optional (adj nilmap) (num-edges 0)
                                 (props nilmap) (mid nilmap)))
@@ -70,6 +69,11 @@ this terminology is used :
   "count all connected verts."
   (itr-verts (g a) (incf res)) res)
 
+(defun @vmax (g &aux (res 0))
+  (declare (grph g) (pn res))
+  "get highest vertex index."
+  (itr-verts (g a) (setf res (max a res))) res)
+
 (defun @edges (g &aux (res (list)))
   (declare (grph g) (list res))
   "list of lists of all edges."
@@ -83,28 +87,42 @@ this terminology is used :
 (defun @out (g a &aux (res (list)))
   (declare (grph g) (pn a) (list res))
   "list all outboud verts of a."
-  (itr-adj (g a b) (push b res)) res)
+  (itr-adj (g a b ->) (push b res)) res)
 
 (defun @in (g a &aux (res (list)))
   (declare (grph g) (pn a) (list res))
   "list all outboud verts of a."
-  (itr-adj (g a b :in) (push b res)) res)
+  (itr-adj (g a b <-) (push b res)) res)
+
+(defun @both (g a &aux (res (list)))
+  (declare (grph g) (pn a) (list res))
+  "list all verts of a that are bi-directional."
+  (itr-adj (g a b <>) (push b res)) res)
+
+(defun @either (g a &aux (res (list)))
+  (declare (grph g) (pn a) (list res))
+  "list both inbound and outbond verts of a."
+  (itr-adj (g a b ><) (push b res)) res)
 
 ; MUTATE
+
+; TODO: clear edge props fx?
 
 ; TODO: assert edge exists?
 (defun prop (g k props)
   (declare #.*opt* (grph g) (list k props))
   "set prop, p, of edge or vert, k."
   (labels ((with-prop (p val)
-             (declare (symbol p))
-             (grph (adj g) (grph-num-edges g)
-                   (set-multi-rel (props g) k p val)
-                   (set-multi-rel (mid g) p k))))
+             (declare (keyword p))
+             (if (not (eq p :_))
+                 (grph (adj g) (grph-num-edges g)
+                     (set-multi-rel (props g) k p val)
+                     (set-multi-rel (mid g) p k))
+                 g)))
     (loop for p* in props
           do (setf g (etypecase p*
                        (cons (dsb (p val) p* (with-prop p val)))
-                       (symbol (with-prop p* t)))))
+                       (keyword (with-prop p* t)))))
     g))
 
 (defun -add (g a b)
@@ -122,7 +140,7 @@ this terminology is used :
   "new edge (a b). optionally set prop, p, (with val).
 returns: (values g created?)"
   (when (= a b) (warn "ADD: incorrect edge: (~a ~a)." a b))
-  (if (@mem g a b) (values g nil)
+  (if (@mem g a b) (values (prop g (list a b) props) nil)
                    (progn (setf g (-add g a b))
                           (values (prop g (list a b) props) t))))
 
@@ -154,6 +172,11 @@ returns: (values g deleted?)"
 
 (defun grp (val &optional (s :g))
   (declare (symbol val s))
+  "for val = :black and s = :color, creates list of two props
+((:color :black) :black). this is useful for making both :colour and :black
+filterable via @prop or in queries.
+
+eg: (add! g a b (grp :black :color))"
   `((,s ,val) ,val))
 
 (defun ingest-edges (g f)
@@ -161,8 +184,8 @@ returns: (values g deleted?)"
   "ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9))."
   (loop for (l p r) in f
         do (cond ((not (@mem g l r))
-                    (add! g l r (if (not (eq p :_)) (list p))))
+                    (add! g l r (if (not (eq (kv p) :_)) (list p))))
                  ((not (@prop g (list l r) p))
-                    (prop! g (list l r) (list p)))))
+                    (add! g l r (list p)))))
   g)
 

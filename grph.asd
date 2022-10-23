@@ -1,6 +1,6 @@
 (asdf:defsystem #:grph
   :description "graph thing"
-  :version "0.8.0"
+  :version "0.10.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :licence "MIT"
   :in-order-to ((asdf:test-op (asdf:test-op #:grph/tests)))
@@ -9,6 +9,7 @@
   :depends-on (#:veq #:fset #:alexandria #+:grph-parallel #:lparallel)
   :components ((:file "packages")
                (:file "utils" :depends-on ("packages"))
+               (:file "docs" :depends-on ("utils"))
                (:file "config" :depends-on ("utils"))
                (:file "edge-set" :depends-on ("utils"))
                (:file "macros" :depends-on ("utils"))
@@ -29,12 +30,17 @@
 
                (:file "qry-rules" :depends-on ("qry"))
                (:file "xgrph" :depends-on ("qry"))
-               (:file "docs" :depends-on ("xgrph"))))
+               (:file "grph-walk" :depends-on ("xgrph"))))
 
 (asdf:defsystem #:grph/tests
   :depends-on (#:veq #:grph #:prove #+:grph-parallel #:lparallel)
-  :perform (asdf:test-op (o s) (uiop:symbol-call ':grph-tests '#:run-tests))
+  :perform (asdf:test-op (o s)
+             (uiop:symbol-call ':grph-tests
+               #+:grph-parallel '#:p/run-tests
+               #-:grph-parallel '#:run-tests))
   :pathname "test/"
   :serial t
   :components ((:file "run")))
+
+; TODO: there is an if-feature feature in ASDF, how does it work??
 

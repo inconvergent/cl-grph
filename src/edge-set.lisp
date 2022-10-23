@@ -23,7 +23,8 @@ if closed is t, (1 5) will be included in the above output."
                                (-insert b a)))
     edge-map))
 
-; TODO: this assumes edges er bidirectional?
+; NOTE: this assumes the edge set is bidirectional
+; TODO: this can cause heap overflow on manifold paths
 (defun edge-set->path (es)
   (declare (list es))
   "convert edge set: ((3 4) (4 5) (5 6) (1 2) (6 1) (2 3))
@@ -62,3 +63,4 @@ second result is a boolean for whether it is a cycle."
                     (error "path is manifold or incomplete:~%~a~% eslen: ~a. pathlen ~a"
                            res (length es) (length res)))
             (values res nil)))))))
+

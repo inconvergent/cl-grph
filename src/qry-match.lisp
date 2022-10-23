@@ -48,7 +48,7 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
                   (when ,has ,(do-props l p r (fact l p r))))))
           ; NOTE: if props has verts, we need a fixnum/pn test here?
           ((hit pat t nil t)
-             `(do-set (,s (or (@ (mid ,g) ,mid) ,nilset))
+             `(do-set (,s (or (@ (mid ,g) ,mid) (fset:empty-set)))
                 (etypecase ,s (list (dsb (,l ,r) ,s
                                      (declare (ignorable ,l ,r))
                                      ,(fact l mid r))))))

@@ -42,7 +42,7 @@
   "add vert."
   `(let ((,n (fset:size ,s)))
      (declare (pn ,n))
-     (mvb (,@gs) (mvc #'values ,@rest)
+     (mvb (,@gs) (veq:~ ,@rest)
        (declare (veq:ff ,@gs))
        (progn (setf ,s (seq (fset:$ ,s) ,@gs))
               (the pn (/ ,n ,dim))))))
@@ -95,13 +95,14 @@ pos-modes: (:rel :abs)."
         (declare (pn ,i* ,ii*))
         (mvb (,@gs-new) ,pos
           (declare (veq:ff ,@gs-new))
-          ,(case pos-mode
+          ,(ecase pos-mode
              (:abs `(values ,@abs*))
-             (:rel `(mvb (,@gs-pos) (@vert ,dim ,s ,i*) (values ,@rel*)))
-             (t (error "MOVE!: bad pos-mode ~a. use (:rel :abs)."
-                       pos-mode))))))))
+             (:rel `(mvb (,@gs-pos) (@vert ,dim ,s ,i*) (values ,@rel*)))))))))
 (defmacro 2move! (&rest rest) `(move! 2 ,@rest))
 (defmacro 3move! (&rest rest) `(move! 3 ,@rest))
+(defmacro vset! (dim s i pos) `(move! ,dim ,s ,i ,pos :abs))
+(defmacro 2vset! (s i pos) `(move! 2 ,s ,i ,pos :abs))
+(defmacro 3vset! (s i pos) `(move! 3 ,s ,i ,pos :abs))
 
 ; use % scheme for all similar fxns?
 (defmacro %append! (dim g s i x &optional modes props)
@@ -113,13 +114,13 @@ dir-modes: (:-> :<- :<>)."
   (let* ((modes (grph::valid-modes :append! modes `(,@*dir-mode* ,@*pos-mode*)))
          (gs-pos (veq::-gensyms :pos dim))
          (gs-new (veq::-gensyms :new dim))
-         (pm (case (grph::select-mode modes *pos-mode*)
+         (pm (ecase (grph::select-mode modes *pos-mode*)
                (:abs x)
                (:rel `(mvb (,@gs-new) ,x
                        (mvb (,@gs-pos) (@vert ,dim ,s ,i)
                          (values ,@(loop for a in gs-pos and b in gs-new
                                          collect `(+ ,a ,b))))))))
-         (dm (case (grph::select-mode modes *dir-mode*)
+         (dm (ecase (grph::select-mode modes *dir-mode*)
                (:-> `(add! ,g ,i ,j ,props))
                (:<- `(add! ,g ,j ,i ,props))
                (:<> `(progn (add! ,g ,i ,j ,props)

@@ -1,7 +1,7 @@
 (in-package :grph)
 
-(declaim (list *docstring-map*))
-(defvar *docstring-map* (list))
+; (declaim (list *docstring-map*))
+(defvar *docstring-map* nil)
 
 
 (defun desc (sym)

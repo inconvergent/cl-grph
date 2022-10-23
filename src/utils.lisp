@@ -33,6 +33,8 @@
 
 ; from on lisp by pg
 (defun symb (&rest args) (values (intern (apply #'mkstr args))))
+(defun kv (s) (declare (symbol s)) (intern (string-upcase (symbol-name s)) :keyword))
+(defun last* (l) (declare (list l)) (first (last l)))
 
 ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
 (defun psymb (package &rest args) (values (intern (apply #'mkstr args) package)))
@@ -48,9 +50,9 @@
   (declare (optimize speed))
   (remove-duplicates (if flatten (awf e) e)))
 
-(defun internal-path-string (path)
-  (declare (string path))
-  (namestring (asdf:system-relative-pathname :grph path)))
+(defun at-most (n &rest rest)
+  (declare (pn n))
+  (<= (length (remove-if-not #'identity rest)) n))
 
 (defun -gensyms (name n)
   (declare (symbol name) (fixnum n))
@@ -88,10 +90,6 @@
     (let ((res (splt (concatenate 'string s (string x)))))
       (if prune (remove-if (lambda (s) (= 0 (length s))) res)
                 res))))
-
-(defun interject (ll &optional (s :-) &aux (res (list)))
-  (loop for l in ll do (push l res) (push s res))
-  (reverse (cdr res)))
 
 ; modified from on lisp by pg
 (defun group (source n)

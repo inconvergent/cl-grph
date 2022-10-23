@@ -124,11 +124,13 @@
 
     (is (ls (grph:qry g :select ?b
                   :where (and (or (?b _ _) (_ _ ?b))
-                              (not-join ?b
-                                (?a _ ?b)
-                                (?b _ ?c)
-                                (% /= ?a ?c)))))
+                              (not-join ?b (?a _ ?b) (?b _ ?c) (% /= ?a ?c)))))
         (ls '((0) (2) (7) (77) (99))))
+    (is (ls (grph:qry g :select ?b
+                  :where (and (or (?b _ _) (_ _ ?b))
+                              (not-join ?b (?a _ ?b) (?b _ ?c) (% (/= ?a ?c))))))
+        (ls '((0) (2) (7) (77) (99))))
+
     (is (ls (grph:qry g :select (?x ?y)
                         :where (and (?x _ 1) (1 _ ?y)
                                     (f `(((?x . 0) (?y . 0))
@@ -146,6 +148,28 @@
         (ls '((2 3) (2 0) (1 3) (1 0))))
     (is (ls (grph:qry g :select (?a ?b) :where (and (?a _ ?b) (not (?a _ 0)))))
         (ls '((3 2) (3 1) (0 2) (0 1))))))
+
+(subtest "qry nested or"
+  (let ((g (grph:ingest-edges (grph:grph)
+             '((0 _ 1) (1 _ 0) (1 _ 4) (4 _ 1) (4 _ 7)
+               (7 _ 4) (7 _ 6) (6 _ 7) (6 _ 3) (3 _ 6)
+               (3 _ 0) (0 _ 3) (4 _ 5) (5 _ 4) (5 _ 2) (2 _ 5)))))
+
+    (is (ls (grph:qry g :select ?x :where  (and (or (?x _ 2) (2 _ ?x)))))
+        (ls '((5))))
+    (is (ls (grph:qry g :select (?x ?y)
+                        :where (and (?x _ ?y)
+                                    (or (?x _ 2) (2 _ ?x)))))
+        (ls '((5 2) (5 4))))
+    (is (ls (grph:qry g :select (?x ?y)
+                        :where  (and (?x _ ?y) (?x _ 2)
+                                     (or (?x _ 2) (2 _ ?x)))))
+        (ls '((5 2) (5 4))))
+    (is (ls (grph:qry g :select (?x ?y)
+                        :where  (and (?x _ ?y) (?x _ 2)
+                                     (or (?x _ 2) (2 _ ?x))
+                                     (% /= ?y 4))))
+        (ls '((5 2))))))
 
 (unless (finalize) (error "error in QRY BASIC."))
 

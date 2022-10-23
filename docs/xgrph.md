@@ -137,6 +137,19 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
+#### XGRPH:2VSET!
+
+```
+:missing:todo:
+
+ ; XGRPH:2VSET!
+ ;   [symbol]
+ ; 
+ ; 2VSET! names a macro:
+ ;   Lambda-list: (S I POS)
+ ;   Source file: /data/x/grph/src/xgrph.lisp
+```
+
 #### XGRPH:3@
 
 ```
@@ -273,6 +286,19 @@
  ; 
  ; 3VERTS! names a macro:
  ;   Lambda-list: (&REST REST)
+ ;   Source file: /data/x/grph/src/xgrph.lisp
+```
+
+#### XGRPH:3VSET!
+
+```
+:missing:todo:
+
+ ; XGRPH:3VSET!
+ ;   [symbol]
+ ; 
+ ; 3VSET! names a macro:
+ ;   Lambda-list: (S I POS)
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -445,6 +471,19 @@ add verts.
  ;   Lambda-list: (DIM S PATH)
  ;   Documentation:
  ;     add verts.
+ ;   Source file: /data/x/grph/src/xgrph.lisp
+```
+
+#### XGRPH:VSET!
+
+```
+:missing:todo:
+
+ ; XGRPH:VSET!
+ ;   [symbol]
+ ; 
+ ; VSET! names a macro:
+ ;   Lambda-list: (DIM S I POS)
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 

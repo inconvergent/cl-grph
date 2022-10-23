@@ -49,14 +49,19 @@
                `(let ((,a (list ,a* ,b*))) ,@body)))))))
 
 (defmacro itr-adj ((g a b &optional (mode :out)) &body body)
-  (declare (symbol g b))
-  "iterate all outboud verts, b, of a."
-  (awg (a* b* eset has)
-    `(let* ((,a* ,a)
-            (,eset (@ (adj ,g) ,a*)))
-      (when ,eset (do-map (,b* ,has ,eset)
-                    (,@(if (eq mode :out) `(when ,has) `(unless ,has))
-                      (let ((,b ,b*)) ,@body)))))))
+  (declare (symbol g b) (symbol mode))
+  "iterate all adjacent verts, b, of a. use modes (:-> :<- :>< :<>)."
+  (awg (b* eset has)
+    (labels ((bind-let () `(let ((,b ,b*)) (declare (pn ,b*)) ,@body)))
+      `(let* ((,eset (@ (adj ,g) (the pn ,a))))
+         (when ,eset (do-map (,b* ,has ,eset)
+                       (declare (pn ,b*) (ignorable ,has))
+                       ,(ecase (kv mode)
+                         (:-> `(when (@mem ,g ,a ,b*) ,(bind-let))) ; a -> b
+                         (:<- `(when (@mem ,g ,b* ,a) ,(bind-let))) ; a <- b
+                         (:>< (bind-let)) ; either
+                         (:<> `(when (and (@mem ,g ,b* ,a) (@mem ,g ,a ,b*)) ; both
+                                       ,(bind-let))))))))))
 
 (defmacro itr-verts ((g a) &body body)
   (declare (symbol g a))
@@ -85,11 +90,4 @@
     `(mvb (,g* ,deleted?) (del ,g ,a ,b)
       (setf ,g ,g*)
       ,deleted?)))
-
-; TODO: should this return anything else?
-(defmacro prop! (g k props)
-  (declare (symbol g))
-  "set prop and re-bind. returns: nil"
-  `(progn (setf ,g (prop ,g ,k ,props))
-          nil))
 

@@ -69,6 +69,14 @@
   (declare (optimize speed) (symbol s) (list l))
   (cdr (find s l :key #'car :test #'eq)))
 
+(defun rec/get-var (f l)
+  (declare (symbol f))
+  (cond ((var? l) `(get-var ',l ,f))
+        ((atom l) l)
+        ((consp l) (cons (rec/get-var f (car l))
+                         (rec/get-var f (cdr l))))
+        (t (error "REC/GET-VAR: unexpected value in rec/repl/var: ~s" l))))
+
 (defun get-all-vars (a)
   (declare (optimize speed) (list a))
   (remove-if-not #'var? (undup a))) ; undup use is ok
