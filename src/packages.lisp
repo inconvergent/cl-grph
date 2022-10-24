@@ -31,7 +31,7 @@
     #:@vert #:2@vert #:3@vert
     #:@num #:2@num #:3@num
     #:@ #:2@ #:3@
-    #:pos
+    #:pos #:fxpos!
     #:vert! #:2vert! #:3vert!
     #:verts! #:2verts! #:3verts!
     #:move! #:2move! #:3move!

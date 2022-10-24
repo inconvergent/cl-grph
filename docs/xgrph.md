@@ -383,17 +383,13 @@ get verts in l as fvec.
 #### XGRPH:MOVE!
 
 ```
-move vert i to pos.
-pos-modes: (:rel :abs).
+:missing:todo:
 
  ; XGRPH:MOVE!
  ;   [symbol]
  ; 
  ; MOVE! names a macro:
- ;   Lambda-list: (DIM S I POS &OPTIONAL (POS-MODE REL))
- ;   Documentation:
- ;     move vert i to pos.
- ;     pos-modes: (:rel :abs).
+ ;   Lambda-list: (&REST REST)
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -483,7 +479,7 @@ add verts.
  ;   [symbol]
  ; 
  ; VSET! names a macro:
- ;   Lambda-list: (DIM S I POS)
+ ;   Lambda-list: (S I POS)
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 

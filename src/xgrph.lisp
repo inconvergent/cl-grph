@@ -20,7 +20,6 @@
 (defmacro 2@num (&rest rest) `(@num 2 ,@rest))
 (defmacro 3@num (&rest rest) `(@num 3 ,@rest))
 
-; prefix with $?
 (defmacro @verts (dim s l)
   (declare (pn dim) (symbol s))
   "get verts in l as fvec."
@@ -36,7 +35,7 @@
 (defmacro 2@verts (&rest rest) `(@verts 2 ,@rest))
 (defmacro 3@verts (&rest rest) `(@verts 3 ,@rest))
 
-(defmacro vert! (dim s &rest rest &aux (gs (veq::-gensyms :pos dim))
+(defmacro vert! (dim s &rest rest &aux (gs (grph::-gensyms :pos dim))
                                        (n (gensym "N")))
   (declare (pn dim) (symbol s))
   "add vert."
@@ -66,6 +65,33 @@
 (defmacro 2verts! (&rest rest) `(verts! 2 ,@rest))
 (defmacro 3verts! (&rest rest) `(verts! 3 ,@rest))
 
+(defmacro %move! (dim s i pos &optional (pos-mode :rel))
+  (declare (pn dim) (symbol s) (keyword pos-mode))
+  "move vert i to pos.
+pos-modes: (:rel :abs)."
+  (grph::awg (i* ii*)
+  (let* ((gs-pos (grph::-gensyms :pos dim))
+         (gs-new (grph::-gensyms :new dim))
+         (rel* (loop for a in gs-pos for b in gs-new for k from 0
+                     collect `(setf (fset:@ ,s (+ ,ii* ,k)) (+ ,a ,b))))
+         (abs* (loop for a in gs-new for k from 0
+                     collect `(setf (fset:@ ,s (+ ,ii* ,k)) ,a))))
+     `(let* ((,i* ,i) (,ii* (* ,dim ,i*)))
+        (declare (pn ,i* ,ii*))
+        (mvb (,@gs-new) ,pos
+          (declare (veq:ff ,@gs-new))
+          ,(ecase pos-mode
+             (:abs `(values ,@abs*))
+             (:rel `(mvb (,@gs-pos) (@vert ,dim ,s ,i*) (values ,@rel*)))))))))
+(defmacro move! (&rest rest) `(%move! 1 ,@rest))
+(defmacro 2move! (&rest rest) `(%move! 2 ,@rest))
+(defmacro 3move! (&rest rest) `(%move! 3 ,@rest))
+
+(defmacro %vset! (dim s i pos) `(%move! ,dim ,s ,i ,pos :abs))
+(defmacro vset! (s i pos) `(%move! 1 ,s ,i ,pos :abs))
+(defmacro 2vset! (s i pos) `(%move! 2 ,s ,i ,pos :abs))
+(defmacro 3vset! (s i pos) `(%move! 3 ,s ,i ,pos :abs))
+
 
 ; TODO: mode for both dirs?
 (defmacro path! (dim g s path &optional props)
@@ -80,30 +106,6 @@
 (defmacro 2path! (&rest rest) `(path! 2 ,@rest))
 (defmacro 3path! (&rest rest) `(path! 3 ,@rest))
 
-(defmacro move! (dim s i pos &optional (pos-mode :rel))
-  (declare (pn dim) (symbol s) (keyword pos-mode))
-  "move vert i to pos.
-pos-modes: (:rel :abs)."
-  (grph::awg (i* ii*)
-  (let* ((gs-pos (veq::-gensyms :pos dim))
-         (gs-new (veq::-gensyms :new dim))
-         (rel* (loop for a in gs-pos for b in gs-new for k from 0
-                     collect `(setf (fset:@ ,s (+ ,ii* ,k)) (+ ,a ,b))))
-         (abs* (loop for a in gs-new for k from 0
-                     collect `(setf (fset:@ ,s (+ ,ii* ,k)) ,a))))
-     `(let* ((,i* ,i) (,ii* (* ,dim ,i*)))
-        (declare (pn ,i* ,ii*))
-        (mvb (,@gs-new) ,pos
-          (declare (veq:ff ,@gs-new))
-          ,(ecase pos-mode
-             (:abs `(values ,@abs*))
-             (:rel `(mvb (,@gs-pos) (@vert ,dim ,s ,i*) (values ,@rel*)))))))))
-(defmacro 2move! (&rest rest) `(move! 2 ,@rest))
-(defmacro 3move! (&rest rest) `(move! 3 ,@rest))
-(defmacro vset! (dim s i pos) `(move! ,dim ,s ,i ,pos :abs))
-(defmacro 2vset! (s i pos) `(move! 2 ,s ,i ,pos :abs))
-(defmacro 3vset! (s i pos) `(move! 3 ,s ,i ,pos :abs))
-
 ; use % scheme for all similar fxns?
 (defmacro %append! (dim g s i x &optional modes props)
   (declare (pn dim) (symbol g s))
@@ -112,8 +114,8 @@ pos-modes: (:rel :abs)
 dir-modes: (:-> :<- :<>)."
   (grph::awg (j)
   (let* ((modes (grph::valid-modes :append! modes `(,@*dir-mode* ,@*pos-mode*)))
-         (gs-pos (veq::-gensyms :pos dim))
-         (gs-new (veq::-gensyms :new dim))
+         (gs-pos (grph::-gensyms :pos dim))
+         (gs-new (grph::-gensyms :new dim))
          (pm (ecase (grph::select-mode modes *pos-mode*)
                (:abs x)
                (:rel `(mvb (,@gs-new) ,x
@@ -148,6 +150,12 @@ dir-modes: (:-> :<- :<>)."
   `(veq:~ ,@(loop for i in rest collect `(@vert ,dim ,s ,i))))
 (defmacro 2@ (&rest rest) `(@ 2 ,@rest))
 (defmacro 3@ (&rest rest) `(@ 3 ,@rest))
+
+
+(defmacro fxpos! ((g pos i) &body body)
+  (declare (symbol g pos i))
+  `(loop for ,i in (grph:@verts ,g)
+         do (xgrph:2vset! ,pos ,i (progn ,@body))))
 
 ; TODO: transform
 ; TODO: intersect-all
