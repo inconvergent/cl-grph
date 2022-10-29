@@ -54,13 +54,14 @@
   (declare (list p) (pn a b))
   (and (> (length p) 2) (or (@mem g a b) (@mem g b a))))
 
-(defmacro walk-grph (g prop &key (lim 100000))
-  (declare (symbol g) (pn lim))
+(defmacro walk-grph (g* prop &key (lim 100000))
+  (declare (symbol g*) (pn lim))
   "walk the grph and return tuples: ((path closed?) ...)"
-  (awg (a b p res)
-    `(let ((,res (list))
-           (?p ,prop))
-       (declare (list ,res) (keyword ?p))
+  (awg (g a b p res)
+    `(let ((,g ,g*) ; avoid side effects on g* outside
+           (?p ,prop)
+           (,res (list)))
+       (declare (grph ,g) (list ,res) (keyword ?p))
        (labels
          ((pthdel (,p)
             (declare (list ,p))

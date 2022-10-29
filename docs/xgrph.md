@@ -380,6 +380,19 @@ get verts in l as fvec.
  ;   [symbol]
 ```
 
+#### XGRPH:FXPOS!
+
+```
+:missing:todo:
+
+ ; XGRPH:FXPOS!
+ ;   [symbol]
+ ; 
+ ; FXPOS! names a macro:
+ ;   Lambda-list: ((G POS I) &BODY BODY)
+ ;   Source file: /data/x/grph/src/xgrph.lisp
+```
+
 #### XGRPH:MOVE!
 
 ```
@@ -396,15 +409,17 @@ get verts in l as fvec.
 #### XGRPH:PATH!
 
 ```
-add path (with :prop).
+add path.
+dir-modes: (-> <- <>)
 
  ; XGRPH:PATH!
  ;   [symbol]
  ; 
  ; PATH! names a macro:
- ;   Lambda-list: (DIM G S PATH &OPTIONAL PROPS)
+ ;   Lambda-list: (DIM G S PATH &OPTIONAL MODES PROPS)
  ;   Documentation:
- ;     add path (with :prop).
+ ;     add path.
+ ;     dir-modes: (-> <- <>)
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 

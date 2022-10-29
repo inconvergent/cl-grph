@@ -94,14 +94,14 @@ pos-modes: (:rel :abs)."
 
 
 ; TODO: mode for both dirs?
-(defmacro path! (dim g s path &optional props)
+(defmacro path! (dim g s path &optional modes props)
   (declare (pn dim) (symbol g s))
-  "add path (with :prop)."
+  "add path.
+dir-modes: (-> <- <>)"
   (grph::awg (i j res props*)
-  `(let ((,res (verts! ,dim ,s ,path)) (,props* ,props))
+  `(let ((,res (verts! ,dim ,s ,path)))
      (declare (list ,res))
-     (loop for ,i in ,res for ,j in (cdr ,res)
-           do (add! ,g ,i ,j ,props*))
+     (grph:path! ,g ,res ,modes ,props)
      ,res)))
 (defmacro 2path! (&rest rest) `(path! 2 ,@rest))
 (defmacro 3path! (&rest rest) `(path! 3 ,@rest))
@@ -110,8 +110,8 @@ pos-modes: (:rel :abs)."
 (defmacro %append! (dim g s i x &optional modes props)
   (declare (pn dim) (symbol g s))
   "append edge from vert i to pos x. returns new vert.
-pos-modes: (:rel :abs)
-dir-modes: (:-> :<- :<>)."
+pos-modes: (rel abs)
+dir-modes: (-> <- <>)."
   (grph::awg (j)
   (let* ((modes (grph::valid-modes :append! modes `(,@*dir-mode* ,@*pos-mode*)))
          (gs-pos (grph::-gensyms :pos dim))

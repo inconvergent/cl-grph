@@ -34,7 +34,7 @@
 (defun invert-path (dim pa &aux (e2 (expt 2 dim)))
   (loop for p in pa collect (- e2 p 1)))
 (defun rot-path (dim pa &aux (e2 (expt 2 dim)))
-  (loop for p in pa collect (print (- e2 (mod (+ (/ e2 2) p ) e2) 1))))
+  (loop for p in pa collect (- e2 (mod (+ (/ e2 2) p ) e2) 1)))
 
 (defun pad (dim h)
   (concatenate 'list (math:nrep (- dim (length h)) 0) h))
@@ -49,17 +49,31 @@
     (veq:f$fxlspace
       (n 0f0 veq:fpii :end nil)
       (lambda (i x) (veq:2$vset (a i)
-                      (veq:f2scale (veq:fcos-sin (+ (rnd:rnd* 0.4) x))
-                                   (rnd:rnd rad)))))
+                      (veq:f2scale (veq:fcos-sin (+ (rnd:rnd* 0.3) x))
+                                   (rnd:rndrng 50f0 rad)))))
     a))
 
+(defun dimsel (h)
+  (grph:mvb (d r) (floor (h->i h) 16)
+    (values (1+ (floor (log (1+ d) 2)))
+            (if (< r 8) -1f0 1f0))))
+
 (veq:fvdef proj (proj hh)
-  (veq:f2let ((res (veq:f2rep 0f0)))
-    (loop for h in hh
+  (grph:mvb (d r) (dimsel hh)
+    ; (print hh)
+    ; (print (list d proj (veq:f2$num proj)))
+    ; (veq:vpr (veq:f2scale (veq:f2$ proj d) r))
+    ; (print (list (h->i hh) (floor (h->i hh) 8)) )
+    (veq:f2let ((res (veq:f2scale (veq:f2$ proj d) (* r 3)))
+                ; (res (veq:f2rep 0f0))
+                )
+     (loop for h in hh
           for i from 0
           do (veq:f2vset (res)
                (veq:f2from res (veq:f2$ proj i) (veq:ff h))))
-    (values res)))
+    (values res)
+     )
+    ))
 
 (veq:fvdef* proj-all (proj hh &optional (x 0f0) (y 0f0))
   (declare (veq:fvec proj))

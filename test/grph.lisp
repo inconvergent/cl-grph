@@ -1,6 +1,32 @@
 (in-package #:grph-tests)
 
-(plan 2)
+(plan 3)
+
+
+(subtest "grph add"
+  (let ((g (grph:grph)))
+    (grph:add! g 8 9)
+    (grph:add! g 8 9 '(:a))
+    (grph:add! g 8 6)
+    (is (ls (grph:@edges g)) (ls '((8 9) (8 6))))
+
+    (grph:path! g (list 55 66 77 88))
+    (grph:path! g (list 188 177 166 155) <-)
+    (grph:path! g (list 1881 1771 1661 1551) (<- closed))
+
+    (is (ls (grph:@edges g))
+        (ls '((8 6) (8 9)
+              (55 66) (66 77) (77 88)
+              (155 166) (166 177) (177 188)
+              (1551 1661) (1661 1771) (1771 1881) (1881 1551))))
+
+    (grph:add*! g 45 57 <>)
+    (is (grph:@mem g 45 57) t)
+    (is (grph:@mem g 57 45) t)
+
+    (grph:add*! g 35 37 ->)
+    (is (grph:@mem g 35 37) t)
+    (is (grph:@mem g 37 35) nil)))
 
 
 (subtest "grph"

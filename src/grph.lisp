@@ -88,17 +88,14 @@ this terminology is used :
   (declare (grph g) (pn a) (list res))
   "list all outboud verts of a."
   (itr-adj (g a b ->) (push b res)) res)
-
 (defun @in (g a &aux (res (list)))
   (declare (grph g) (pn a) (list res))
   "list all outboud verts of a."
   (itr-adj (g a b <-) (push b res)) res)
-
 (defun @both (g a &aux (res (list)))
   (declare (grph g) (pn a) (list res))
   "list all verts of a that are bi-directional."
   (itr-adj (g a b <>) (push b res)) res)
-
 (defun @either (g a &aux (res (list)))
   (declare (grph g) (pn a) (list res))
   "list both inbound and outbond verts of a."
@@ -139,7 +136,8 @@ this terminology is used :
   (declare #.*opt* (grph g) (pn a b) (list props))
   "new edge (a b). optionally set prop, p, (with val).
 returns: (values g created?)"
-  (when (= a b) (warn "ADD: incorrect edge: (~a ~a)." a b))
+  (when (= a b) (warn "ADD: ignoring incorrect edge: (~a ~a)." a b)
+                (return-from add (values g nil)))
   (if (@mem g a b) (values (prop g (list a b) props) nil)
                    (progn (setf g (-add g a b))
                           (values (prop g (list a b) props) t))))

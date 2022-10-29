@@ -12,7 +12,7 @@
 
   (is (xgrph:2path! g pos (veq:f$_ '((1f0 3f0) (340f0 20f0) (83f0 2f0)
                                      (0f0 3f0) (33f0 8f0) (6f0 8f0)))
-                        '(:a))
+                        -> '(:a))
       '(1 2 3 4 5 6))
   (is (xgrph:2@verts pos (list 4 1 3)) #(0.0 3.0 1.0 3.0 83.0 2.0)
       :test #'equalp)

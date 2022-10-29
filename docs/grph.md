@@ -252,6 +252,21 @@ add edge edge and re-bind. returns: (a b) or nil.
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
+#### GRPH:ADD\*!
+
+```
+add edge edge and re-bind. returns: (a b) or nil.
+
+ ; GRPH:ADD*!
+ ;   [symbol]
+ ; 
+ ; ADD*! names a macro:
+ ;   Lambda-list: (G A B &OPTIONAL MODES PROPS)
+ ;   Documentation:
+ ;     add edge edge and re-bind. returns: (a b) or nil.
+ ;   Source file: /data/x/grph/src/macros.lisp
+```
+
 #### GRPH:ANY-EDGE
 
 ```
@@ -570,15 +585,15 @@ ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9)).
 #### GRPH:ITR-ADJ
 
 ```
-iterate all adjacent verts, b, of a. use modes (:-> :<- :>< :<>).
+iterate all adjacent verts, b, of a. use modes (-> <- >< <>).
 
  ; GRPH:ITR-ADJ
  ;   [symbol]
  ; 
  ; ITR-ADJ names a macro:
- ;   Lambda-list: ((G A B &OPTIONAL (MODE OUT)) &BODY BODY)
+ ;   Lambda-list: ((G A B &OPTIONAL (MODES ->)) &BODY BODY)
  ;   Documentation:
- ;     iterate all adjacent verts, b, of a. use modes (:-> :<- :>< :<>).
+ ;     iterate all adjacent verts, b, of a. use modes (-> <- >< <>).
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
@@ -683,6 +698,19 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
  ; MVC names a macro:
  ;   Lambda-list: (&REST ARGS)
  ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:PATH!
+
+```
+:missing:todo:
+
+ ; GRPH:PATH!
+ ;   [symbol]
+ ; 
+ ; PATH! names a macro:
+ ;   Lambda-list: (G PATH &OPTIONAL (MODES (QUOTE (OPEN ->))) PROPS)
+ ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
 #### GRPH:PN
@@ -846,7 +874,7 @@ walk the grph and return tuples: ((path closed?) ...)
  ;   [symbol]
  ; 
  ; WALK-GRPH names a macro:
- ;   Lambda-list: (G PROP &KEY (LIM 100000))
+ ;   Lambda-list: (G* PROP &KEY (LIM 100000))
  ;   Documentation:
  ;     walk the grph and return tuples: ((path closed?) ...)
  ;   Source file: /data/x/grph/src/grph-walk.lisp

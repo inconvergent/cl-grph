@@ -9,7 +9,7 @@
     #:ext-symbols? #:pn
     #:@edges #:@enum #:@in #:@out #:@either #:@both
     #:@verts #:@vnum #:@vmax #:@prop #:@mem #:@inv
-    #:add #:del #:add! #:del!
+    #:add #:add! #:add*! #:del #:del! #:path!
     #:itr-edges #:itr-adj #:itr-verts
     #:grph #:prt
     #:compile-query #:match

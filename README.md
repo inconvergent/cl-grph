@@ -39,7 +39,7 @@ See the [docs folder](docs) for auomatically generated docs (incomplete).
 
 The subset of Datalog currently supported in `grph` is the most basic pattern
 matching using `and`, `or`, `not`, `or-join` and `not-join`. Rules/fixed-point
-iteration is not currently supported.
+iteration is supported in `grph:rqry`. See examples.
 
 Here is a small example that demonstrates a few supported Datalog queries for a
 small graph:
@@ -79,6 +79,8 @@ folder](examples).
                          (?r :e 5)))))
 ;> '((4) (1)))
 ```
+
+![Hyper](img/hyper.png)
 
 
 ## Dependencies

@@ -68,7 +68,7 @@
       (veq:mvb (nodes edges) (hypercube dim)
         (loop for (a b) in edges do (grph:add! g a b)))
 
-      (loop repeat 2 ;(rnd:rndrngi 2 10)
+      (loop repeat 1 ;(rnd:rndrngi 2 10)
             for hit = (rnd:rndget
                         (grph:qry g :select (?x ?y)
                                     :where (and (?x _ ?y) (not (?x :path ?y)))))
@@ -85,9 +85,11 @@
                                :select (?x ?y ?a ?b) :db nil
                                :where (and (?x :path ?y) (?y _ ?a)
                                            (?a _ ?b) (?b _ ?x)
+                                           ; (not (?x :delpath ?y))
                                            (not (or-join (?a ?b)
                                                   (?y :path ?a) (?a :path ?b)
-                                                  (?b :path ?x))))))
+                                                  (?b :path ?x)))
+                                           )))
           (grph:del! g x y)
           (grph:add! g x y '(:delpath))
 
