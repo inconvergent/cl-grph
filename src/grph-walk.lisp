@@ -1,6 +1,7 @@
 (in-package :grph)
 
 (defun num-either (g ?p ?x)
+  "number of edges to or from ?x (with propery ?p)."
   (length (undup (qry g :in (?x ?p)
                         :select ?y
                         :where (or (?x ?p ?y) (?y ?p ?x))
@@ -8,21 +9,24 @@
 
 (defmacro any-edge (g ?p)
   (declare (symbol g ?p))
+  "all edges (?x ?p ?y)."
   `(qry ,g :in ,?p :select (?x ?y)
                    :where (and (or (?x ,?p ?y) (?y ,?p ?x)))
                    :first (list ?x ?y)))
 
 (defmacro dead-ends (g ?p)
   (declare (symbol g ?p))
+  "get all edges (?x ?p ?y) or (?y ?p ?x) where ?x is only connected to ?y."
   `(qry ,g :in ,?p :select (?x ?y)
                    :where (and (or (?x ,?p ?y) (?y ,?p ?x))
-                               (% (< (num-either ,g ?x) 2)))))
+                               (% (< (num-either ,g ,?p ?x) 2)))))
 
-(defmacro multi-isects (g ?p)
-  (declare (symbol g ?p))
-  `(qry ,g :in ,?p :select (?x ?y)
-                    :where (and (or (?x ,?p ?y) (?y ,?p ?x))
-                                (% (> (num-either ,g ?x) 2)))))
+; (defmacro multi-isects (g ?p)
+;   (declare (symbol g ?p))
+;   "all edges (?x ?p ?y) or (?y ?p ?x) where ?x has  has more than two "
+;   `(qry ,g :in ,?p :select (?x ?y)
+;                     :where (and (or (?x ,?p ?y) (?y ,?p ?x))
+;                                 (% (> (num-either ,g ,?p ?x) 2)))))
 
 (defmacro filament-ends (g ?p)
   (declare (symbol g ?p))
@@ -33,6 +37,8 @@
 
 (defmacro walk-grph-from (g a ?p &key (lim 10000))
   (declare (symbol g ?p))
+  ; TODO: is this accurate?
+  "walk from a along props ?p until self isect or dead end."
   (awg (res c blk)
     `(block ,blk
        (let ((?a ,a))
@@ -50,9 +56,13 @@
            (if (> (length ,res) 1) ,res nil))))))
 
 
-(defun close? (g p &aux (a (car p)) (b (last* p)))
-  (declare (list p) (pn a b))
-  (and (> (length p) 2) (or (@mem g a b) (@mem g b a))))
+(defun close? (g path prop &aux (a (car path)) (b (last* path)))
+  (declare (list path) (pn a b) (symbol prop))
+  "is there an edge (with prop) betweent the first and last or last and first
+item in path?"
+  (and (> (length path) 2)
+       (or (@prop g (list a b) prop)
+           (@prop g (list b a) prop))))
 
 (defmacro walk-grph (g* prop &key (lim 100000))
   (declare (symbol g*) (pn lim))
@@ -75,7 +85,7 @@
                for ,p = (walk-grph-from ,g
                           (caar (filament-ends ,g ?p))
                           ?p :lim ,lim)
-               while ,p if (close? ,g ,p)
+               while ,p if (close? ,g ,p ,prop)
                do (do-close ,p) else do (do-open ,p))
          (loop repeat ,lim ; handle remaining loops
                for ,p = (walk-grph-from ,g

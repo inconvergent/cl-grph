@@ -64,7 +64,7 @@
     ; (print (list d proj (veq:f2$num proj)))
     ; (veq:vpr (veq:f2scale (veq:f2$ proj d) r))
     ; (print (list (h->i hh) (floor (h->i hh) 8)) )
-    (veq:f2let ((res (veq:f2scale (veq:f2$ proj d) (* r 3)))
+    (veq:f2let ((res (veq:f2scale (veq:f2$ proj d) (* r 2)))
                 ; (res (veq:f2rep 0f0))
                 )
      (loop for h in hh

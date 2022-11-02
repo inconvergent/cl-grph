@@ -1,25 +1,19 @@
 #### GRPH:\*DIR-MODE\*
 
 ```
-valid edge direction modes.
-
- ; GRPH:*DIR-MODE*
- ;   [symbol]
- ; 
- ; *DIR-MODE* names a special variable:
- ;   Value: (:-> :<- :<>)
+valid edge direction modes: (-> <- <>)
 ```
 
 #### GRPH:\*POS-MODE\*
 
 ```
-valid spatial modes.
+valid spatial modes: (REL ABS)
+```
 
- ; GRPH:*POS-MODE*
- ;   [symbol]
- ; 
- ; *POS-MODE* names a special variable:
- ;   Value: (:REL :ABS)
+#### GRPH:\*VALID-CLAUSES\*
+
+```
+valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT)
 ```
 
 #### GRPH:@BOTH
@@ -261,7 +255,7 @@ add edge edge and re-bind. returns: (a b) or nil.
  ;   [symbol]
  ; 
  ; ADD*! names a macro:
- ;   Lambda-list: (G A B &OPTIONAL MODES PROPS)
+ ;   Lambda-list: (G A B &OPTIONAL (MODES ->) PROPS)
  ;   Documentation:
  ;     add edge edge and re-bind. returns: (a b) or nil.
  ;   Source file: /data/x/grph/src/macros.lisp
@@ -270,13 +264,15 @@ add edge edge and re-bind. returns: (a b) or nil.
 #### GRPH:ANY-EDGE
 
 ```
-:missing:todo:
+all edges (?x ?p ?y).
 
  ; GRPH:ANY-EDGE
  ;   [symbol]
  ; 
  ; ANY-EDGE names a macro:
  ;   Lambda-list: (G ?P)
+ ;   Documentation:
+ ;     all edges (?x ?p ?y).
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -317,13 +313,15 @@ add edge edge and re-bind. returns: (a b) or nil.
 #### GRPH:DEAD-ENDS
 
 ```
-:missing:todo:
+get all edges (?x ?p ?y) or (?y ?p ?x) where ?x is only connected to ?y.
 
  ; GRPH:DEAD-ENDS
  ;   [symbol]
  ; 
  ; DEAD-ENDS names a macro:
  ;   Lambda-list: (G ?P)
+ ;   Documentation:
+ ;     get all edges (?x ?p ?y) or (?y ?p ?x) where ?x is only connected to ?y.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -668,10 +666,6 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
 
  ; GRPH:MULTI-ISECTS
  ;   [symbol]
- ; 
- ; MULTI-ISECTS names a macro:
- ;   Lambda-list: (G ?P)
- ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:MVB

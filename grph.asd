@@ -1,6 +1,6 @@
 (asdf:defsystem #:grph
   :description "graph thing"
-  :version "0.10.1"
+  :version "0.11.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :licence "MIT"
   :in-order-to ((asdf:test-op (asdf:test-op #:grph/tests)))

@@ -1,5 +1,15 @@
 (in-package :grph)
 
+
+; ; TODO: possibly improve?
+(defun -dedupe-matches (l)
+  (declare (optimize speed (safety 1)) (list l))
+  "remove duplicates in l."
+  (labels ((srt-varset (a)
+             (declare (list a))
+             (sort (copy-list a) #'string< :key #'car)))
+    (remove-duplicates (mapcar #'srt-varset l) :test #'equal)))
+
 (defmacro match ((g f lft mid rht) &body body)
   (declare (symbol g f))
   "execute body with alist f as every bindable var for every fact in the graph
@@ -60,5 +70,5 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
     `(let ((,gather-res (list)))
        (declare (list ,gather-res))
        (match (,g ,f ,l ,p ,r) (push ,f ,gather-res))
-       (dedupe-matches ,gather-res))))
+       (-dedupe-matches ,gather-res))))
 

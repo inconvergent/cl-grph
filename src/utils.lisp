@@ -62,7 +62,7 @@
         collect (gensym (format nil "~a-~a-" name x))))
 
 (defun filter-by-predicate (l fx &key (key #'identity))
-  (declare (list l) (function fx key))
+  (declare (optimize speed (safety 2)) (list l) (function fx key))
   "split l into (values yes no) according to fx"
   (loop for x in l
         if (funcall fx (funcall key x)) collect x into yes
@@ -90,6 +90,16 @@
     (let ((res (splt (concatenate 'string s (string x)))))
       (if prune (remove-if (lambda (s) (= 0 (length s))) res)
                 res))))
+
+; https://rosettacode.org/wiki/Cartesian_product_of_two_or_more_lists#Common_Lisp
+(defun n-cartesian-product (l)
+  (declare (optimize speed (safety 1)) (list l))
+  "recursively calculate the n-cartesian product of a list of lists (sets)"
+  (if (null l)
+      (list nil)
+      (loop for x in (car l)
+            nconc (loop for y in (n-cartesian-product (cdr l))
+                        collect (cons x y)))))
 
 ; modified from on lisp by pg
 (defun group (source n)

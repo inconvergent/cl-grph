@@ -1,7 +1,5 @@
 (in-package :grph)
 
-; (declaim (inline conflict distinct some-subsets p/some-subsets))
-
 ; RUNTIME QRY FXS AND REDUCERS (AND/NOT/FILTERS/SORT/...) ----------------
 
 (defun distinct (&rest rest &aux (n (length rest)))
@@ -29,80 +27,131 @@
                    (setf l (stable-sort (the list l) #'p))))
   l)
 
-(defun dedupe-matches (l)
+(declaim (inline uni psrt pkeys split-by-common))
+(defun psrt (l)
   (declare (optimize speed (safety 1)) (list l))
-  "remove duplicates in l."
-  (labels ((srt-varset (a)
-             (declare (list a))
-             (sort (copy-list a) #'string< :key #'car)))
-    (remove-duplicates (mapcar #'srt-varset l) :test #'equal)))
+  (sort (copy-list l) #'string< :key #'car))
 
-(defun select-vars (ll select)
-  (declare (optimize speed (safety 1)) (list ll))
-  "select only pairs with key from select for every element in ll."
-  ; NOTE: optional dedupe?
-  ; NOTE: it is possible to do nothing if select is nil (if we know we dont need)
-  ; (unless select (return-from select-vars ll))
-  (labels ((row-select (l)
-             (remove-if-not (lambda (s) (member (the symbol (car s))
-                                          select :test #'eq))
-                            l))
-           (select (ll) (loop for l in ll
-                              for s = (row-select l)
-                              if s collect s)))
-    (dedupe-matches (select ll))))
+(defun pkeys (a)
+  (declare (optimize speed (safety 1)) (list a))
+  (mapcar #'car (first a)))
 
-(defun conflict (aa bb)
-  (declare (optimize speed (safety 0)) (list aa bb))
-  "T if any pair in aa and bb has conflicting values.
-eg: (?a . 1) and (?a . 2)."
-  (loop for a in aa
-        while (not c)
-        for c = (let ((f (find (car a) bb :key #'car :test #'eq)))
-                  (when (and f (not (eq (cdr a) (cdr f)))) t)) ; is eq use ok?
-        finally (return c)))
+(defun uni (a b)
+  (declare (optimize speed (safety 1)) (list a b))
+  (union a b :test #'equal))
 
-(defun qry-and (aa bb &rest rest)
-  (declare (optimize speed (safety 0)) (list aa bb) (ignore rest))
-  "intersection of aa and bb."
-  (when (< (length aa) (length bb)) (rotatef aa bb))
-  (dedupe-matches
-    (mapcan (lambda (a)
-              (loop for b in bb
-                    unless (conflict a b)
-                    collect (union a b :test #'equal)))
-            aa)))
+(defun split-by-common (common a)
+  (declare (optimize speed (safety 0)) (list common a))
+  "split l into (values yes no) according to fx"
+  (loop for x of-type list in a
+        if (find (car x) common :test #'eq) collect x into yes
+        else collect x into no
+        finally (return (values yes no))))
 
-; NOTE: select is passed to reducers to allow future specialised algorithms
-; where applicable
+(defun qry-and (aa bb)
+  (declare (optimize speed (safety 1)) (list aa bb))
+  "very messy, but faster than the naive approach"
+  (when (or (not aa) (not bb)) (return-from qry-and nil))
+  (labels ((set-pair (ht k v)
+             (declare (hash-table ht) (symbol k))
+             (setf (gethash k ht) (uni (gethash k ht (list)) (list v))))
+          (ht-merge-common (ht a)
+            (declare (hash-table ht) (list a))
+            (setf (gethash (psrt a) ht) :nil))
+          (ht-add-common (ht a &aux (c (psrt a)))
+            (declare (hash-table ht) (list a))
+            (when (gethash c ht) (setf (gethash c ht) t)))
+           (do-merge (ht common a)
+             (declare (hash-table ht) (list common a))
+             (mvb (c u) (split-by-common common a)
+               (let ((c (psrt c)))
+                 (setf (gethash c ht) (uni (gethash c ht) u)))))
+           (do-add (ht ht-isect common a)
+             (declare (hash-table ht ht-isect) (list common a))
+             (mvb (c u) (split-by-common common a)
+               (let* ((c (psrt c))
+                      (h (gethash c ht)))
+                 (when h (setf (gethash c ht) (uni h u)
+                               (gethash c ht-isect) t)))))
+           (cart (ht)
+             (declare (hash-table ht))
+             (n-cartesian-product
+               (loop for k being the hash-keys of ht using (hash-value v)
+                     collect (mapcar (lambda (x) (cons k x)) v)))))
+    (let* ((ka (pkeys aa)) (kb (pkeys bb))
+           (common (intersection ka kb :test #'eq))
+           (uncommon (set-difference (uni ka kb) common :test #'eq))
+           (n (length uncommon))
+           (ht (make-hash-table :test #'equal))
+           (ht-isect (make-hash-table :test #'equal))
+           (ht-pairs (make-hash-table :test #'eq)))
+      (case n
+        (0 (loop for a in aa do (ht-merge-common ht a))
+           (loop for b in bb do (ht-add-common ht b))
+           (loop for common-pairs being the hash-keys of ht using (hash-value v)
+                 if (not (eq v :nil)) collect common-pairs))
+        (otherwise
+          (when (= (length ka) (length common)) (rotatef aa bb))
+          (loop for a in aa do (do-merge ht common a))
+          (loop for b in bb do (do-add ht ht-isect common b))
+          (loop with res = (list)
+                for common-pairs being the hash-keys of ht-isect
+                for v = (gethash common-pairs ht)
+                do (clrhash ht-pairs)
+                   (loop for (pk . pv) in v do (set-pair ht-pairs pk pv))
+                   (when (= (hash-table-count ht-pairs) n)
+                     (loop for prod in (cart ht-pairs)
+                           do (push (concatenate 'list prod common-pairs) res)))
+                   finally (return res)))))))
 
 (defun qry-or (aa bb &optional select)
-  (declare (optimize speed (safety 0)) (list aa bb))
-  "union of aa and bb."
-  (dedupe-matches
-    (if select
-        (union (select-vars aa select) (select-vars bb select) :test #'equal)
-        (union aa bb :test #'equal))))
+  (declare (optimize speed (safety 1)) (list aa bb))
+  (when (not aa) (return-from qry-or bb))
+  (when (not bb) (return-from qry-or aa))
+  (labels ((do-merge (ht common a)
+             (setf (gethash (psrt (split-by-common common a)) ht) t)))
+    (let ((common (or select (intersection (pkeys aa) (pkeys bb) :test #'eq)))
+          (ht (make-hash-table :test #'equal))
+          (res (list)))
+      (loop for a in aa do (do-merge ht common a))
+      (loop for b in bb do (do-merge ht common b))
+      (loop for k being the hash-keys of ht do (push k res))
+      res)))
 
-(defun some-subsets (a b)
-  (declare (optimize speed (safety 0)) (list a b))
-  "t if a contains any subsets of b."
-  (some (lambda (o)
-          (declare (list o))
-          (subsetp o a :test #'equal)) b))
+(defun select-vars (aa common)
+  (declare (optimize speed (safety 0)) (list aa common))
+  (when (not aa) (return-from select-vars nil))
+  (labels ((do-merge (ht common a)
+             (declare (hash-table ht) (list common a))
+             (setf (gethash (psrt (split-by-common common a)) ht) t)))
+    (let ((ht (make-hash-table :test #'equal))
+          (res (list)))
+      (loop for a in aa do (do-merge ht common a))
+      (loop for k being the hash-keys of ht do (push k res))
+      res)))
+
 
 (defun qry-not (orig not* &optional select)
-  (declare (optimize speed (safety 0)) (list orig not*))
-  "subtract not* from orig."
-  (remove-if (lambda (a)
-               (declare (list a))
-               (some-subsets a (if select (select-vars not* select) not*))) orig))
+  (declare (optimize speed (safety 1)) (list orig not*))
+  ; early exit when nothing to subtract or nothing to return
+  ; orig will either be nil, or whatever was pass in (when not is nil)
+  (when (or (not orig) (not not*)) (return-from qry-not orig))
+  (labels ((do-merge (ht common a)
+             (push a (gethash (psrt (split-by-common common a)) ht)))
+           (do-rem (ht common a) (remhash (psrt (split-by-common common a)) ht)))
+    (let ((common (or select (intersection (pkeys not*) (pkeys orig) :test #'eq)))
+          (ht (make-hash-table :test #'equal))
+          (res (list)))
+      (loop for a in orig do (do-merge ht common a))
+      (loop for n in not* do (do-rem ht common n))
+      (loop for v being the hash-values of ht
+            do (loop for p in v do (push p res)))
+      res)))
 
 (defun qry-filter (a b fx)
   (declare (optimize speed (safety 0)) (list a) (ignore b) (function fx))
   "used for % filter clauses."
   (remove-if-not fx a))
-
 
 (defun rules/prev-matches (var &rest pairs)
   (declare (optimize speed (safety 1)) (list var))

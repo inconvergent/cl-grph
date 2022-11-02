@@ -27,18 +27,22 @@
 ; (init-config (optimize safety (speed 1) debug (space 2))
 ;              (optimize (safety 1) (speed 3) debug space))
 
-(defvar *valid-clauses* '(:and :not :or :or-join :not-join :q :% :f :fact))
-(map-docstring '*valid-clauses* "valid query clauses.")
-(defvar *dir-mode* '(:-> :<- :<>))
-(map-docstring '*dir-mode* "valid edge direction modes.")
-(defvar *pos-mode* '(:rel :abs))
-(map-docstring '*pos-mode* "valid spatial modes.")
+(defparameter *valid-clauses* '(:and :not :or :or-join :not-join
+                                :q :% :f :fact))
+(map-docstring '*valid-clauses*
+  (format nil "valid query clauses: ~a" *valid-clauses*) :nodesc)
+(defparameter *dir-mode* '(:-> :<- :<>))
+(map-docstring '*dir-mode*
+  (format nil"valid edge direction modes: ~a" *dir-mode*) :nodesc)
+(defparameter *pos-mode* '(:rel :abs))
+(map-docstring '*pos-mode*
+  (format nil "valid spatial modes: ~a" *pos-mode*) :nodesc)
 
 
 (defun psel (k)
   #+:grph-parallel
-  (ecase k ((:and :fact :f :q) 'p/qry-and) (:or 'p/qry-or)
-           (:not 'p/qry-not) (:% 'p/qry-filter) (:let 'lparallel:plet))
+  (ecase k ((:and :fact :f :q) 'qry-and) (:or 'qry-or)
+           (:not 'qry-not) (:% 'p/qry-filter) (:let 'lparallel:plet))
   #-:grph-parallel
   (ecase k ((:and :fact :f :q) 'qry-and) (:or 'qry-or)
            (:not 'qry-not) (:% 'qry-filter)  (:let 'let)))

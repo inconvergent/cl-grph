@@ -4,7 +4,7 @@
   (:import-from #:fset
     #:@ #:contains? #:less #:empty-set #:empty-map #:do-map #:do-set)
   (:export
-    #:*dir-mode* #:*pos-mode*
+    #:*dir-mode* #:*pos-mode* #:*valid-clauses*
     #:mvb #:dsb #:mvc
     #:ext-symbols? #:pn
     #:@edges #:@enum #:@in #:@out #:@either #:@both

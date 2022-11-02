@@ -98,7 +98,7 @@ pos-modes: (:rel :abs)."
   (declare (pn dim) (symbol g s))
   "add path.
 dir-modes: (-> <- <>)"
-  (grph::awg (i j res props*)
+  (grph::awg (res)
   `(let ((,res (verts! ,dim ,s ,path)))
      (declare (list ,res))
      (grph:path! ,g ,res ,modes ,props)

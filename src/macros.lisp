@@ -46,7 +46,7 @@
                `(let ((,a (list ,a* ,b*))) ,@body)))))))
 
 (defmacro itr-adj ((g a b &optional (modes :->)) &body body)
-  (declare (symbol g b) (symbol mode))
+  (declare (symbol g b) (symbol modes))
   "iterate all adjacent verts, b, of a. use modes (-> <- >< <>)."
   (awg (b* eset has)
     (let ((modes (valid-modes :itr-adj modes `(,@*dir-mode* :><)))
@@ -83,7 +83,7 @@
 
 ; TODO: ladd*!, clear! (props)
 ; ldel!, lclear! ?
-(defmacro add*! (g a b &optional modes props)
+(defmacro add*! (g a b &optional (modes :->) props)
   (declare (symbol g))
   "add edge edge and re-bind. returns: (a b) or nil."
   (awg (props* a* b*)
