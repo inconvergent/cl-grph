@@ -76,10 +76,11 @@
 (defmacro add! (g a b &optional props)
   (declare (symbol g))
   "add edge edge and re-bind. returns: (a b) or nil."
-  (awg (g* created?)
-    `(mvb (,g* ,created?) (add ,g ,a ,b ,props)
-       (setf ,g ,g*)
-       (if ,created? (list ,a ,b) nil))))
+  (awg (a* b* g* created?)
+    `(let ((,a* ,a) (,b* ,b))
+       (mvb (,g* ,created?) (add ,g ,a* ,b* ,props)
+         (setf ,g ,g*)
+         (if ,created? (list ,a* ,b*) nil)))))
 
 ; TODO: ladd*!, clear! (props)
 ; ldel!, lclear! ?
@@ -117,8 +118,10 @@
 (defmacro del! (g a b)
   (declare (symbol g))
   "del edge and re-bind. returns: deleted?"
-  (awg (g* deleted?)
-    `(mvb (,g* ,deleted?) (del ,g ,a ,b)
-      (setf ,g ,g*)
-      ,deleted?)))
+  (awg (a* b* g* deleted?)
+    `(let ((,a* ,a) (,b* ,b))
+      (mvb (,g* ,deleted?) (del ,g ,a* ,b*)
+        (setf ,g ,g*)
+        ,deleted?))))
+(defmacro del*! (g ab) `(dsb (a b) ,ab (del! ,g a b)))
 

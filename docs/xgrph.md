@@ -72,6 +72,69 @@
  ;   [symbol]
 ```
 
+#### XGRPH:2CUT-TO-AREA
+
+```
+DOCSTRING for %2CUT-TO-AREA;
+removes all edges outside envelope.
+all edges intersecting the envelope will be deleted, a new vert will be
+inserted on the intersection; connected to the inside vert.
+
+ ; XGRPH:2CUT-TO-AREA
+ ;   [symbol]
+ ; 
+ ; 2CUT-TO-AREA names a macro:
+ ;   Lambda-list: (&REST REST)
+ ;   Documentation:
+ ;     DOCSTRING for %2CUT-TO-AREA;
+ ;     removes all edges outside envelope.
+ ;     all edges intersecting the envelope will be deleted, a new vert will be
+ ;     inserted on the intersection; connected to the inside vert.
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
+```
+
+#### XGRPH:2CUT-TO-AREA!
+
+```
+:missing:todo:
+
+ ; XGRPH:2CUT-TO-AREA!
+ ;   [symbol]
+ ; 
+ ; 2CUT-TO-AREA! names a macro:
+ ;   Lambda-list: (G POS &REST REST)
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
+```
+
+#### XGRPH:2INTERSECT-ALL
+
+```
+creates intersections for all edges in g such that it becomes a planar graph.
+
+ ; XGRPH:2INTERSECT-ALL
+ ;   [symbol]
+ ; 
+ ; 2INTERSECT-ALL names a compiled function:
+ ;   Lambda-list: (G POS &OPTIONAL PROPS)
+ ;   Derived type: (FUNCTION (T T &OPTIONAL T) (VALUES T T &OPTIONAL))
+ ;   Documentation:
+ ;     creates intersections for all edges in g such that it becomes a planar graph.
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
+```
+
+#### XGRPH:2INTERSECT-ALL!
+
+```
+:missing:todo:
+
+ ; XGRPH:2INTERSECT-ALL!
+ ;   [symbol]
+ ; 
+ ; 2INTERSECT-ALL! names a macro:
+ ;   Lambda-list: (G POS &REST REST)
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
+```
+
 #### XGRPH:2MOVE!
 
 ```
@@ -453,6 +516,24 @@ delete edge (a b) and add edges (a x) (x b).
  ;   Documentation:
  ;     delete edge (a b) and add edges (a x) (x b).
  ;   Source file: /data/x/grph/src/xgrph.lisp
+```
+
+#### XGRPH:TRIANGULATE-EDGE-SET
+
+```
+triangulate the hull defined by edge set, using the fx provided where
+  (funcall fx i ... k) is (values pix piy ... pkx pky)
+
+ ; XGRPH:TRIANGULATE-EDGE-SET
+ ;   [symbol]
+ ; 
+ ; TRIANGULATE-EDGE-SET names a compiled function:
+ ;   Lambda-list: (EDGE-SET FX)
+ ;   Derived type: (FUNCTION (LIST T) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     triangulate the hull defined by edge set, using the fx provided where
+ ;       (funcall fx i ... k) is (values pix piy ... pkx pky)
+ ;   Source file: /data/x/grph/src/xgrph-triangulate.lisp
 ```
 
 #### XGRPH:VERT!

@@ -7,7 +7,7 @@
     #:*dir-mode* #:*pos-mode* #:*valid-clauses*
     #:mvb #:dsb #:mvc
     #:ext-symbols? #:pn
-    #:@edges #:@enum #:@in #:@out #:@either #:@both
+    #:@edges #:@enum #:@in #:@out #:@either #:@both #:num-either
     #:@verts #:@vnum #:@vmax #:@prop #:@mem #:@inv
     #:add #:add! #:add*! #:del #:del! #:path!
     #:itr-edges #:itr-adj #:itr-verts
@@ -15,10 +15,13 @@
     #:compile-query #:match
     #:qry #:qry-collect-while #:stop #:cancel #:collect-while
     #:rqry
-    #:edge-set->path
+    #:to-vector #:ensure-list #:last* #:vector-last #:vector-first
     #:gather-match #:ingest-edges
     #:grp #:distinct #:first< #:first> #:lsort
-    #:walk-grph #:any-edge #:dead-ends #:multi-isects #:filament-ends))
+    #:walk-grph #:walk-edge-set
+    #:any-edge #:dead-ends #:multi-isects #:filament-ends
+    #:del-simple-filaments
+    #:path->edge-set #:edge-set->path))
 
 (defpackage #:xgrph
   (:use #:common-lisp)
@@ -39,5 +42,8 @@
     #:path! #:2path! #:3path!
     #:split! #:2split! #:3split!
     #:append! #:2append! #:3append!
-    #:append-inv! #:2append-inv! #:3append-inv!))
+    #:append-inv! #:2append-inv! #:3append-inv!
+    #:2intersect-all #:2intersect-all!
+    #:2cut-to-area #:2cut-to-area!
+    #:triangulate-edge-set))
 

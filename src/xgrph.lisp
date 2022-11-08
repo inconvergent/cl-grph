@@ -135,14 +135,16 @@ dir-modes: (-> <- <>)."
 
 ; TODO: inv mode
 (defmacro split! (dim g s a b x &optional props)
-  (declare (pn dim))
+  (declare (symbol g s) (pn dim))
   "delete edge (a b) and add edges (a x) (x b)."
-  (grph::awg (v props*)
-  `(let ((,v (vert! ,dim ,s ,x)) (,props* ,props))
-    (del! ,g ,a ,b)
-    (add! ,g ,a ,v ,props*)
-    (add! ,g ,v ,b ,props*)
-    ,v)))
+  (grph::awg (a* b* v* props*)
+  `(let ((,a* ,a) (,b* ,b)
+         (,v* (vert! ,dim ,s ,x))
+         (,props* ,props))
+    (del! ,g ,a* ,b*)
+    (add! ,g ,a* ,v* ,props*)
+    (add! ,g ,v* ,b* ,props*)
+    ,v*)))
 (defmacro 2split! (&rest rest) `(split! 2 ,@rest))
 (defmacro 3split! (&rest rest) `(split! 3 ,@rest))
 
@@ -150,7 +152,6 @@ dir-modes: (-> <- <>)."
   `(veq:~ ,@(loop for i in rest collect `(@vert ,dim ,s ,i))))
 (defmacro 2@ (&rest rest) `(@ 2 ,@rest))
 (defmacro 3@ (&rest rest) `(@ 3 ,@rest))
-
 
 (defmacro fxpos! ((g pos i) &body body)
   (declare (symbol g pos i))

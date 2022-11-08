@@ -264,16 +264,10 @@ add edge edge and re-bind. returns: (a b) or nil.
 #### GRPH:ANY-EDGE
 
 ```
-all edges (?x ?p ?y).
+:missing:todo:
 
  ; GRPH:ANY-EDGE
  ;   [symbol]
- ; 
- ; ANY-EDGE names a macro:
- ;   Lambda-list: (G ?P)
- ;   Documentation:
- ;     all edges (?x ?p ?y).
- ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:CANCEL
@@ -313,16 +307,10 @@ all edges (?x ?p ?y).
 #### GRPH:DEAD-ENDS
 
 ```
-get all edges (?x ?p ?y) or (?y ?p ?x) where ?x is only connected to ?y.
+:missing:todo:
 
  ; GRPH:DEAD-ENDS
  ;   [symbol]
- ; 
- ; DEAD-ENDS names a macro:
- ;   Lambda-list: (G ?P)
- ;   Documentation:
- ;     get all edges (?x ?p ?y) or (?y ?p ?x) where ?x is only connected to ?y.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:DEL
@@ -358,6 +346,20 @@ del edge and re-bind. returns: deleted?
  ;   Documentation:
  ;     del edge and re-bind. returns: deleted?
  ;   Source file: /data/x/grph/src/macros.lisp
+```
+
+#### GRPH:DEL-SIMPLE-FILAMENTS
+
+```
+:missing:todo:
+
+ ; GRPH:DEL-SIMPLE-FILAMENTS
+ ;   [symbol]
+ ; 
+ ; DEL-SIMPLE-FILAMENTS names a compiled function:
+ ;   Lambda-list: (G &OPTIONAL (?P _))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:DISTINCT
@@ -409,6 +411,20 @@ second result is a boolean for whether it is a cycle.
  ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
+#### GRPH:ENSURE-LIST
+
+```
+:missing:todo:
+
+ ; GRPH:ENSURE-LIST
+ ;   [symbol]
+ ; 
+ ; ENSURE-LIST names a compiled function:
+ ;   Lambda-list: (L)
+ ;   Derived type: (FUNCTION (T) (VALUES LIST &OPTIONAL))
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
 #### GRPH:EXT-SYMBOLS?
 
 ```
@@ -433,10 +449,6 @@ use :pretty to print verbose output to stdout in a readable form.
 
  ; GRPH:FILAMENT-ENDS
  ;   [symbol]
- ; 
- ; FILAMENT-ENDS names a macro:
- ;   Lambda-list: (G ?P)
- ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:FIRST<
@@ -625,6 +637,20 @@ iterate all connected verts, as a.
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
+#### GRPH:LAST\*
+
+```
+:missing:todo:
+
+ ; GRPH:LAST*
+ ;   [symbol]
+ ; 
+ ; LAST* names a compiled function:
+ ;   Lambda-list: (L)
+ ;   Derived type: (FUNCTION (LIST) (VALUES T &OPTIONAL))
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
 #### GRPH:LSORT
 
 ```
@@ -694,6 +720,23 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
+#### GRPH:NUM-EITHER
+
+```
+number of edges to or from ?x (with propery ?p).
+
+ ; GRPH:NUM-EITHER
+ ;   [symbol]
+ ; 
+ ; NUM-EITHER names a compiled function:
+ ;   Lambda-list: (G ?X &OPTIONAL (?P _))
+ ;   Derived type: (FUNCTION (GRPH:GRPH T &OPTIONAL SYMBOL)
+ ;                  (VALUES (MOD 4611686018427387901) &OPTIONAL))
+ ;   Documentation:
+ ;     number of edges to or from ?x (with propery ?p).
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
 #### GRPH:PATH!
 
 ```
@@ -705,6 +748,27 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
  ; PATH! names a macro:
  ;   Lambda-list: (G PATH &OPTIONAL (MODES (QUOTE (OPEN ->))) PROPS)
  ;   Source file: /data/x/grph/src/macros.lisp
+```
+
+#### GRPH:PATH->EDGE-SET
+
+```
+return edge set from cycle.
+ex: (1 2 3 4 5) -> ((1 2) (2 3) (3 4) (4 5))
+if closed is t, (1 5) will be included in the above output.
+
+ ; GRPH:PATH->EDGE-SET
+ ;   [symbol]
+ ; 
+ ; PATH->EDGE-SET names a compiled function:
+ ;   Lambda-list: (PATH &KEY CLOSED)
+ ;   Derived type: (FUNCTION (LIST &KEY (:CLOSED BOOLEAN))
+ ;                  (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     return edge set from cycle.
+ ;     ex: (1 2 3 4 5) -> ((1 2) (2 3) (3 4) (4 5))
+ ;     if closed is t, (1 5) will be included in the above output.
+ ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
 #### GRPH:PN
@@ -859,18 +923,74 @@ note the difference between rule types:
  ;   [symbol]
 ```
 
+#### GRPH:TO-VECTOR
+
+```
+:missing:todo:
+
+ ; GRPH:TO-VECTOR
+ ;   [symbol]
+ ; 
+ ; TO-VECTOR names a compiled function:
+ ;   Lambda-list: (INIT)
+ ;   Derived type: (FUNCTION (LIST) (VALUES SIMPLE-VECTOR &OPTIONAL))
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:VECTOR-FIRST
+
+```
+:missing:todo:
+
+ ; GRPH:VECTOR-FIRST
+ ;   [symbol]
+ ; 
+ ; VECTOR-FIRST names a compiled function:
+ ;   Lambda-list: (A)
+ ;   Derived type: (FUNCTION (VECTOR) (VALUES T &OPTIONAL))
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:VECTOR-LAST
+
+```
+:missing:todo:
+
+ ; GRPH:VECTOR-LAST
+ ;   [symbol]
+ ; 
+ ; VECTOR-LAST names a compiled function:
+ ;   Lambda-list: (A)
+ ;   Derived type: (FUNCTION (VECTOR) (VALUES T &OPTIONAL))
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:WALK-EDGE-SET
+
+```
+greedily walks the graph so that every edge is returned exactly once.
+
+ ; GRPH:WALK-EDGE-SET
+ ;   [symbol]
+ ; 
+ ; WALK-EDGE-SET names a compiled function:
+ ;   Lambda-list: (G EDGE-SET &AUX (ALL-EDGES (EDGES-HT EDGE-SET)))
+ ;   Derived type: (FUNCTION (GRPH:GRPH LIST) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     greedily walks the graph so that every edge is returned exactly once.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
 #### GRPH:WALK-GRPH
 
 ```
-walk the grph and return tuples: ((path closed?) ...)
+:missing:todo:
 
  ; GRPH:WALK-GRPH
  ;   [symbol]
  ; 
  ; WALK-GRPH names a macro:
- ;   Lambda-list: (G* PROP &KEY (LIM 100000))
- ;   Documentation:
- ;     walk the grph and return tuples: ((path closed?) ...)
+ ;   Lambda-list: (G &OPTIONAL (P _))
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 

@@ -27,7 +27,7 @@
                    (setf l (stable-sort (the list l) #'p))))
   l)
 
-(declaim (inline uni psrt pkeys split-by-common))
+; (declaim (inline uni psrt pkeys split-by-common))
 (defun psrt (l)
   (declare (optimize speed (safety 1)) (list l))
   (sort (copy-list l) #'string< :key #'car))
@@ -42,7 +42,7 @@
 
 (defun split-by-common (common a)
   (declare (optimize speed (safety 0)) (list common a))
-  "split l into (values yes no) according to fx"
+  "split common pairs to the left."
   (loop for x of-type list in a
         if (find (car x) common :test #'eq) collect x into yes
         else collect x into no
@@ -55,12 +55,12 @@
   (labels ((set-pair (ht k v)
              (declare (hash-table ht) (symbol k))
              (setf (gethash k ht) (uni (gethash k ht (list)) (list v))))
-          (ht-merge-common (ht a)
-            (declare (hash-table ht) (list a))
-            (setf (gethash (psrt a) ht) :nil))
-          (ht-add-common (ht a &aux (c (psrt a)))
-            (declare (hash-table ht) (list a))
-            (when (gethash c ht) (setf (gethash c ht) t)))
+           (ht-merge-common (ht a)
+             (declare (hash-table ht) (list a))
+             (setf (gethash (psrt a) ht) :nil))
+           (ht-add-common (ht a &aux (c (psrt a)))
+             (declare (hash-table ht) (list a))
+             (when (gethash c ht) (setf (gethash c ht) t)))
            (do-merge (ht common a)
              (declare (hash-table ht) (list common a))
              (mvb (c u) (split-by-common common a)
@@ -84,25 +84,26 @@
            (n (length uncommon))
            (ht (make-hash-table :test #'equal))
            (ht-isect (make-hash-table :test #'equal))
-           (ht-pairs (make-hash-table :test #'eq)))
+           (ht-pairs (make-hash-table :test #'eq))
+           (res (list)))
       (case n
         (0 (loop for a in aa do (ht-merge-common ht a))
            (loop for b in bb do (ht-add-common ht b))
            (loop for common-pairs being the hash-keys of ht using (hash-value v)
-                 if (not (eq v :nil)) collect common-pairs))
+                 if (not (eq v :nil)) do (push common-pairs res)))
         (otherwise
           (when (= (length ka) (length common)) (rotatef aa bb))
           (loop for a in aa do (do-merge ht common a))
           (loop for b in bb do (do-add ht ht-isect common b))
-          (loop with res = (list)
-                for common-pairs being the hash-keys of ht-isect
+          (loop for common-pairs being the hash-keys of ht-isect
                 for v = (gethash common-pairs ht)
                 do (clrhash ht-pairs)
                    (loop for (pk . pv) in v do (set-pair ht-pairs pk pv))
                    (when (= (hash-table-count ht-pairs) n)
                      (loop for prod in (cart ht-pairs)
-                           do (push (concatenate 'list prod common-pairs) res)))
-                   finally (return res)))))))
+                           do (push (concatenate 'list prod common-pairs)
+                                    res))))))
+      res)))
 
 (defun qry-or (aa bb &optional select)
   (declare (optimize speed (safety 1)) (list aa bb))

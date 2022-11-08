@@ -1,7 +1,7 @@
 (in-package #:grph)
 
 (deftype pn (&optional (bits 31)) `(unsigned-byte ,bits))
-(defvar *opt* '(optimize (safety 3) (speed 3) debug space))
+(defvar *opt* '(optimize (safety 1) (speed 3) debug space))
 
 (defun v? (&optional (silent t)
            &aux (v (slot-value (asdf:find-system 'grph) 'asdf:version)))
@@ -116,6 +116,24 @@
 
 (defun ensure-list (l)
   (the list (typecase l (null nil) (list l) (t (list l)))))
+(defun to-list (a) (declare (sequence a)) (coerce a 'list))
+(defun vector-last (a) (declare (vector a)) (aref a (1- (length a))))
+(defun vector-first (a) (declare (vector a)) (aref a 0))
+(defun to-vector (init)
+  (declare (list init))
+  (make-array (length init)
+    :initial-contents init :adjustable nil :element-type 'list))
+
+(defmacro vector-rearrange (a &rest rest)
+  (declare (symbol a))
+  `(concatenate 'vector
+    ,@(loop for ind in rest
+            collect (etypecase ind
+                      (number `(list (aref ,a ,ind)))
+                      (symbol `(list (aref ,a ,ind)))
+                      (cons (ecase (length ind)
+                              (1 `(list (aref ,a ,@ind)))
+                              (2 `(subseq ,a ,@ind))))))))
 
 (defun select-mode (c valid &aux (c* (ensure-list c)))
   (declare (list valid c*))
