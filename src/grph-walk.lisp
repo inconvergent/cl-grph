@@ -97,13 +97,12 @@
                       (concatenate 'list
                         (-until-dead-end a b)
                         (reverse (-until-dead-end b a)))))))))
-
 (defmacro walk-grph (g &optional (p :_))
   (declare (symbol g p))
   `(let ((?p ,p))
      (declare (ignorable ?p))
      (walk-edge-set ,g
-       (qry ,g :in ,(when (any? p) '?p) :select (?x ?y)
+       (qry ,g :in ,(when (not (any? p)) '?p) :select (?x ?y)
          :where ,(if (any? p) '(or (?x _ ?y) (?y _ ?x))
                               '(or (?x ?p ?y) (?y ?p ?x)))))))
 

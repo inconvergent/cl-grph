@@ -12,6 +12,13 @@
   (declare (notinline grph-num-edges))
   (format s "<@grph: (verts: ~a, edges: ~a)>" (@vnum o) (@enum o)))
 
+; TODO: improve this
+; this is silly, we should ensure that props accepts at least an fset:map
+(defun props-as-list (m &aux (res (list)))
+  (unless m (return-from props-as-list nil))
+  (fset:do-map (k v m) (push (list k v) res))
+  res)
+
 (defstruct (grph
   (:constructor grph (&optional (adj nilmap) (num-edges 0)
                                 (props nilmap) (mid nilmap)))

@@ -3,18 +3,17 @@
 
 (deftype simple-list () `(simple-array list))
 
-(veq:fvdef 2intersect-all (g pos &optional props)
+(veq:fvdef 2intersect-all (g pos)
   (declare (grph g))
   "creates intersections for all edges in g such that it becomes a planar graph."
 
   (let ((crossing->vert (make-hash-table :test #'equal)))
     (declare (hash-table crossing->vert))
-
     (labels
       ((ic (i c) (declare (fixnum i c)) (if (< i c) (list i c) (list c i)))
        (-add (a b &key e)
          (declare (grph:pn a b) (list e))
-         (add! g a b props))
+         (add! g a b (grph::props-as-list (grph:@prop g e))))
        (edges-as-lines (edges)
          (declare (simple-list edges))
          (loop for edge of-type list across edges
@@ -32,11 +31,7 @@
                if (not (gethash (the list (ic i c)) crossing->vert))
                do (let ((new (2vert! pos (veq:f2lerp (veq:f2$ line 0 1) p))))
                     (declare (grph:pn new))
-                    (setf (gethash (the list (ic i c)) crossing->vert) new)
-                    ; not implemented: vert props
-                    ; (when prop (set-vert-prop wer new
-                    ;              (the keyword prop) old-edge))
-                    )))
+                    (setf (gethash (the list (ic i c)) crossing->vert) new))))
        (add-new-verts (edges isects)
          (declare (simple-list edges isects))
          (loop for hits across isects
@@ -76,9 +71,9 @@
              ; isects: #(((16 . 0.18584675) (5 . 0.35215548)) NIL NIL ...)
              (isects (sort-hits (veq:f2lsegx lines)))) ;  p/q is the lerp
         (declare (simple-list isects edges) (simple-array lines))
-        (del-hit-edges edges isects)
         (add-new-verts edges isects)
         (add-new-edges edges isects)
+        (del-hit-edges edges isects)
         (values g pos)))))
 (defmacro 2intersect-all! (g pos &rest rest)
  `(grph:mvb (g* pos*) (xgrph::2intersect-all ,g ,pos ,@rest)
@@ -118,14 +113,16 @@ inserted on the intersection; connected to the inside vert."
 
   (grph:qry g :select (?x ?y)
     :using (^g ^pos)
-    :where (or (?x _ ?y) (?y _ ?x))
+    :where (or (?x _ ?y))
     :then (mvb (state rev (:va 2 px)) (cutfx ?x ?y)
             (ecase state
               (:keep nil)
               (:outside (grph:del! ^g ?x ?y))
-              (:split (grph:del! ^g ?x ?y)
-                      (2append! ^g ^pos (if rev ?y ?x)
-                        (veq:f2 px) abs))))))
+              (:split (let ((props (grph::props-as-list
+                                     (grph:@prop g (list ?x ?y)))))
+                        (grph:del! ^g ?x ?y)
+                        (2append! ^g ^pos (if rev ?y ?x)
+                        (veq:f2 px) abs props)))))))
   (values g pos))
 (defmacro 2cut-to-area! (g pos &rest rest)
  `(grph:mvb (g* pos*) (2cut-to-area ,g ,pos ,@rest)
