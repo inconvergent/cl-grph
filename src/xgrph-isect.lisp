@@ -122,7 +122,7 @@ inserted on the intersection; connected to the inside vert."
                                      (grph:@prop g (list ?x ?y)))))
                         (grph:del! ^g ?x ?y)
                         (2append! ^g ^pos (if rev ?y ?x)
-                        (veq:f2 px) abs props)))))))
+                          (veq:f2 px) abs props)))))))
   (values g pos))
 (defmacro 2cut-to-area! (g pos &rest rest)
  `(grph:mvb (g* pos*) (2cut-to-area ,g ,pos ,@rest)
