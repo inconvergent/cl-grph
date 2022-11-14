@@ -115,8 +115,8 @@ creates intersections for all edges in g such that it becomes a planar graph.
  ;   [symbol]
  ; 
  ; 2INTERSECT-ALL names a compiled function:
- ;   Lambda-list: (G POS &OPTIONAL PROPS)
- ;   Derived type: (FUNCTION (T T &OPTIONAL T) (VALUES T T &OPTIONAL))
+ ;   Lambda-list: (G POS)
+ ;   Derived type: (FUNCTION (T T) (VALUES T T &OPTIONAL))
  ;   Documentation:
  ;     creates intersections for all edges in g such that it becomes a planar graph.
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
@@ -512,7 +512,7 @@ delete edge (a b) and add edges (a x) (x b).
  ;   [symbol]
  ; 
  ; SPLIT! names a macro:
- ;   Lambda-list: (DIM G S A B X &OPTIONAL PROPS)
+ ;   Lambda-list: (DIM G S A B X)
  ;   Documentation:
  ;     delete edge (a b) and add edges (a x) (x b).
  ;   Source file: /data/x/grph/src/xgrph.lisp

@@ -14,6 +14,10 @@
 
 (in-package :grph)
 
+; HI!
+; I have written an introduction to (this) datalog at:
+; https://inconvergent.net/2022/graph-data-structure-with-datalog-ql/
+; you might want to start there
 
 (defun main ()
 

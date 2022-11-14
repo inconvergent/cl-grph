@@ -23,14 +23,14 @@
         (fset:with (or ,pk ,default) ,p
                    ,@(if val? `(,val)))))))
 
+
+(defun -del-multi-prune (props k pk p)
+  (let ((new-pk (when pk (fset:less pk p))))
+    (if (fset:empty? new-pk) (fset:less props k)
+                             (fset:with props k new-pk))))
 (defmacro del-multi-rel (props k &optional p)
-  (awg (props* pk)
-    `(let* ((,props* ,props)
-            (,pk (@ ,props* ,k)))
-       (declare (ignorable ,pk))
-       ,(if p `(fset:with ,props* ,k
-                 (when ,pk (fset:less ,pk ,p)))
-              `(fset:less ,props* ,k)))))
+  (if p `(-del-multi-prune ,props ,k (@ ,props ,k) ,p)
+        `(fset:less ,props ,k)))
 
 ; TODO: itr prop edges, itr prop verts?
 ; TODO: ignore half?
@@ -115,13 +115,15 @@
                              `(,path* (cdr ,path*))))
         ,path*)))) ; should we return edges instead?
 
-(defmacro del! (g a b)
+
+(defmacro del! (g a b &optional p)
   (declare (symbol g))
   "del edge and re-bind. returns: deleted?"
-  (awg (a* b* g* deleted?)
+  (awg (a* b* g* deleted? p*)
     `(let ((,a* ,a) (,b* ,b))
-      (mvb (,g* ,deleted?) (del ,g ,a* ,b*)
+      (mvb (,g* ,deleted?) ,(if p `(del-props ,g (list ,a* ,b*) ,p)
+                                  `(del ,g ,a* ,b*))
         (setf ,g ,g*)
         ,deleted?))))
-(defmacro del*! (g ab) `(dsb (a b) ,ab (del! ,g a b)))
+; (defmacro ldel! (g ab &rest rest) `(dsb (a b) ,ab (del! ,g a b ,@rest)))
 

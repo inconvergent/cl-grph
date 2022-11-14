@@ -172,6 +172,24 @@ returns: (values g deleted?)"
   (when (= a b) (warn "DEL: incorrect edge: (~a ~a)." a b))
   (-del g a b))
 
+; TODO: what happens with dangling mid/props values?
+(defun -del-prop (g ab prop)
+  (declare (grph g) (list ab) (symbol prop))
+  (if (@prop g ab prop)
+      (values (grph (adj g)
+                    (grph-num-edges g)
+                    (del-multi-rel (props g) ab prop)
+                    (del-multi-rel (mid g) prop ab))
+              t)
+      (values g nil)))
+
+(defun del-props (g ab props)
+  (declare (grph g) (list ab props))
+  (loop with deleted? = nil
+        for p in props
+        do (mvb (g* del?) (-del-prop g ab p)
+             (setf g g* deleted? (or del? deleted?)))
+        finally (return-from del-props (veq:vpr (values g deleted?)))))
 
 ; VARIOUS ---
 

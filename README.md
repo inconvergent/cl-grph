@@ -20,6 +20,11 @@ makes it easier to work with higher dimensional data.
 There are many benefits to having immutable data structures; perhaps the most
 interesting being that it makes it trivial to to create transactions.
 
+I have written about this library at
+
+ - https://inconvergent.net/2022/graph-data-structure-with-datalog-ql/
+ - (more to come)
+
 
 ![Lines](img/lines.png)
 

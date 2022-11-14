@@ -342,10 +342,24 @@ del edge and re-bind. returns: deleted?
  ;   [symbol]
  ; 
  ; DEL! names a macro:
- ;   Lambda-list: (G A B)
+ ;   Lambda-list: (G A B &OPTIONAL P)
  ;   Documentation:
  ;     del edge and re-bind. returns: deleted?
  ;   Source file: /data/x/grph/src/macros.lisp
+```
+
+#### GRPH:DEL-PROPS
+
+```
+:missing:todo:
+
+ ; GRPH:DEL-PROPS
+ ;   [symbol]
+ ; 
+ ; DEL-PROPS names a compiled function:
+ ;   Lambda-list: (G AB PROPS)
+ ;   Derived type: (FUNCTION (GRPH:GRPH LIST LIST) *)
+ ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
 #### GRPH:DEL-SIMPLE-FILAMENTS

@@ -26,6 +26,8 @@ ADD grph.asd quicklisp/local-projects/grph
 ADD run-tests.sh quicklisp/local-projects/grph/run-tests.sh
 RUN mkdir -p ~/quicklisp/ && ln -s  /opt/quicklisp/setup.lisp ~/quicklisp/setup.lisp
 
+RUN git clone https://github.com/inconvergent/cl-veq.git quicklisp/local-projects/veq
+
 WORKDIR /opt/quicklisp/local-projects/grph/
 
 CMD ["bash", "./run-tests.sh"]
