@@ -127,7 +127,7 @@
 
         (grph:qry g :select ?x
           :where (or (?x :delpath _) (_ :delpath ?x))
-          :then (let ((rad (1+ (grph::num-either g :path ?x))))
+          :then (let ((rad (1+ (grph::num-either g ?x :path))))
                   (wsvg:circ wsvg (case rad (1 4f0) (2 15f0) (otherwise 30f0))
                     :xy (veq:lst (veq:f2+ mid
                                    (xgrph:2@vert pos

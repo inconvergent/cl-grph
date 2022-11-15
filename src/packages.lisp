@@ -21,7 +21,8 @@
     #:walk-grph #:walk-edge-set
     #:any-edge #:dead-ends #:multi-isects #:filament-ends
     #:del-simple-filaments
-    #:path->edge-set #:edge-set->path))
+    #:path->edge-set #:edge-set->path
+    #:normalise-fold #:normalise-fold!))
 
 (defpackage #:xgrph
   (:use #:common-lisp)

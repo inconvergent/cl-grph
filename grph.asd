@@ -1,6 +1,6 @@
 (asdf:defsystem #:grph
   :description "graph thing"
-  :version "0.13.0"
+  :version "0.14.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :licence "MIT"
   :in-order-to ((asdf:test-op (asdf:test-op #:grph/tests)))
@@ -28,6 +28,8 @@
                ; serial:
                #-:grph-parallel
                (:file "qry" :depends-on ("qry-runtime"))
+
+               (:file "qry-extra" :depends-on ("qry"))
 
                (:file "xgrph-triangulate" :depends-on ("grph"))
                (:file "qry-rules" :depends-on ("qry"))

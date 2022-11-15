@@ -4,7 +4,7 @@
 (deftype simple-list () `(simple-array list))
 
 (veq:fvdef 2intersect-all (g pos)
-  (declare (grph g))
+  (declare (grph:grph g))
   "creates intersections for all edges in g such that it becomes a planar graph."
 
   (let ((crossing->vert (make-hash-table :test #'equal)))
@@ -25,8 +25,8 @@
                do (setf (aref isects i)
                         (sort (aref isects i) #'< :key #'cdr)))
          isects)
-       (add-vert (old-edge line i hits)
-         (declare (list old-edge hits) (fixnum i))
+       (add-vert (line i hits)
+         (declare (list hits) (fixnum i))
          (loop for (c . p) in hits
                if (not (gethash (the list (ic i c)) crossing->vert))
                do (let ((new (2vert! pos (veq:f2lerp (veq:f2$ line 0 1) p))))
@@ -37,15 +37,14 @@
          (loop for hits across isects
                for i of-type fixnum from 0
                if hits
-               do (let ((old-edge (aref edges i)))
-                    (add-vert old-edge (2@verts pos old-edge) i hits))))
+               do (add-vert (2@verts pos (aref edges i)) i hits)))
        (del-hit-edges (edges isects)
          (declare (simple-list edges isects))
          (loop for hits of-type list across isects
                for i of-type fixnum from 0
-               if hits do (grph::del*! g (aref edges i))
+               if hits do (grph::ldel! g (aref edges i))
                           (loop for (c . p) in hits
-                                do (grph::del*! g (aref edges c)))))
+                                do (grph::ldel! g (aref edges c)))))
        (add-new-edges (edges isects)
          (declare (simple-list edges isects))
          (loop for hits of-type list across isects
@@ -82,7 +81,7 @@
 
 (veq:fvdef* 2cut-to-area (g pos &optional (top 0f0) (lft 0f0)
                                           (rht 1000f0) (bot 1000f0))
-  (declare (grph g) (veq:ff top lft bot rht))
+  (declare (grph:grph g) (veq:ff top lft bot rht))
   "removes all edges outside envelope.
 all edges intersecting the envelope will be deleted, a new vert will be
 inserted on the intersection; connected to the inside vert."

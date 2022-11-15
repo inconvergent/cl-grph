@@ -1,7 +1,7 @@
 (in-package :xgrph)
 
 (veq:fvdef triangulate-edge-set (edge-set fx)
-  (declare (grph g) (list edge-set))
+  (declare (list edge-set))
   "triangulate the hull defined by edge set, using the fx provided where
   (funcall fx i ... k) is (values pix piy ... pkx pky)"
   (let ((path (grph:to-vector (grph:edge-set->path edge-set)))

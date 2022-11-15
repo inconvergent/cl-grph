@@ -119,11 +119,11 @@
 (defmacro del! (g a b &optional p)
   (declare (symbol g))
   "del edge and re-bind. returns: deleted?"
-  (awg (a* b* g* deleted? p*)
+  (awg (a* b* g* deleted?)
     `(let ((,a* ,a) (,b* ,b))
       (mvb (,g* ,deleted?) ,(if p `(del-props ,g (list ,a* ,b*) ,p)
                                   `(del ,g ,a* ,b*))
         (setf ,g ,g*)
         ,deleted?))))
-; (defmacro ldel! (g ab &rest rest) `(dsb (a b) ,ab (del! ,g a b ,@rest)))
+(defmacro ldel! (g ab &rest rest) `(dsb (a b) ,ab (del! ,g a b ,@rest)))
 
