@@ -34,7 +34,7 @@
 (defparameter *dir-mode* '(:-> :<- :<>))
 (map-docstring '*dir-mode*
   (format nil"valid edge direction modes: ~a" *dir-mode*) :nodesc)
-(defparameter *pos-mode* '(:rel :abs))
+(defparameter *pos-mode* '(:abs :rel))
 (map-docstring '*pos-mode*
   (format nil "valid spatial modes: ~a" *pos-mode*) :nodesc)
 

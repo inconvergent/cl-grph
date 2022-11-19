@@ -25,7 +25,7 @@
 
 
   (is (grph:@mem g 3 7) nil)
-  (is (xgrph:2append! g pos 3 (veq:f2 3f0 7f0)) 7)
+  (is (xgrph:2append! g pos 3 (veq:f2 3f0 7f0) rel) 7)
   (is (grph:@mem g 3 7) t)
   (is (veq:lst (xgrph:2@vert pos 7)) '(86.0 9.0))
 

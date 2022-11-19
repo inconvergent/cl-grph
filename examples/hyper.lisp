@@ -1,9 +1,7 @@
 #!/usr/local/bin/sbcl --script
 
 (load "~/quicklisp/setup.lisp")
-(let ((*features* `(:veq-reader-macros
-                    :grph-parallel
-                    ,@*features*)))
+(let ((*features* `(:veq-reader-macros :grph-parallel ,@*features*)))
   (ql:quickload :weird)
   (ql:quickload :grph))
 

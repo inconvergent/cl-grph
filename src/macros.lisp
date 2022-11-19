@@ -127,3 +127,22 @@
         ,deleted?))))
 (defmacro ldel! (g ab &rest rest) `(dsb (a b) ,ab (del! ,g a b ,@rest)))
 
+(defmacro using ((&rest using) &body body)
+  (unless (and (every #'^var? using) (no-dupes? using))
+          (warn "USING: got bad value for :using ~s. vars need ^ prefix." using))
+  (awg (res stop*)
+    (labels
+      ((re-intern (g) (intern (subseq (mkstr g) 1) (symbol-package g)))
+       (bind-partial () (loop for g in using collect `(,g ,(re-intern g))))
+       (re-bind-result ()
+         `(setf ,@(awf (loop for g in using collect `(,(re-intern g) ,g))))))
+      `(macrolet
+         ((cancel (&body cbody) `(return-from ,',stop* (progn ,@cbody)))
+         ; stop, but keep the results
+         (stop (&body sbody) `(progn ,',(re-bind-result)
+                                    (return-from ,',stop* (progn ,@sbody)))))
+         (let (,@(bind-partial))
+           (block ,stop* (let ((,res (progn ,@body)))
+                           ,(re-bind-result)
+                           ,res)))))))
+

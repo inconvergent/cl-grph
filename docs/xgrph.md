@@ -116,7 +116,7 @@ creates intersections for all edges in g such that it becomes a planar graph.
  ; 
  ; 2INTERSECT-ALL names a compiled function:
  ;   Lambda-list: (G POS)
- ;   Derived type: (FUNCTION (T T) (VALUES T T &OPTIONAL))
+ ;   Derived type: (FUNCTION (GRPH:GRPH T) (VALUES GRPH:GRPH T &OPTIONAL))
  ;   Documentation:
  ;     creates intersections for all edges in g such that it becomes a planar graph.
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp

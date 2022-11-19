@@ -7,7 +7,7 @@ valid edge direction modes: (-> <- <>)
 #### GRPH:\*POS-MODE\*
 
 ```
-valid spatial modes: (REL ABS)
+valid spatial modes: (ABS REL)
 ```
 
 #### GRPH:\*VALID-CLAUSES\*
@@ -292,7 +292,7 @@ add edge edge and re-bind. returns: (a b) or nil.
  ;                  (LIM 1000) (CRES (GENSYM COLLECT-RES))
  ;                  (CITR (GENSYM COLLECT-ITR)))
  ;                 &BODY BODY)
- ;   Source file: /data/x/grph/src/qry.lisp
+ ;   Source file: /data/x/grph/src/qry-extra.lisp
 ```
 
 #### GRPH:COMPILE-QUERY
@@ -734,6 +734,33 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
+#### GRPH:NORMALISE-FOLD
+
+```
+:missing:todo:
+
+ ; GRPH:NORMALISE-FOLD
+ ;   [symbol]
+ ; 
+ ; NORMALISE-FOLD names a compiled function:
+ ;   Lambda-list: (G)
+ ;   Derived type: (FUNCTION (GRPH:GRPH) (VALUES GRPH:GRPH &OPTIONAL))
+ ;   Source file: /data/x/grph/src/qry-extra.lisp
+```
+
+#### GRPH:NORMALISE-FOLD!
+
+```
+:missing:todo:
+
+ ; GRPH:NORMALISE-FOLD!
+ ;   [symbol]
+ ; 
+ ; NORMALISE-FOLD! names a macro:
+ ;   Lambda-list: (G)
+ ;   Source file: /data/x/grph/src/qry-extra.lisp
+```
+
 #### GRPH:NUM-EITHER
 
 ```
@@ -880,7 +907,7 @@ see examples for more usage.
  ; 
  ; QRY-COLLECT-WHILE names a macro:
  ;   Lambda-list: (G &REST REST)
- ;   Source file: /data/x/grph/src/qry.lisp
+ ;   Source file: /data/x/grph/src/qry-extra.lisp
 ```
 
 #### GRPH:RQRY
@@ -949,6 +976,19 @@ note the difference between rule types:
  ;   Lambda-list: (INIT)
  ;   Derived type: (FUNCTION (LIST) (VALUES SIMPLE-VECTOR &OPTIONAL))
  ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:USING
+
+```
+:missing:todo:
+
+ ; GRPH:USING
+ ;   [symbol]
+ ; 
+ ; USING names a macro:
+ ;   Lambda-list: ((&REST USING) &BODY BODY)
+ ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
 #### GRPH:VECTOR-FIRST

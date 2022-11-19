@@ -7,26 +7,20 @@
 (defvar *colors* `((:yellow 1.0) (:magenta 1.0)
                    (:cyan 1.0) (,*front* 3.5)))
 
+(let ((*features* `(:veq-reader-macros :grph-parallel ,@*features*)))
+  (ql:quickload :weird)
+  (ql:quickload :grph))
 
-; load grph with serial query reducers:
-(ql:quickload :grph)
-
-; or load grph with parallel reducers:
-; note parallelism does not help much for this ex, the main work happens when the graph is
-; mutating ** which happens in serial either way
-; (let ((*features* (cons :grph-parallel *features*)))
-;   (ql:quickload :grph))
-; (setf lparallel:*kernel* (lparallel:make-kernel 8))
-
-(ql:quickload :weird)
-; (rnd:set-rnd-state 37)
+(setf lparallel:*kernel* (lparallel:make-kernel 2))
 
 
 (veq:fvdef make-svg (&optional (wsvg (wsvg:make*)))
   (wsvg:rect wsvg 502 502 :xy (list 500f0 500f0) :fill *back* :fo 0.96)
   wsvg)
+
 (veq:fvdef* walker ((:va 2 acc))
   (rnd:2walker-acc (veq:f2+ (veq:f2rep 500f0) (rnd:2in-square 400f0)) acc))
+
 (veq:fvdef walker-lerp ((:va 4 wa wb) xe)
   (veq:f2scale (veq:f2lerp (veq:fsel (2 3 6 7) wa wb) xe) 0.9f0))
 
@@ -38,6 +32,7 @@
     (veq:f$fxlspace (145 left right :end t)
       (lambda (i x) (xgrph:2path! g s
                       (veq:f2$line left x right x)
+                      ->
                       (grph:grp *front* :color))))
 
     (loop for (c sw) in *colors*
