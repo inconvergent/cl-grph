@@ -27,7 +27,7 @@
                    (setf l (stable-sort (the list l) #'p))))
   l)
 
-; (declaim (inline uni psrt pkeys split-by-common))
+(declaim (inline uni psrt pkeys split-by-common))
 (defun psrt (l)
   (declare (optimize speed (safety 1)) (list l))
   (sort (copy-list l) #'string< :key #'car))

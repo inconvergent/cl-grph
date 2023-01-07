@@ -49,6 +49,35 @@
     (is (grph:@prop g (list 7 8)) nil)
     (is (grph:@verts g) '(9 8 6 5 4 3 1 0))))
 
+(subtest "modify"
+  (let ((g (mk-grph-main))
+        (edges '((0 1) (1 0) (0 4) (4 0) (6 77) (11 12) (11 12) (8 7))))
+    (grph:modify! (g grp)
+      (is (loop for (a b) in edges collect (grp-> a b '(:x)))
+          '(nil (1 0) (0 4) (4 0) (6 77) (11 12) nil (8 7)))
+      (is (loop for (a b) in edges collect (grph:@mem g a b))
+          '(t nil nil nil nil nil nil nil)))
+    (is (loop for (a b) in edges collect (grph:@mem g a b))
+        '(t t t t t t t t)))
+
+  (let ((g (grph:grph)))
+    (grph:add! g 0 1 '((:a 77)))
+    (grph:add! g 0 2 '((:b 87)))
+    (grph:add! g 2 7 '((:c 96)))
+    (grph:modify! (g grp)
+      (grp-> 0 1 `((:b 3)))
+      (grp-> 3 4 `((:c 4)))
+      (grp-> 9 7 `((:y 77)))
+      (grp-> 9 7 `(:u))
+      (grp-> 3 4)
+      (grp-> 1 0))
+
+    (is (grph:@enum g) 6)
+    (is (grph::props-as-list (grph:@prop g `(0 1))) '((:b 3) (:a 77)))
+    (is (grph::props-as-list (grph:@prop g `(9 7))) '((:y 77) (:u t)))
+    (is (grph::props-as-list (grph:@prop g `(3 4))) '((:c 4)))
+    (is (grph:@mem g 0 2) t)))
+
 (subtest "grph match"
   (let ((g (mk-grph-match)))
 

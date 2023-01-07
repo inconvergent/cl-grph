@@ -33,8 +33,10 @@
 
 ; from on lisp by pg
 (defun symb (&rest args) (values (intern (apply #'mkstr args))))
+
 (defun kv (s) (declare (symbol s)) (intern (string-upcase (symbol-name s)) :keyword))
 (defun last* (l) (declare (list l)) (first (last l)))
+(defun close-path (l) (declare (list l)) (cons (last* l) l))
 
 ;https://gist.github.com/lispm/6ed292af4118077b140df5d1012ca646
 (defun psymb (package &rest args) (values (intern (apply #'mkstr args) package)))

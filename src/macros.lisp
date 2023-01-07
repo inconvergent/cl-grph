@@ -12,17 +12,15 @@
       ,(if prop `(and ,pmap (values (@ ,pmap ,prop)))
                 `(or ,pmap ,default)))))
 
-(defmacro set-multi-rel (props k p &optional (val nil val?)
-                                   &aux (default (if val?  'nilmap 'nilset)))
+(defmacro set-multi-rel (props k p &optional (val nil map?))
+  (declare (symbol k p val))
   (awg (pk props*)
     `(let* ((,props* ,props)
             (,pk (@ ,props* ,k)))
-      (declare (ignorable ,pk))
       (fset:with ,props* ,k ; props is a map
         ; pk is a map if val is provided, otherwise set
-        (fset:with (or ,pk ,default) ,p
-                   ,@(if val? `(,val)))))))
-
+        ,(if map? `(if ,pk (fset:with ,pk ,p ,val) (fset:map (,p ,val)))
+                  `(if ,pk (fset:with ,pk ,p) (fset:set ,p)))))))
 
 (defun -del-multi-prune (props k pk p)
   (let ((new-pk (when pk (fset:less pk p))))
@@ -99,22 +97,96 @@
 
 (defmacro path! (g path &optional (modes '(:open :->)) props)
   (declare (symbol g))
-  (awg (i j path* path** props*)
+  (awg (i j path* props*)
     (let* ((modes (valid-modes :path! modes `(,@*dir-mode* :closed :open)))
            (-> `(add! ,g ,i ,j ,props*))
            (<- `(add! ,g ,j ,i ,props*))
            (closed (eq :closed (select-mode modes '(:open :closed)))))
       `(let* ((,props* ,props)
-              (,path* ,path)
-              ,@(if closed `((,path** (cons (last* ,path*) ,path*)))))
+              (,path* ,(if closed `(close-path ,path) path)))
         (declare (list ,props* ,path*))
         (mapcar (lambda (,i ,j)
                   ,(ecase (select-mode modes *dir-mode*)
                           (:-> ->) (:<- <-) (:<> `(progn ,<- ,->))))
-                ,@(if closed `(,path** (cdr ,path**))
-                             `(,path* (cdr ,path*))))
+                ,path* (cdr ,path*))
         ,path*)))) ; should we return edges instead?
 
+; TODO: del?, path?
+(defmacro modify! ((g* sym &key (out g*)) &body body)
+  (declare (symbol g* out sym))
+  "batch modify g in a transaction. more efficient for loading a large number
+of edges and/or props. faster for larger batches. g will be available
+unchanged inside the context. and the changes are applied at the end. use
+:out to assign the result to a different variable.
+
+ex: (modify! (g mygrp)
+      (loop repeat 10
+            for a = (rnd:rndi n)
+            for b = (rnd:rndi n)
+            do (rnd:either (mygrp-> a b '(:x :c))
+                           (mygrp<> a b '(:y :d)))))"
+  (awg (g ht mget madd sadd merge* do-merge
+        do-> ne hm-adj hm-mid hm-props stop bdy)
+    `(locally (declare (optimize speed (safety 1)))
+     (let ((,g ,g*))
+       (declare (grph ,g))
+       (labels
+       ((,ht (&optional (fx #'eql)) (make-hash-table :test fx))
+        (,mget (hm a b) (@ (gethash a hm (fset:empty-map)) b))
+        (,madd (fx hm a b &optional (v t))
+          (setf (gethash a hm)
+                (fset:with (gethash a hm (or (@ (funcall fx ,g) a)
+                                             (fset:empty-map)))
+                           b v)))
+        (,sadd (fx hm a b)
+          (setf (gethash a hm)
+                (fset:with (gethash a hm (or (@ (funcall fx ,g) a)
+                                             (fset:empty-set)))
+                           b)))
+        (,merge* (adj hm)
+           (loop for a being the hash-keys of hm using (hash-value emap)
+                 do (setf adj (fset:with adj a emap)))
+           adj))
+       (let ((,hm-adj (,ht)) (,hm-mid (,ht #'eq))
+             (,hm-props (,ht #'equal)) (,ne 0))
+         (declare (veq:pn ,ne) (hash-table ,hm-adj ,hm-mid ,hm-props))
+         (labels
+           ((,do-> (a b)
+              (declare (veq:pn a b))
+              (,madd #'grph-adj ,hm-adj a b)
+              (,madd #'grph-adj ,hm-adj b a (or (,mget ,hm-adj b a)
+                                                (@mem ,g b a)))
+              (incf ,ne)
+              (list a b))
+            (,(symb sym :->) (a b &optional props)
+              (declare (veq:pn a b))
+              (when (= a b) (return-from ,(symb sym :->) nil))
+              (loop with edg of-type list = (list a b)
+                    for p* in props
+                    do (etypecase p*
+                         (cons (dsb (p val) p*
+                                 (,madd #'grph-props ,hm-props edg p val)
+                                 (,sadd #'grph-mid ,hm-mid p edg)))
+                         (keyword (,madd #'grph-props ,hm-props edg p*)
+                                  (,sadd #'grph-mid ,hm-mid p* edg))))
+              (unless (or (,mget ,hm-adj a b) (@mem ,g a b))
+                      (,do-> a b)))
+            (,(symb sym :<-) (a b &optional props) (,(symb sym :->) b a props))
+            (,(symb sym :<>) (a b &optional props)
+              (list (,(symb sym :->) a b props) (,(symb sym :<-) a b props)))
+            (,do-merge ()
+              (grph (,merge* (adj ,g) ,hm-adj) (+ ,ne (grph-num-edges ,g))
+                    (,merge* (props ,g) ,hm-props) (,merge* (mid ,g) ,hm-mid))))
+
+           (macrolet ((,(symb sym :-cancel) (&body body)
+                         `(return-from ,',stop (progn ,@body)))
+                      (,(symb sym :-stop) (&body body)
+                         `(return-from ,',stop (let ((,',bdy (progn ,@body)))
+                                                 (setf ,',out (,',do-merge))
+                                                 ,',bdy))))
+             (block ,stop (let ((,bdy (progn ,@body)))
+                            (setf ,out (,do-merge))
+                            ,bdy))))))))))
 
 (defmacro del! (g a b &optional p)
   (declare (symbol g))
@@ -128,6 +200,7 @@
 (defmacro ldel! (g ab &rest rest) `(dsb (a b) ,ab (del! ,g a b ,@rest)))
 
 (defmacro using ((&rest using) &body body)
+  (declare (notinline ^var? no-dupes?))
   (unless (and (every #'^var? using) (no-dupes? using))
           (warn "USING: got bad value for :using ~s. vars need ^ prefix." using))
   (awg (res stop*)

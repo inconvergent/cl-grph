@@ -9,7 +9,7 @@
     #:ext-symbols? #:pn
     #:@edges #:@enum #:@in #:@out #:@either #:@both #:num-either
     #:@verts #:@vnum #:@vmax #:@prop #:@mem #:@inv
-    #:add #:add! #:add*! #:del #:del! #:path! #:del-props
+    #:add #:add! #:add*! #:del #:del! #:path! #:del-props #:modify!
     #:itr-edges #:itr-adj #:itr-verts
     #:grph #:prt
     #:compile-query #:match
@@ -23,7 +23,8 @@
     #:del-simple-filaments
     #:path->edge-set #:edge-set->path
     #:normalise-fold #:normalise-fold!
-    #:using))
+    #:using
+    #:-> #:<- #:<> #:><))
 
 (defpackage #:xgrph
   (:use #:common-lisp)

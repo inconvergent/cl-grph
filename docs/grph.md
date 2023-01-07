@@ -16,6 +16,42 @@ valid spatial modes: (ABS REL)
 valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT)
 ```
 
+#### GRPH:->
+
+```
+:missing:todo:
+
+ ; GRPH:->
+ ;   [symbol]
+```
+
+#### GRPH:<-
+
+```
+:missing:todo:
+
+ ; GRPH:<-
+ ;   [symbol]
+```
+
+#### GRPH:<>
+
+```
+:missing:todo:
+
+ ; GRPH:<>
+ ;   [symbol]
+```
+
+#### GRPH:><
+
+```
+:missing:todo:
+
+ ; GRPH:><
+ ;   [symbol]
+```
+
 #### GRPH:@BOTH
 
 ```
@@ -697,6 +733,41 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
  ;     execute body with alist f as every bindable var for every fact in the graph
  ;     that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
  ;   Source file: /data/x/grph/src/qry-match.lisp
+```
+
+#### GRPH:MODIFY!
+
+```
+batch modify g in a transaction. more efficient for loading a large number
+of edges and/or props. faster for larger batches. g will be available
+unchanged inside the context. and the changes are applied at the end. use
+:out to assign the result to a different variable.
+
+ex: (modify! (g mygrp)
+      (loop repeat 10
+            for a = (rnd:rndi n)
+            for b = (rnd:rndi n)
+            do (rnd:either (mygrp-> a b '(:x :c))
+                           (mygrp<> a b '(:y :d)))))
+
+ ; GRPH:MODIFY!
+ ;   [symbol]
+ ; 
+ ; MODIFY! names a macro:
+ ;   Lambda-list: ((G SYM &KEY (OUT G)) &BODY BODY)
+ ;   Documentation:
+ ;     batch modify g in a transaction. more efficient for loading a large number
+ ;     of edges and/or props. faster for larger batches. g will be available
+ ;     unchanged inside the context. and the changes are applied at the end. use
+ ;     :out to assign the result to a different variable.
+ ;     
+ ;     ex: (modify! (g mygrp)
+ ;           (loop repeat 10
+ ;                 for a = (rnd:rndi n)
+ ;                 for b = (rnd:rndi n)
+ ;                 do (rnd:either (mygrp-> a b '(:x :c))
+ ;                                (mygrp<> a b '(:y :d)))))
+ ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
 #### GRPH:MULTI-ISECTS

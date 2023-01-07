@@ -131,23 +131,21 @@ this terminology is used :
 
 (defun -add (g a b)
   (declare #.*opt* (grph g) (pn a b))
-  (let ((adj (if (@mem g b a) (adj g)
-               ; TODO: check if it is already nil?
-               (set-multi-rel (adj g) b a nil))))
-    (grph (set-multi-rel adj a b t)
-          (1+ (grph-num-edges g))
-          (props g) (mid g))))
+  (grph (set-multi-rel (if (@mem g b a) (adj g)
+                           (set-multi-rel (adj g) b a nil))
+                       a b t)
+        (1+ (grph-num-edges g))
+        (props g) (mid g)))
 
 ; alter all refs to add
 (defun add (g a b &optional props) ; option to force set prop?
   (declare #.*opt* (grph g) (pn a b) (list props))
   "new edge (a b). optionally set prop, p, (with val).
 returns: (values g created?)"
-  (when (= a b) (warn "ADD: ignoring incorrect edge: (~a ~a)." a b)
+  (when (= a b) ;(warn "ADD: ignoring incorrect edge: (~a ~a)." a b)
                 (return-from add (values g nil)))
   (if (@mem g a b) (values (prop g (list a b) props) nil)
-                   (progn (setf g (-add g a b))
-                          (values (prop g (list a b) props) t))))
+                   (values (prop (-add g a b) (list a b) props) t)))
 
 (defun -del (g a b)
   (declare #.*opt* (grph g) (pn a b))
