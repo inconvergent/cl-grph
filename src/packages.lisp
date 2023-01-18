@@ -47,6 +47,7 @@
     #:append! #:2append! #:3append!
     #:append-inv! #:2append-inv! #:3append-inv!
     #:2intersect-all #:2intersect-all!
+    #:3cut-all #:3cut-all!
     #:2cut-to-area #:2cut-to-area!
     #:triangulate-edge-set))
 

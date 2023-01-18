@@ -75,10 +75,12 @@
 #### XGRPH:2CUT-TO-AREA
 
 ```
-DOCSTRING for %2CUT-TO-AREA;
-removes all edges outside envelope.
+WRAPS: %2CUT-TO-AREA
+ARGS: (G POS &OPTIONAL (TOP 0.0) (LFT 0.0) (RHT 1000.0) (BOT 1000.0))
+DOCSTRING: removes all edges outside envelope.
 all edges intersecting the envelope will be deleted, a new vert will be
 inserted on the intersection; connected to the inside vert.
+defined via veq:FVDEF*
 
  ; XGRPH:2CUT-TO-AREA
  ;   [symbol]
@@ -86,10 +88,12 @@ inserted on the intersection; connected to the inside vert.
  ; 2CUT-TO-AREA names a macro:
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
- ;     DOCSTRING for %2CUT-TO-AREA;
- ;     removes all edges outside envelope.
+ ;     WRAPS: %2CUT-TO-AREA
+ ;     ARGS: (G POS &OPTIONAL (TOP 0.0) (LFT 0.0) (RHT 1000.0) (BOT 1000.0))
+ ;     DOCSTRING: removes all edges outside envelope.
  ;     all edges intersecting the envelope will be deleted, a new vert will be
  ;     inserted on the intersection; connected to the inside vert.
+ ;     defined via veq:FVDEF*
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
@@ -285,6 +289,36 @@ creates intersections for all edges in g such that it becomes a planar graph.
 
  ; XGRPH:3APPEND-INV!
  ;   [symbol]
+```
+
+#### XGRPH:3CUT-ALL
+
+```
+cut every edge where they intersect in 2d according to projection fx.
+
+ ; XGRPH:3CUT-ALL
+ ;   [symbol]
+ ; 
+ ; 3CUT-ALL names a compiled function:
+ ;   Lambda-list: (G POS FX)
+ ;   Derived type: (FUNCTION (GRPH:GRPH T T)
+ ;                  (VALUES GRPH:GRPH T &OPTIONAL))
+ ;   Documentation:
+ ;     cut every edge where they intersect in 2d according to projection fx.
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
+```
+
+#### XGRPH:3CUT-ALL!
+
+```
+:missing:todo:
+
+ ; XGRPH:3CUT-ALL!
+ ;   [symbol]
+ ; 
+ ; 3CUT-ALL! names a macro:
+ ;   Lambda-list: (G POS FX)
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
 #### XGRPH:3MOVE!

@@ -754,7 +754,7 @@ ex: (modify! (g mygrp)
  ;   [symbol]
  ; 
  ; MODIFY! names a macro:
- ;   Lambda-list: ((G SYM &KEY (OUT G)) &BODY BODY)
+ ;   Lambda-list: ((G* SYM &KEY (OUT G*)) &BODY BODY)
  ;   Documentation:
  ;     batch modify g in a transaction. more efficient for loading a large number
  ;     of edges and/or props. faster for larger batches. g will be available

@@ -75,7 +75,67 @@
         (del-hit-edges edges isects)
         (values g pos)))))
 (defmacro 2intersect-all! (g pos &rest rest)
- `(grph:mvb (g* pos*) (xgrph::2intersect-all ,g ,pos ,@rest)
+ `(grph:mvb (g* pos*) (2intersect-all ,g ,pos ,@rest)
+    (setf ,g g* ,pos pos*)))
+
+; TODO: propagate props
+; TODO: use modify! macro
+(veq:fvdef 3cut-all (g pos fx)
+  (declare (grph:grph g))
+  "cut every edge where they intersect in 2d according to projection fx."
+  (labels
+    ((edges-as-lines (edges)
+       (declare (simple-list edges))
+       (loop for (a b) across edges
+             collect (veq:f2$line (veq:mvc fx (3@ pos a))
+                                  (veq:mvc fx (3@ pos b)))))
+     (sort-hits (isects)
+       (declare (simple-list isects))
+       (loop for i of-type fixnum from 0 below (length isects)
+             if (aref isects i)
+             do (setf (aref isects i)
+                      (sort (aref isects i) #'< :key #'cdr)))
+       isects)
+     (add-path-verts (old-edge line hits)
+       (declare (list old-edge hits))
+       "add verts along edge for each intersect"
+       (loop for (c . p) in hits
+             collect (3vert! pos (veq:f3lerp (veq:f3$ line 0 1) p))))
+
+     (add-new-paths (edges isects)
+       (declare (simple-list edges isects))
+       "add new edge along old edge with new verts for each intersect"
+       (loop for hits across isects
+             for i of-type fixnum from 0
+             if hits
+             do (let* ((old-edge (aref edges i))
+                       (path-ind (add-path-verts old-edge
+                                    (3@verts pos old-edge) hits)))
+                  (declare (list old-edge path-ind))
+                  (when path-ind
+                    (grph:path! g
+                      (cons (first old-edge)
+                            (concatenate 'list path-ind (last old-edge))))))))
+     (del-hit-edges (edges isects)
+       (declare (simple-list edges isects))
+       (loop for hits of-type list across isects
+             for i of-type fixnum from 0
+             if hits do (grph::ldel! g (aref edges i))
+                        (loop for (c . p) in hits
+                              do (grph::ldel! g (aref edges c))))))
+             ; edges ((v1 v2) (v8 v1) ...)
+    (let* ((edges (grph:to-vector (grph:@edges g)))
+           ; lines: (#(ax ay bx by) #(cx cy dx dy) ...)
+           (lines (grph:to-vector (edges-as-lines edges)))
+           (veq::*eps* 0.00001)
+           ; isects: #(((16 . 0.18584675) (5 . 0.35215548)) NIL NIL ...)
+           (isects (sort-hits (veq:f2lsegx lines)))) ;  p/q is the lerp
+      ; (declare (grph::simple-list isects edges) (grph::simple-array lines))
+      (del-hit-edges edges isects)
+      (add-new-paths edges isects)
+      (values g pos))))
+(defmacro 3cut-all! (g pos fx)
+ `(grph:mvb (g* pos*) (3cut-all ,g ,pos ,fx)
     (setf ,g g* ,pos pos*)))
 
 
