@@ -147,24 +147,40 @@ returns: (values g created?)"
   (if (@mem g a b) (values (prop g (list a b) props) nil)
                    (values (prop (-add g a b) (list a b) props) t)))
 
+(defun -del-adj-both (adj ea eb a b)
+  (declare #.*opt* (fset:map ea eb) (veq:pn a b))
+  (let* ((ea (fset:less ea b))
+         (eb (fset:less eb a))
+         (nila (fset:empty? ea))
+         (nilb (fset:empty? eb)))
+    (declare (fset:map ea eb) (boolean nila nilb))
+    (cond ((and nila nilb) (fset:less (fset:less adj b) a))
+          (nilb (fset:with (fset:less adj b) a ea))
+          (nila (fset:with (fset:less adj a) b eb))
+          (t (fset:map (fset:$ adj) (a ea) (b eb))))))
+
+; this EXPECTS a->b to exits. but handles the possibility that b<-a exists too
+(defun -del-adj (adj a b)
+  (declare #.*opt* (fset:map adj) (veq:pn a b))
+  (let ((ea (@ adj a)) (eb (@ adj b)))
+    (declare (fset:map ea eb))
+    (if (@ eb a) (fset:with adj a (fset:with ea b nil)) ; a <> b. now set a->b to nil, keep ba
+                 (-del-adj-both adj ea eb a b))))
+
 (defun -del (g a b)
   (declare #.*opt* (grph g) (pn a b))
-  (labels
-    ((prune-props (&aux (mid (mid g)) (ab `(,a ,b)))
-       (do-map (p _ (or (@prop g ab) nilmap)) ; ignore _=v
-         (declare (ignorable _))
-         (setf mid (del-multi-rel mid p ab)))
-       (let ((adj (if (@mem g b a) (adj g)
-                    (del-multi-rel (adj g) b a))))
-        (grph (del-multi-rel adj a b)
-              (1- (grph-num-edges g))
-              (del-multi-rel (props g) ab)
-              mid))))
-    (if (@mem g a b) (values (prune-props) t)
-                     (values g nil))))
+  (labels ((prune-props (&aux (mid (mid g)) (ab `(,a ,b)))
+             (do-map (p _ (or (@prop g ab) nilmap)) ; ignore _=v
+               (declare (ignorable _))
+               (setf mid (del-multi-rel mid p ab)))
+             (grph (-del-adj (adj g) a b)
+               (1- (grph-num-edges g))
+               (del-multi-rel (props g) ab)
+               mid)))
+     (if (@mem g a b) (values (prune-props) t) (values g nil))))
 
 (defun del (g a b) ; option to dont delete props?, option to force del prop?
-  (declare (grph g) (pn a b))
+  (declare #.*opt* (grph g) (pn a b))
   "delete edge (a b). deletes associated props.
 returns: (values g deleted?)"
   (when (= a b) (warn "DEL: incorrect edge: (~a ~a)." a b))
@@ -172,7 +188,7 @@ returns: (values g deleted?)"
 
 ; TODO: what happens with dangling mid/props values?
 (defun -del-prop (g ab prop)
-  (declare (grph g) (list ab) (symbol prop))
+  (declare #.*opt* (grph g) (list ab) (symbol prop))
   (if (@prop g ab prop)
       (values (grph (adj g)
                     (grph-num-edges g)
@@ -182,7 +198,7 @@ returns: (values g deleted?)"
       (values g nil)))
 
 (defun del-props (g ab props)
-  (declare (grph g) (list ab props))
+  (declare #.*opt* (grph g) (list ab props))
   (loop with deleted? = nil
         for p in props
         do (mvb (g* del?) (-del-prop g ab p)

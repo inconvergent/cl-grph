@@ -297,15 +297,6 @@ add edge edge and re-bind. returns: (a b) or nil.
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:ANY-EDGE
-
-```
-:missing:todo:
-
- ; GRPH:ANY-EDGE
- ;   [symbol]
-```
-
 #### GRPH:CANCEL
 
 ```
@@ -343,10 +334,16 @@ add edge edge and re-bind. returns: (a b) or nil.
 #### GRPH:DEAD-ENDS
 
 ```
-:missing:todo:
+vertices that have exactly one adjacent vertices. ignores edge dir.
 
  ; GRPH:DEAD-ENDS
  ;   [symbol]
+ ; 
+ ; DEAD-ENDS names a macro:
+ ;   Lambda-list: (G &OPTIONAL (P _) Y)
+ ;   Documentation:
+ ;     vertices that have exactly one adjacent vertices. ignores edge dir.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:DEL
@@ -401,14 +398,16 @@ del edge and re-bind. returns: deleted?
 #### GRPH:DEL-SIMPLE-FILAMENTS
 
 ```
-:missing:todo:
+delete dead-ends until there are no more dead ends left. ignores edge dir.
 
  ; GRPH:DEL-SIMPLE-FILAMENTS
  ;   [symbol]
  ; 
  ; DEL-SIMPLE-FILAMENTS names a compiled function:
- ;   Lambda-list: (G &OPTIONAL (?P _))
+ ;   Lambda-list: (G &OPTIONAL (P _))
  ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     delete dead-ends until there are no more dead ends left. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -439,6 +438,21 @@ t if values in rest are distinct.
  ; DSB names a macro:
  ;   Lambda-list: (&REST ARGS)
  ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:EDGE-SET
+
+```
+get edge set. ignores edge dir.
+
+ ; GRPH:EDGE-SET
+ ;   [symbol]
+ ; 
+ ; EDGE-SET names a macro:
+ ;   Lambda-list: (G &OPTIONAL (P _))
+ ;   Documentation:
+ ;     get edge set. ignores edge dir.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:EDGE-SET->PATH
@@ -492,13 +506,19 @@ use :pretty to print verbose output to stdout in a readable form.
  ;   Source file: /data/x/grph/src/docs.lisp
 ```
 
-#### GRPH:FILAMENT-ENDS
+#### GRPH:FILAMENT-ISECTS
 
 ```
-:missing:todo:
+vertices that do not have exactly 2 adjacent vertices. ignores edge dir.
 
- ; GRPH:FILAMENT-ENDS
+ ; GRPH:FILAMENT-ISECTS
  ;   [symbol]
+ ; 
+ ; FILAMENT-ISECTS names a macro:
+ ;   Lambda-list: (G &OPTIONAL (P _) Y)
+ ;   Documentation:
+ ;     vertices that do not have exactly 2 adjacent vertices. ignores edge dir.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:FIRST<
@@ -773,10 +793,16 @@ ex: (modify! (g mygrp)
 #### GRPH:MULTI-ISECTS
 
 ```
-:missing:todo:
+vertices that have 2 or more adjacent vertices. ignores edge dir.
 
  ; GRPH:MULTI-ISECTS
  ;   [symbol]
+ ; 
+ ; MULTI-ISECTS names a macro:
+ ;   Lambda-list: (G &OPTIONAL (P _) Y)
+ ;   Documentation:
+ ;     vertices that have 2 or more adjacent vertices. ignores edge dir.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:MVB
@@ -835,17 +861,18 @@ ex: (modify! (g mygrp)
 #### GRPH:NUM-EITHER
 
 ```
-number of edges to or from ?x (with propery ?p).
+number of adjacent vertices to ?x. ignores edge dir.
 
  ; GRPH:NUM-EITHER
  ;   [symbol]
  ; 
  ; NUM-EITHER names a compiled function:
  ;   Lambda-list: (G ?X &OPTIONAL (?P _))
- ;   Derived type: (FUNCTION (GRPH:GRPH T &OPTIONAL SYMBOL)
+ ;   Derived type: (FUNCTION
+ ;                  (GRPH:GRPH (UNSIGNED-BYTE 31) &OPTIONAL SYMBOL)
  ;                  (VALUES (MOD 4611686018427387901) &OPTIONAL))
  ;   Documentation:
- ;     number of edges to or from ?x (with propery ?p).
+ ;     number of adjacent vertices to ?x. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -1093,29 +1120,32 @@ note the difference between rule types:
 #### GRPH:WALK-EDGE-SET
 
 ```
-greedily walks the graph so that every edge is returned exactly once.
+greedily walk the graph and return every edge exactly once. ignores edge dir.
 
  ; GRPH:WALK-EDGE-SET
  ;   [symbol]
  ; 
  ; WALK-EDGE-SET names a compiled function:
- ;   Lambda-list: (G EDGE-SET &AUX (ALL-EDGES (EDGES-HT EDGE-SET)))
+ ;   Lambda-list: (G ES &AUX (EDGES (EDGES-HT ES)))
  ;   Derived type: (FUNCTION (GRPH:GRPH LIST) (VALUES LIST &OPTIONAL))
  ;   Documentation:
- ;     greedily walks the graph so that every edge is returned exactly once.
+ ;     greedily walk the graph and return every edge exactly once. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:WALK-GRPH
 
 ```
-:missing:todo:
+walk graph via walk-edge-set.
 
  ; GRPH:WALK-GRPH
  ;   [symbol]
  ; 
- ; WALK-GRPH names a macro:
+ ; WALK-GRPH names a compiled function:
  ;   Lambda-list: (G &OPTIONAL (P _))
+ ;   Derived type: (FUNCTION (GRPH:GRPH &OPTIONAL SYMBOL) *)
+ ;   Documentation:
+ ;     walk graph via walk-edge-set.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 

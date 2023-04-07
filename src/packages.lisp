@@ -19,7 +19,8 @@
     #:gather-match #:ingest-edges
     #:grp #:distinct #:first< #:first> #:lsort
     #:walk-grph #:walk-edge-set
-    #:any-edge #:dead-ends #:multi-isects #:filament-ends
+    #:dead-ends #:edge-set
+    #:filament-isects #:multi-isects
     #:del-simple-filaments
     #:path->edge-set #:edge-set->path
     #:normalise-fold #:normalise-fold!

@@ -152,6 +152,7 @@ dir-modes: (-> <- <>)."
 (defmacro 2@ (&rest rest) `(@ 2 ,@rest))
 (defmacro 3@ (&rest rest) `(@ 3 ,@rest))
 
+; TODO: ndim
 (defmacro fxpos! ((g pos i) &body body)
   (declare (symbol g pos i))
   `(loop for ,i in (grph:@verts ,g)

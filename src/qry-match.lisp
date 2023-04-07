@@ -19,27 +19,26 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
   (awg (l p r eset has s)
     (labels
       ((hit (pat &rest rest) (equal pat rest))
+       (mem (l r body) `(when (@mem ,g ,l ,r) ,body)) ; non-free lft/rht (edge)
+       (prop (l p r body) `(when (@prop ,g (list ,l ,r) ,p) ,body)) ; non-free mid
        (fact (l p r)
          `(let ((,f (list ,@(when (bindable? lft) `((cons ',lft ,l)))
                           ,@(when (bindable? mid) `((cons ',mid ,p)))
                           ,@(when (bindable? rht) `((cons ',rht ,r))))))
             (declare (list ,f))
             ,@body))
-
-       (mem (l r body) `(when (@mem ,g ,l ,r) ,body))
-       (prop (l p r body) `(when (@prop ,g (list ,l ,r) ,p) ,body))
-       (itr-rht (r body)
+       (itr-rht (r body) ; rht is free
          `(let ((,eset (@ (adj ,g) ,lft)))
             (when ,eset (do-map (,r ,has ,eset)
                           (declare (ignorable ,r ,has))
                           ,(mem lft r body)))))
-       (itr-lft (l body)
+       (itr-lft (l body) ; lft is free
          `(let ((,eset (@ (adj ,g) ,rht)))
             (when ,eset (do-map (,l ,has ,eset)
                           (declare (ignorable ,l ,has))
                           ,(mem l rht body)))))
 
-       (itr-props (l p r body)
+       (itr-props (l p r body) ; mid is free
          ; if mid is :_ we don't need to iterate all props
          (if (not (bindable? mid)) body
              `(do-map (,p ,has (or (@ (props ,g) (list ,l ,r))

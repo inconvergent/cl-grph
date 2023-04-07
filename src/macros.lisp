@@ -48,16 +48,16 @@
   "iterate all adjacent verts, b, of a. use modes (-> <- >< <>)."
   (awg (b* eset has)
     (let ((modes (valid-modes :itr-adj modes `(,@*dir-mode* :><)))
-          (bind-let `(let ((,b ,b*)) (declare (pn ,b*)) ,@body)))
+          (let-b `(let ((,b ,b*)) (declare (pn ,b*)) ,@body)))
       `(let* ((,eset (@ (adj ,g) (the pn ,a))))
          (when ,eset (do-map (,b* ,has ,eset)
                        (declare (pn ,b*) (ignorable ,has))
                        ,(ecase (select-mode modes `(,@*dir-mode* :><))
-                         (:-> `(when (@mem ,g ,a ,b*) ,bind-let)) ; a -> b
-                         (:<- `(when (@mem ,g ,b* ,a) ,bind-let)) ; a <- b
-                         (:>< bind-let) ; either
+                         (:-> `(when (@mem ,g ,a ,b*) ,let-b)) ; a -> b
+                         (:<- `(when (@mem ,g ,b* ,a) ,let-b)) ; a <- b
+                         (:>< let-b) ; either
                          (:<> `(when (and (@mem ,g ,b* ,a) (@mem ,g ,a ,b*)) ; both
-                                       ,bind-let)))))))))
+                                       ,let-b)))))))))
 
 (defmacro itr-verts ((g a) &body body)
   (declare (symbol g a))

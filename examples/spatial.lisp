@@ -40,8 +40,8 @@
           for b = (walker (rnd:2in-circ 1.5f0))
           do (loop repeat (rnd:rndrngi 10 40)
           for itt from 0
-          do (veq:fvlet ((wa 4 (funcall a stp))
-                         (wb 4 (funcall b stp)))
+          do (veq:xlet ((f4!wa (funcall a stp))
+                        (f4!wb (funcall b stp)))
                ; ** mutating the graph, g, and the spatial data, s with the
                ; :using keyword
                (grph:qry g

@@ -1,6 +1,6 @@
 (in-package #:grph-tests)
 
-(plan 3)
+(plan 5)
 
 
 (subtest "grph add"
@@ -28,6 +28,50 @@
     (is (grph:@mem g 35 37) t)
     (is (grph:@mem g 37 35) nil)))
 
+(subtest "grph add/del adj"
+  (let ((g (grph:grph)))
+    (is (grph:add! g 0 1) '(0 1))
+    (is (grph:add! g 0 1) nil)
+    (is (grph:@either g 0) '(1))
+    (is (grph:@either g 1) '(0))
+    (is (grph:add! g 1 0) '(1 0))
+    (is (grph:del! g 1 0) t)
+    (is (grph:del! g 1 0) nil)
+    (is (grph:@either g 0) '(1))
+    (is (grph:@either g 1) '(0))
+    (is (grph:del! g 0 1) t)
+    (is (grph:@either g 0) nil)
+    (is (grph:@either g 1) nil)
+    (is (grph:del! g 0 1) nil))
+
+  (let ((g (grph:grph)))
+    (is (grph:add! g 0 1) '(0 1))
+    (is (grph:add! g 1 0) '(1 0))
+    (is (grph:add! g 1 2) '(1 2))
+    (is (grph:@either g 1) '(2 0))
+    (is (grph:@either g 0) '(1))
+    (is (grph:@either g 2) '(1))
+    (is (grph:del! g 1 0) t)
+    (is (grph:@either g 1) '(2 0))
+    (is (grph:del! g 2 1) nil)
+    (is (grph:del! g 1 2) t)
+    (is (grph:@either g 1) '(0)))
+
+  (let ((g (make-edge-set)))
+    (is (loop for (a b) in '( (7 3) (5 4) (5 3) (4 3) (3 1) (2 1) (1 0))
+              collect (grph:del! g a b))
+        '(t t t t t t t))
+    (is (ls (grph:@edges g)) '((0 1) (1 2) (1 3) (3 4) (3 5) (3 7) (4 5) (99 77)))
+    (is (grph:@mem g 3 5) t)
+    (is (grph:@mem g 3 7) t)
+    (is (grph:del! g 3 5) t)
+    (is (grph:@mem g 3 5) nil)
+    (is (grph:@mem g 3 7) t)
+    (is (grph:@mem g 3 1) nil)
+    (is (grph:@mem g 3 4) t)
+    (is (grph:del! g 3 4) t)
+    (is (grph:@mem g 3 4) nil)
+    (is (grph:@mem g 3 7) t)))
 
 (subtest "grph"
   (let ((g (mk-grph-main)))
@@ -47,7 +91,9 @@
     (is (grph:@prop g (list 4 3)) (fset:map (:a "43")) :test #'equalp)
     (is (grph:@prop g (list 4 3) :a) "43")
     (is (grph:@prop g (list 7 8)) nil)
-    (is (grph:@verts g) '(9 8 6 5 4 3 1 0))))
+    (is (grph:@verts g) '(9 8 6 5 4 3 1 0)))
+
+  )
 
 (subtest "modify"
   (let ((g (mk-grph-main))

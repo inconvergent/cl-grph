@@ -165,6 +165,8 @@ because gensyms have no symbol-package. as a result :in vals are not free."
         (when db (format t s where in res))
         `(let (,@in) ,res)))))
 
+(defun remove-nil (l) (remove-if-not #'identity (ensure-list l)))
+
 ; TODO: with modifier
 ; TODO: how to do proc?
 ; MAYBE rename :first? make :fx alternative?
@@ -172,9 +174,9 @@ because gensyms have no symbol-package. as a result :in vals are not free."
                       then collect first pairs
                       (itr (gensym "QRY-ITR")) (proc 'identity)
                       (res (gensym "QRY-RES"))
-                 &aux (select (ensure-list select))
-                      (in (ensure-list in))
-                      (using (ensure-list using)))
+                 &aux (select (remove-nil select))
+                      (in (remove-nil in))
+                      (using (remove-nil using)))
   (declare (symbol g) (list select where using in)
            (symbol itr res) (boolean pairs))
   "evaluate a trivial datalog query against g.
