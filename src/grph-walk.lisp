@@ -9,20 +9,16 @@
   "number of adjacent vertices to ?x. ignores edge dir."
   (declare (grph g) (pn ?x) (symbol ?p))
   (length (undup (if (any? ?p)
-                     (qry g :in ?x :select ?y :where (or (?x _ ?y) (?y _ ?x))
-                            :collect ?y)
-                     (qry g :in (?x ?p) :select ?y :where (or (?x ?p ?y) (?y ?p ?x))
-                            :collect ?y)))))
+                     (qry g :in ?x :select ?y :where (or (?x _ ?y) (?y _ ?x)))
+                     (qry g :in (?x ?p) :select ?y :where (or (?x ?p ?y) (?y ?p ?x)))))))
 
 (defmacro edge-set (g &optional (p :_))
   (declare (symbol g p))
   "get edge set. ignores edge dir."
   (if (any? p)
-   `(qry ,g :select (?x ?y) :where (and (% (< ?x ?y)) (or (?x _ ?y) (?y _ ?x)))
-            :collect (list ?x ?y))
+   `(qry ,g :select (?x ?y) :where (and (% (< ?x ?y)) (or (?x _ ?y) (?y _ ?x))))
    `(let ((?p ,p))
-      (qry ,g :select (?x ?y) :in ?p :where (and (% (< ?x ?y)) (or (?x ?p ?y) (?y ?p ?x)))
-              :collect (list ?x ?y)))))
+      (qry ,g :select (?x ?y) :in ?p :where (and (% (< ?x ?y)) (or (?x ?p ?y) (?y ?p ?x)))))))
 
 (defmacro dead-ends (g &optional (p :_) y)
   (declare (symbol g p) (boolean y))

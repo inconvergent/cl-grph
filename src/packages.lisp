@@ -6,22 +6,24 @@
   (:export
     #:*dir-mode* #:*pos-mode* #:*valid-clauses*
     #:mvb #:dsb #:mvc
+    #:to-vector #:ensure-list #:last* #:vector-last #:vector-first
     #:ext-symbols? #:pn
     #:@edges #:@enum #:@in #:@out #:@either #:@both #:num-either
-    #:@verts #:@vnum #:@vmax #:@prop #:@mem #:@inv
-    #:add #:add! #:add*! #:del #:del! #:path! #:del-props #:modify!
+    #:@verts #:@vcnt #:@vmax #:@prop #:@mem #:@inv
+    #:add #:add! #:add*! #:del #:del! #:ldel! #:path! #:del-props #:modify!
     #:itr-edges #:itr-adj #:itr-verts
     #:grph #:prt
     #:compile-query #:match
-    #:qry #:qry-collect-while #:stop #:cancel #:collect-while
-    #:rqry
-    #:to-vector #:ensure-list #:last* #:vector-last #:vector-first
+    #:qry #:lqry #:rqry
+    #:stop #:cancel
+    #:collect-while
+    #:qry-collect-while
     #:gather-match #:ingest-edges
     #:grp #:distinct #:first< #:first> #:lsort
     #:walk-grph #:walk-edge-set
     #:dead-ends #:edge-set
     #:filament-isects #:multi-isects
-    #:del-simple-filaments
+    #:del-simple-filaments #:del-simple-filaments!
     #:path->edge-set #:edge-set->path
     #:normalise-fold #:normalise-fold!
     #:using

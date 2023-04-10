@@ -170,21 +170,20 @@ because gensyms have no symbol-package. as a result :in vals are not free."
 ; TODO: with modifier
 ; TODO: how to do proc?
 ; MAYBE rename :first? make :fx alternative?
-(defmacro qry (g &key db in using select when where
-                      then collect first pairs
-                      (itr (gensym "QRY-ITR")) (proc 'identity)
+(defmacro qry (g &key db in using select where collect
+                      then first pairs (proc 'identity)
+                      (itr (gensym "QRY-ITR"))
                       (res (gensym "QRY-RES"))
-                 &aux (select (remove-nil select))
+                 &aux (select* (remove-nil select))
                       (in (remove-nil in))
                       (using (remove-nil using)))
-  (declare (symbol g) (list select where using in)
-           (symbol itr res) (boolean pairs))
-  "evaluate a trivial datalog query against g.
-
+  (declare (symbol g itr res) (boolean pairs) (list select* where using in))
+  "evaluate a trivial (datalog-like) query against g.
 :ex
   (qry g :select (?x ?y)
-         :where (and (?x :c ?y) (not (or (?x :a 1)
-                                         (?x :a 3)))))
+         :where (and (?x :c ?y)
+                     (not (or (?x :a 1)
+                              (?x :a 3)))))
 will return tuples (?x ?y) matching the query.
 other alternatives are (selected vars are available when using these keywords):
  - :pairs T; same as the default, but return the full result pairs
@@ -201,44 +200,45 @@ other modifiers:
 
 see examples for more usage."
 
-  (when (not (and select where)) (return-from qry nil))
+  (when (not (and select* where)) (return-from qry nil))
   (when (and pairs using)
         (error "QRY: :pairs can not be combined with :using."))
-  (unless (and (every #'var? select) (no-dupes? select))
-          (error "QRY: got bad value for :select ~s." select))
-  (unless (not (intersection select in))
-          (error "QRY: :select ~s and :in ~s can not overlap." select in))
+  (unless (and (every #'var? select*) (no-dupes? select*))
+          (error "QRY: got bad value for :select ~s." select*))
+  (unless (not (intersection select* in))
+          (error "QRY: :select ~s and :in ~s can not overlap." select* in))
   (unless (at-most 1 pairs then collect first)
           (error "QRY: use either :pairs :then, :first, :collect; or neither."))
   (unless (and (every #'^var? using) (no-dupes? using))
           (error "QRY: got bad value for :using ~s. vars need ^ prefix." using))
-  (unless (subsetp select (get-all-vars where))
+  (unless (subsetp select* (get-all-vars where))
           (warn "QRY: unexpected var in :select ~s,~%for :where ~s."
-                select where))
+                select* where))
 
   (awg (q hit stop* qry-final-res lp)
     (labels
       ((select-with ()
-         (loop with selres = (list) for s in select
+         (loop with selres = (list) for s in select*
                do (setf selres `(,@selres for ,s = (get-var ',s ,hit)))
                finally (return selres)))
        (re-intern (g) (intern (subseq (mkstr g) 1) (symbol-package g)))
+       (sym-or-list (s) (typecase s (cons `(list ,@s)) (atom s)))
        (bind-partial () (loop for g in using collect `(,g ,(re-intern g))))
-       (select-pairs () `(list ,@(mapcar (lambda (s) `(cons ',s ,s)) select)))
+       (select-pairs () `(list ,@(mapcar (lambda (s) `(cons ',s ,s)) select*)))
        (re-bind-result ()
          `(setf ,@(awf (loop for g in using collect `(,(re-intern g) ,g)))))
        (do/collect (c)
          `(loop for ,hit of-type list in ,res and ,itr of-type pn from 0
-                ,@(select-with) ,@(when when `(if ,when)) ,@c))
+                ,@(select-with) ,@c))
        (itr-body ()
          (cond (first `(loop named ,lp with ,itr of-type pn = 0
                              for ,hit of-type list in ,res
-                             ,@(select-with) ,@(when when `(if ,when))
+                             ,@(select-with)
                              do (return-from ,lp ,first)))
                (then (do/collect `(do ,then)))
-               (collect (do/collect `(collect ,collect)))
                (pairs (do/collect `(collect ,(select-pairs))) )
-               (t (do/collect `(collect (list ,@select)))))))
+               (collect (do/collect `(collect ,collect)))
+               (t (do/collect `(collect ,(sym-or-list select)))))))
       `(macrolet
          ; cancel and ignore all results
         ((cancel (&body body) `(return-from ,',stop* (progn ,@body)))
@@ -253,10 +253,22 @@ see examples for more usage."
         ; NOTE: is it possible to move select vars into qry-compile-where?
         (let ((,qry-final-res nil)
               (,res (,proc (select-vars (qry/compile-where ,where ,in :db ,db)
-                                        ',select)))
+                                        ',select*)))
                ,@(bind-partial))
           (block ,stop* (setf ,qry-final-res ,(itr-body))
                         ,(re-bind-result)
                         ,qry-final-res))))))
 
+(defun lqry (g &key db using select where then collect)
+  (declare (grph g) (boolean db))
+  "compile and evaluate queries at runtime.
+ex:
+  (let ((g (grph))
+        (q '(or (?x ?p ?y) (?y ?p ?x))))
+    (add! g 1 2)
+    (print (lqry g :select '(?x ?p ?y) :where q)))"
+  (awg (g*) (eval `(let ((,g* ,g))
+                     (declare (grph ,g*))
+                     (grph:qry ,g* :db ,db :select ,select :where ,where
+                                   :then ,then :collect ,collect)))))
 

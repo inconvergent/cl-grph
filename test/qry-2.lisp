@@ -1,6 +1,6 @@
 (in-package #:grph-tests)
 
-(plan 4)
+(plan 3)
 
 (subtest  "qry nested"
   (let ((g (make-edge-set)))
@@ -10,21 +10,21 @@
                                        :where (?a :a _)))))
       (ls '((0) (1) (2) (3))))
 
-    (is (ls (grph:qry g :select ?b
+    (is (rs (grph:qry g :select ?b
                         :where (and (or (?b _ _) (_ _ ?b))
                                     (not-join ?b
                                       (q :select (?a ?b ?c)
-                                         :where (and (?a _ ?b) (?b _ ?c))
-                                         :when (/= ?a ?b ?c))))))
-        (ls '((0) (2) (7) (77) (99))))))
+                                         :where (and (?a _ ?b) (?b _ ?c)
+                                                     (% (/= ?a ?b ?c))))))))
+        (rs '(0 2 7 77 99)))))
 
 (subtest "qry using"
   (let ((g (make-edge-set)))
 
     (is (grph:qry g :using ^g
                     :select (?a ?b)
-                    :when (grph:first> ?a ?b)
-                    :where (and (?a _ ?b) (?b _ ?a))
+                    :where (and (?a _ ?b) (?b _ ?a)
+                                (% (grph:first> ?a ?b)))
                     :collect (grph:del! ^g ?a ?b))
         '(t t t t t t t))
 

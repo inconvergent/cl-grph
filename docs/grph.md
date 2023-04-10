@@ -196,6 +196,23 @@ get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
+#### GRPH:@VCNT
+
+```
+count all connected verts.
+
+ ; GRPH:@VCNT
+ ;   [symbol]
+ ; 
+ ; @VCNT names a compiled function:
+ ;   Lambda-list: (G &AUX (RES 0))
+ ;   Derived type: (FUNCTION (GRPH:GRPH)
+ ;                  (VALUES (UNSIGNED-BYTE 31) &OPTIONAL))
+ ;   Documentation:
+ ;     count all connected verts.
+ ;   Source file: /data/x/grph/src/grph.lisp
+```
+
 #### GRPH:@VERTS
 
 ```
@@ -226,23 +243,6 @@ get highest vertex index.
  ;                  (VALUES (UNSIGNED-BYTE 31) &OPTIONAL))
  ;   Documentation:
  ;     get highest vertex index.
- ;   Source file: /data/x/grph/src/grph.lisp
-```
-
-#### GRPH:@VNUM
-
-```
-count all connected verts.
-
- ; GRPH:@VNUM
- ;   [symbol]
- ; 
- ; @VNUM names a compiled function:
- ;   Lambda-list: (G &AUX (RES 0))
- ;   Derived type: (FUNCTION (GRPH:GRPH)
- ;                  (VALUES (UNSIGNED-BYTE 31) &OPTIONAL))
- ;   Documentation:
- ;     count all connected verts.
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
@@ -409,6 +409,15 @@ delete dead-ends until there are no more dead ends left. ignores edge dir.
  ;   Documentation:
  ;     delete dead-ends until there are no more dead ends left. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
+#### GRPH:DEL-SIMPLE-FILAMENTS!
+
+```
+:missing:todo:
+
+ ; GRPH:DEL-SIMPLE-FILAMENTS!
+ ;   [symbol]
 ```
 
 #### GRPH:DISTINCT
@@ -609,23 +618,23 @@ eg: (add! g a b (grp :black :color))
  ; 
  ; GRPH names the structure-class #<STRUCTURE-CLASS GRPH:GRPH>:
  ;   Documentation:
- ;     create a directed graph instance with no spatial awareness.
+ ;     create a graph instance.
  ;     
- ;     assuming the following graph, where all edges are undirected:
+ ;     assuming the following graph, where all edges are bi directional:
  ;     
  ;       x-y-u
  ;       |   |
- ;     a-b-c-d-o
+ ;     a-b-c-d-o-l
  ;       |
  ;       y
  ;     
- ;     this terminology is used :
- ;       - ab, by and do are (simple) filaments.
+ ;     the following terminology is used:
+ ;       - ab, by and dol are (simple) filaments
  ;       - bcd and bxyud are segments.
  ;       - (simple) filaments are segments.
  ;       - bcduyx(b) is a cycle.
  ;       - b and d are multi intersection points/vertices
- ;       - a, y, o are dead-ends.
+ ;       - a, y, l are dead-ends.
  ;       - a, b, c, y are incident of b
  ; 
  ;   Class precedence-list: GRPH, STRUCTURE-OBJECT, SB-PCL::SLOT-OBJECT, T
@@ -719,6 +728,48 @@ iterate all connected verts, as a.
  ;   Lambda-list: (L)
  ;   Derived type: (FUNCTION (LIST) (VALUES T &OPTIONAL))
  ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:LDEL!
+
+```
+:missing:todo:
+
+ ; GRPH:LDEL!
+ ;   [symbol]
+ ; 
+ ; LDEL! names a macro:
+ ;   Lambda-list: (G AB &REST REST)
+ ;   Source file: /data/x/grph/src/macros.lisp
+```
+
+#### GRPH:LQRY
+
+```
+compile and evaluate queries at runtime.
+ex:
+  (let ((g (grph))
+        (q '(or (?x ?p ?y) (?y ?p ?x))))
+    (add! g 1 2)
+    (print (lqry g :select '(?x ?p ?y) :where q)))
+
+ ; GRPH:LQRY
+ ;   [symbol]
+ ; 
+ ; LQRY names a compiled function:
+ ;   Lambda-list: (G &KEY DB USING SELECT WHERE THEN COLLECT)
+ ;   Derived type: (FUNCTION
+ ;                  (GRPH:GRPH &KEY (:DB BOOLEAN) (:USING T) (:SELECT T)
+ ;                             (:WHERE T) (:THEN T) (:COLLECT T))
+ ;                  *)
+ ;   Documentation:
+ ;     compile and evaluate queries at runtime.
+ ;     ex:
+ ;       (let ((g (grph))
+ ;             (q '(or (?x ?p ?y) (?y ?p ?x))))
+ ;         (add! g 1 2)
+ ;         (print (lqry g :select '(?x ?p ?y) :where q)))
+ ;   Source file: /data/x/grph/src/qry.lisp
 ```
 
 #### GRPH:LSORT
@@ -941,12 +992,12 @@ if closed is t, (1 5) will be included in the above output.
 #### GRPH:QRY
 
 ```
-evaluate a trivial datalog query against g.
-
+evaluate a trivial (datalog-like) query against g.
 :ex
   (qry g :select (?x ?y)
-         :where (and (?x :c ?y) (not (or (?x :a 1)
-                                         (?x :a 3)))))
+         :where (and (?x :c ?y)
+                     (not (or (?x :a 1)
+                              (?x :a 3)))))
 will return tuples (?x ?y) matching the query.
 other alternatives are (selected vars are available when using these keywords):
  - :pairs T; same as the default, but return the full result pairs
@@ -967,16 +1018,16 @@ see examples for more usage.
  ;   [symbol]
  ; 
  ; QRY names a macro:
- ;   Lambda-list: (G &KEY DB IN USING SELECT WHEN WHERE THEN COLLECT FIRST
- ;                 PAIRS (ITR (GENSYM QRY-ITR)) (PROC (QUOTE IDENTITY))
+ ;   Lambda-list: (G &KEY DB IN USING SELECT WHERE COLLECT THEN FIRST
+ ;                 PAIRS (PROC (QUOTE IDENTITY)) (ITR (GENSYM QRY-ITR))
  ;                 (RES (GENSYM QRY-RES)))
  ;   Documentation:
- ;     evaluate a trivial datalog query against g.
- ;     
+ ;     evaluate a trivial (datalog-like) query against g.
  ;     :ex
  ;       (qry g :select (?x ?y)
- ;              :where (and (?x :c ?y) (not (or (?x :a 1)
- ;                                              (?x :a 3)))))
+ ;              :where (and (?x :c ?y)
+ ;                          (not (or (?x :a 1)
+ ;                                   (?x :a 3)))))
  ;     will return tuples (?x ?y) matching the query.
  ;     other alternatives are (selected vars are available when using these keywords):
  ;      - :pairs T; same as the default, but return the full result pairs

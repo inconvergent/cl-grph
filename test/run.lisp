@@ -47,6 +47,7 @@ inefficient. use for tests only."
   l)
 (defun ls (l) (lsort* l))
 (defun mapls (&rest rest) (mapcar #'lsort* rest))
+(defun rs (l) (sort l #'<))
 
 (defun make-edge-set
   (&aux (g (grph:grph))

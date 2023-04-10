@@ -10,7 +10,7 @@
 
 (defun prt (o &optional s)
   (declare (notinline grph-num-edges))
-  (format s "<@grph: (verts: ~a, edges: ~a)>" (@vnum o) (@enum o)))
+  (format s "<@grph: (v: ~a/~a, e: ~a)>" (@vcnt o) (@vmax o) (@enum o)))
 
 ; TODO: improve this
 ; this is silly, we should ensure that props accepts at least an fset:map
@@ -23,23 +23,23 @@
   (:constructor grph (&optional (adj nilmap) (num-edges 0)
                                 (props nilmap) (mid nilmap)))
   (:print-object prt))
-  "create a directed graph instance with no spatial awareness.
+  "create a graph instance.
 
-assuming the following graph, where all edges are undirected:
+assuming the following graph, where all edges are bi directional:
 
   x-y-u
   |   |
-a-b-c-d-o
+a-b-c-d-o-l
   |
   y
 
-this terminology is used :
-  - ab, by and do are (simple) filaments.
+the following terminology is used:
+  - ab, by and dol are (simple) filaments
   - bcd and bxyud are segments.
   - (simple) filaments are segments.
   - bcduyx(b) is a cycle.
   - b and d are multi intersection points/vertices
-  - a, y, o are dead-ends.
+  - a, y, l are dead-ends.
   - a, b, c, y are incident of b
 "
   (adj nilmap :type fset:map :read-only t)
@@ -71,7 +71,7 @@ this terminology is used :
   "total number of edges in graph."
   (grph-num-edges g))
 
-(defun @vnum (g &aux (res 0))
+(defun @vcnt (g &aux (res 0))
   (declare (grph g) (pn res))
   "count all connected verts."
   (itr-verts (g a) (incf res)) res)

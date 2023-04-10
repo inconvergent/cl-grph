@@ -1,6 +1,6 @@
 (in-package #:grph-tests)
 
-(plan 3)
+(plan 4)
 
 (subtest "qry preproc"
   (is (grph::qry/preproc/kv
@@ -47,25 +47,25 @@
                       :where (and (?x :c ?y) (?x :a ?y) (not (?x :b _)))))
         (ls '((0 1) (1 0))))
     (is (ls (grph:qry g :select (?x ?y)
-                        :when (< ?x ?y)
-                        :where (or (?x :e ?y) (?x :a ?y))))
+                        :where (and (or (?x :e ?y) (?x :a ?y))
+                                    (% (< ?x ?y)))))
         (ls '((0 1) (1 2) (1 3) (4 5))))
 
     (is (let ((?x 5))
-          (grph:qry g :select ?y :in ?x :where (or (?x :e ?y) (?x :a ?y))))
-        `((4)))
+          (rs (grph:qry g :select ?y :in ?x :where (or (?x :e ?y) (?x :a ?y)))))
+        (rs `(4)))
 
-      (is (ls (grph:qry g :select ?x
+      (is (rs (grph:qry g :select ?x
                           :where (and (not (?x :c _))
                                       (or (?x :a _) (?x :b _))
                                       (not (?x :e _)))))
-          (ls '((2))))
-      (is (ls (grph:qry g :select ?x
+          (rs '(2)))
+      (is (rs (grph:qry g :select ?x
                           :where (and (or (?x :a _) (?x :b _))
                                       (not (?x :e 4) (?x :b 4))
                                       (not (?x :e 5) (?x :b 5))
                                       (not (?x :c 7)))))
-          (ls '((0) (1) (2))))
+          (rs '(0 1 2)))
 
     (is (ls (grph:qry g :select (?x ?y) :where (and (?x :c ?y) (not (7 :c ?y)))))
         (ls '((3 7) (3 5) (1 0) (0 1))))
@@ -81,8 +81,8 @@
                                     (not (?x :c ?y) (?x :e ?y)))))
         (ls '((0 1) (1 0) (1 2) (1 3) (2 1) (3 1)
               (5 4) (5 3) (4 5) (4 3) (3 5) (3 4))))
-    (is (ls (grph:qry g :select ?y :where (and (_ :a ?y) (not (_ :b ?y)))))
-        (ls '((2) (0) (1))))
+    (is (rs (grph:qry g :select ?y :where (and (_ :a ?y) (not (_ :b ?y)))))
+        (rs '(2 0 1)))
     (is (ls (grph:qry g :select (?x ?y) :where (or (?x :a ?y) (?x :b ?y))))
         (ls '((3 4) (3 5) (4 3) (4 5) (5 3) (5 4)
               (3 1) (2 1) (1 3) (1 2) (1 0) (0 1))))
@@ -111,25 +111,25 @@
                                     (not-join ?x (_ _ ?x )))))
         (ls `((99))))
 
-    (is (ls (grph:qry g :select ?r
+    (is (rs (grph:qry g :select ?r
                         :where (or-join ?r (and (?r :a ?a) (?a :b 5))
                                            (?r :c 0)
                                            (?r :e 5))))
-        (ls '((4) (1))))
-    (is (ls (grph:qry g :select ?r
+        (rs '(4 1)))
+    (is (rs (grph:qry g :select ?r
                         :where (and (?r _ _)
                                     (not-join (?r) (and (?r :a ?a)
                                                         (?a :b 5))))))
-        (ls '((99) (7) (5) (4) (3) (2) (0))))
+        (rs '(99 7 5 4 3 2 0)))
 
-    (is (ls (grph:qry g :select ?b
+    (is (rs (grph:qry g :select ?b
                   :where (and (or (?b _ _) (_ _ ?b))
                               (not-join ?b (?a _ ?b) (?b _ ?c) (% /= ?a ?c)))))
-        (ls '((0) (2) (7) (77) (99))))
-    (is (ls (grph:qry g :select ?b
+        (rs '(0 2 7 77 99)))
+    (is (rs (grph:qry g :select ?b
                   :where (and (or (?b _ _) (_ _ ?b))
                               (not-join ?b (?a _ ?b) (?b _ ?c) (% (/= ?a ?c))))))
-        (ls '((0) (2) (7) (77) (99))))
+        (rs '(0 2 7 77 99)))
 
     (is (ls (grph:qry g :select (?x ?y)
                         :where (and (?x _ 1) (1 _ ?y)
@@ -155,8 +155,8 @@
                (7 _ 4) (7 _ 6) (6 _ 7) (6 _ 3) (3 _ 6)
                (3 _ 0) (0 _ 3) (4 _ 5) (5 _ 4) (5 _ 2) (2 _ 5)))))
 
-    (is (ls (grph:qry g :select ?x :where  (and (or (?x _ 2) (2 _ ?x)))))
-        (ls '((5))))
+    (is (rs (grph:qry g :select ?x :where  (and (or (?x _ 2) (2 _ ?x)))))
+        (rs '(5)))
     (is (ls (grph:qry g :select (?x ?y)
                         :where (and (?x _ ?y)
                                     (or (?x _ 2) (2 _ ?x)))))

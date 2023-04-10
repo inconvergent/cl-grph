@@ -1,6 +1,14 @@
 (in-package #:grph-tests)
 
-(plan 1)
+(plan 2)
+(subtest "runtime qry/lqry"
+
+  (let ((g (make-edge-set))
+        (q '(?x _ ?y)))
+    (is (ls (grph:lqry g :select '(?x ?y) :where q))
+        (ls '((0 1) (1 0) (1 2) (1 3) (2 1) (3 1) (3 4) (3 5)
+              (3 7) (4 3) (4 5) (5 3) (5 4) (7 3) (99 77))))))
+
 
 (subtest "qry rules"
 

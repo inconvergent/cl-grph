@@ -77,12 +77,12 @@
                              (and (?r :a ?a) (?a :b 5))
                              (?r :c 0)
                              (?r :e 5))))
-    ; '((4) (1))
+    ; '(4 1)
 
     ; every edge (?x ?y) with prop :e or :a, when ?x index is less than ?y index
     (veq:vpr (qry g :select (?x ?y)
-                    :where (or (?x :e ?y) (?x :a ?y))
-                    :when (< ?x ?y))) ; filters the final result only
+                    :where (and (or (?x :e ?y) (?x :a ?y))
+                                (% (< ?x ?y)))))
     ; '((0 1) (1 2) (1 3) (4 5))
 
     ; the same using a % filter instead
@@ -99,14 +99,14 @@
                       :select ?y
                       :where (or (?x :b ?y)
                                  (?x :a ?y)))))
-    ; '((3) (4))
+    ; '(3 4)
 
     ; collect (list ...) for every edge (?x ?y)
     ; with prop :a or :b, ignore edges with prop :c
     (veq:vpr (qry g :select (?x ?y)
-                  :where (and (or (?x :a ?y) (?x :b ?y))
-                              (not (?x :c ?y)))
-                  :collect (list (+ ?x ?y) 88 ?x ?y)))
+                    :where (and (or (?x :a ?y) (?x :b ?y))
+                                (not (?x :c ?y)))
+                    :collect (list (+ ?x ?y) 88 ?x ?y)))
     ; '((7 88 3 4) (7 88 4 3) (9 88 4 5) (9 88 5 4)
     ;   (4 88 3 1) (3 88 2 1) (4 88 1 3) (3 88 1 2))
 
@@ -129,9 +129,9 @@
                     :where (and (or (?b _ _) (_ _ ?b))
                                 (not-join ?b
                                   (q :select (?a ?b ?c) ; nested query
-                                     :where (and (?a _ ?b) (?b _ ?c))
-                                     :when (/= ?a ?c))))))
-    ; ((9) (2) (0))
+                                     :where (and (?a _ ?b) (?b _ ?c)
+                                                 (% (/= ?a ?c))))))))
+    ; (9 2 0)
 
     ; and a more elegant version of the same query, with no nesting
     (veq:vpr (qry g :select ?b
@@ -139,7 +139,7 @@
                                 (not-join ?b (?a _ ?b)
                                              (?b _ ?c)
                                              (% /= ?a ?c)))))
-    ; ((9) (2) (0))
+    ; (9 2 0)
     ))
 
 (main)
