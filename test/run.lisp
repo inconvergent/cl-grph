@@ -5,17 +5,10 @@
 
 (in-package #:grph-tests)
 
-#+:grph-parallel (setf lparallel:*kernel* (lparallel:make-kernel 4))
-
-; (defun compile-or-fail (f)
-;   (format t "~%compiling: ~a~%" (grph::mkstr f))
-;   (with-open-stream (*standard-output* (make-broadcast-stream))
-;     (compile-file f)))
 (defun -run-tests (files)
   (loop with fails = 0
         for f in files
-        do ;(compile-or-fail f)
-           (format t "~&~%starting tests in: ~a~%" (grph::mkstr f))
+        do (format t "~&~%starting tests in: ~a~%" (grph::mkstr f))
            (unless (prove:run f :reporter :fiveam)
                    (incf fails))
            (format t "~&done: ~a~%" (grph::mkstr f))
@@ -26,8 +19,7 @@
   (-run-tests '(#P"test/grph.lisp" #P"test/qry.lisp"
                 #P"test/qry-2.lisp" #P"test/qry-3.lisp"
                 #P"test/xgrph.lisp"
-                #P"test/grph-walk.lisp"
-                )))
+                #P"test/grph-walk.lisp")))
 (defun p/run-tests ()
   (-run-tests '(#P"test/grph.lisp" #P"test/qry.lisp"
                 #P"test/qry-2.lisp" #P"test/qry-3.lisp"

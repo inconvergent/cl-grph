@@ -23,22 +23,22 @@
 (defmacro @verts (dim s l)
   (declare (pn dim) (symbol s))
   "get verts in l as fvec."
-  (grph::awg (a i c h l*)
-  `(let ((,l* ,l))
-     (declare (list ,l*))
-     (veq:fvprogn
-       (veq:fwith-arrays (:inds ,l* :itr ,h :cnt ,c
-         :arr ((,a ,dim (veq:f$zero (* ,dim (length ,l*)))))
-         :fxs ((vget (,i) (@vert ,dim ,s ,i)))
-         :exs ((,a ,c (vget ,h))))
-         ,a)))))
+  (grph::awg (a i c l*)
+  `(let* ((,l* ,l)
+          (,a (veq:f$zero (* ,dim (length ,l*)))))
+     (declare (list ,l*) (,(veq:arrtype :ff) ,a))
+     (loop for ,i of-type veq:pn in ,l*
+           for ,c of-type veq:pn from 0
+           do (setf (,(veq:vvsym :nil dim :$ :pkg "VEQ") ,a ,c)
+                    (@vert ,dim ,s ,i)))
+     ,a)))
 (defmacro 2@verts (&rest rest) `(@verts 2 ,@rest))
 (defmacro 3@verts (&rest rest) `(@verts 3 ,@rest))
 
 (defmacro vert! (dim s &rest rest &aux (gs (grph::-gensyms :pos dim))
                                        (n (gensym "N")))
   (declare (pn dim) (symbol s))
-  "add vert."
+  "add vert. from these values."
   `(let ((,n (fset:size ,s)))
      (declare (pn ,n))
      (mvb (,@gs) (veq:~ ,@rest)
@@ -48,20 +48,17 @@
 (defmacro 2vert! (&rest rest) `(vert! 2 ,@rest))
 (defmacro 3vert! (&rest rest) `(vert! 3 ,@rest))
 
+; TODO: this does not really need to be a macro
 (defmacro verts! (dim s path)
   (declare (pn dim) (symbol s))
-  "add verts."
+  "add verts. from path of type fvec."
   (grph::awg (p res)
-  `(let ((,p ,path) (,res (list)))
-    (declare (veq:fvec ,p))
-    (veq:fvprogn
-      (veq:fwith-arrays (:n (the pn (/ (length ,p) ,dim))
-        :arr ((,p ,dim ,p))
-        :fxs ((add ((:va ,dim x))
-               (declare (veq:ff x))
-               (push (vert! ,dim ,s x) ,res)))
-        :nxs ((add ,p))))
-      (reverse ,res)))))
+    `(let ((,p ,path) (,res (list)))
+       (declare (veq:fvec ,p))
+       (veq:fvprogn (,(veq:vvsym :ff dim :x@vset :pkg :xgrph) ,p
+                      ((i (:va ,dim x)) (declare (ignore i))
+                       (push (vert! ,dim ,s x) ,res))))
+       (reverse ,res))))
 (defmacro 2verts! (&rest rest) `(verts! 2 ,@rest))
 (defmacro 3verts! (&rest rest) `(verts! 3 ,@rest))
 

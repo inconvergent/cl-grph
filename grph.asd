@@ -1,5 +1,5 @@
 (asdf:defsystem #:grph
-  :description "graph thing"
+  :description "immutable graph data structure with Datalog query language"
   :version "0.20.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :licence "MIT"

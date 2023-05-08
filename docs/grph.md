@@ -55,8 +55,6 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT)
 #### GRPH:@BOTH
 
 ```
-list all verts of a that are bi-directional.
-
  ; GRPH:@BOTH
  ;   [symbol]
  ; 
@@ -72,8 +70,6 @@ list all verts of a that are bi-directional.
 #### GRPH:@EDGES
 
 ```
-list of lists of all edges.
-
  ; GRPH:@EDGES
  ;   [symbol]
  ; 
@@ -88,8 +84,6 @@ list of lists of all edges.
 #### GRPH:@EITHER
 
 ```
-list both inbound and outbond verts of a.
-
  ; GRPH:@EITHER
  ;   [symbol]
  ; 
@@ -105,8 +99,6 @@ list both inbound and outbond verts of a.
 #### GRPH:@ENUM
 
 ```
-total number of edges in graph.
-
  ; GRPH:@ENUM
  ;   [symbol]
  ; 
@@ -122,8 +114,6 @@ total number of edges in graph.
 #### GRPH:@IN
 
 ```
-list all outboud verts of a.
-
  ; GRPH:@IN
  ;   [symbol]
  ; 
@@ -148,8 +138,6 @@ list all outboud verts of a.
 #### GRPH:@MEM
 
 ```
-t if edge (a b) exists.
-
  ; GRPH:@MEM
  ;   [symbol]
  ; 
@@ -165,8 +153,6 @@ t if edge (a b) exists.
 #### GRPH:@OUT
 
 ```
-list all outboud verts of a.
-
  ; GRPH:@OUT
  ;   [symbol]
  ; 
@@ -182,8 +168,6 @@ list all outboud verts of a.
 #### GRPH:@PROP
 
 ```
-get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
-
  ; GRPH:@PROP
  ;   [symbol]
  ; 
@@ -199,8 +183,6 @@ get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
 #### GRPH:@VCNT
 
 ```
-count all connected verts.
-
  ; GRPH:@VCNT
  ;   [symbol]
  ; 
@@ -216,8 +198,6 @@ count all connected verts.
 #### GRPH:@VERTS
 
 ```
-list of all connected verts.
-
  ; GRPH:@VERTS
  ;   [symbol]
  ; 
@@ -232,8 +212,6 @@ list of all connected verts.
 #### GRPH:@VMAX
 
 ```
-get highest vertex index.
-
  ; GRPH:@VMAX
  ;   [symbol]
  ; 
@@ -249,9 +227,6 @@ get highest vertex index.
 #### GRPH:ADD
 
 ```
-new edge (a b). optionally set prop, p, (with val).
-returns: (values g created?)
-
  ; GRPH:ADD
  ;   [symbol]
  ; 
@@ -270,8 +245,6 @@ returns: (values g created?)
 #### GRPH:ADD!
 
 ```
-add edge edge and re-bind. returns: (a b) or nil.
-
  ; GRPH:ADD!
  ;   [symbol]
  ; 
@@ -285,8 +258,6 @@ add edge edge and re-bind. returns: (a b) or nil.
 #### GRPH:ADD\*!
 
 ```
-add edge edge and re-bind. returns: (a b) or nil.
-
  ; GRPH:ADD*!
  ;   [symbol]
  ; 
@@ -334,24 +305,20 @@ add edge edge and re-bind. returns: (a b) or nil.
 #### GRPH:DEAD-ENDS
 
 ```
-vertices that have exactly one adjacent vertices. ignores edge dir.
-
  ; GRPH:DEAD-ENDS
  ;   [symbol]
  ; 
  ; DEAD-ENDS names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
- ;     vertices that have exactly one adjacent vertices. ignores edge dir.
+ ;     vertices that have exactly one adjacent vertices: [g-] ?y-?x
+ ;     ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:DEL
 
 ```
-delete edge (a b). deletes associated props.
-returns: (values g deleted?)
-
  ; GRPH:DEL
  ;   [symbol]
  ; 
@@ -369,8 +336,6 @@ returns: (values g deleted?)
 #### GRPH:DEL!
 
 ```
-del edge and re-bind. returns: deleted?
-
  ; GRPH:DEL!
  ;   [symbol]
  ; 
@@ -379,6 +344,29 @@ del edge and re-bind. returns: deleted?
  ;   Documentation:
  ;     del edge and re-bind. returns: deleted?
  ;   Source file: /data/x/grph/src/macros.lisp
+```
+
+#### GRPH:DEL-DEAD-ENDS
+
+```
+ ; GRPH:DEL-DEAD-ENDS
+ ;   [symbol]
+ ; 
+ ; DEL-DEAD-ENDS names a compiled function:
+ ;   Lambda-list: (G &OPTIONAL (P _))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     delete dead-ends until there are no more dead ends left. ignores edge dir.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
+#### GRPH:DEL-DEAD-ENDS!
+
+```
+:missing:todo:
+
+ ; GRPH:DEL-DEAD-ENDS!
+ ;   [symbol]
 ```
 
 #### GRPH:DEL-PROPS
@@ -395,36 +383,9 @@ del edge and re-bind. returns: deleted?
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:DEL-SIMPLE-FILAMENTS
-
-```
-delete dead-ends until there are no more dead ends left. ignores edge dir.
-
- ; GRPH:DEL-SIMPLE-FILAMENTS
- ;   [symbol]
- ; 
- ; DEL-SIMPLE-FILAMENTS names a compiled function:
- ;   Lambda-list: (G &OPTIONAL (P _))
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
- ;   Documentation:
- ;     delete dead-ends until there are no more dead ends left. ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
-```
-
-#### GRPH:DEL-SIMPLE-FILAMENTS!
-
-```
-:missing:todo:
-
- ; GRPH:DEL-SIMPLE-FILAMENTS!
- ;   [symbol]
-```
-
 #### GRPH:DISTINCT
 
 ```
-t if values in rest are distinct.
-
  ; GRPH:DISTINCT
  ;   [symbol]
  ; 
@@ -452,8 +413,6 @@ t if values in rest are distinct.
 #### GRPH:EDGE-SET
 
 ```
-get edge set. ignores edge dir.
-
  ; GRPH:EDGE-SET
  ;   [symbol]
  ; 
@@ -467,10 +426,6 @@ get edge set. ignores edge dir.
 #### GRPH:EDGE-SET->PATH
 
 ```
-convert edge set: ((3 4) (4 5) (5 6) (1 2) (6 1) (2 3))
-into a path: (4 5 6 1 2 3)
-second result is a boolean for whether it is a cycle.
-
  ; GRPH:EDGE-SET->PATH
  ;   [symbol]
  ; 
@@ -501,9 +456,6 @@ second result is a boolean for whether it is a cycle.
 #### GRPH:EXT-SYMBOLS?
 
 ```
-list all external symbols in pkg. use :verbose to inlcude docstring.
-use :pretty to print verbose output to stdout in a readable form.
-
  ; GRPH:EXT-SYMBOLS?
  ;   [symbol]
  ; 
@@ -515,26 +467,9 @@ use :pretty to print verbose output to stdout in a readable form.
  ;   Source file: /data/x/grph/src/docs.lisp
 ```
 
-#### GRPH:FILAMENT-ISECTS
-
-```
-vertices that do not have exactly 2 adjacent vertices. ignores edge dir.
-
- ; GRPH:FILAMENT-ISECTS
- ;   [symbol]
- ; 
- ; FILAMENT-ISECTS names a macro:
- ;   Lambda-list: (G &OPTIONAL (P _) Y)
- ;   Documentation:
- ;     vertices that do not have exactly 2 adjacent vertices. ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
-```
-
 #### GRPH:FIRST<
 
 ```
-equvialent to (and (< r1 r2) (< r1 r3) ...). r1 is evaluated only once.
-
  ; GRPH:FIRST<
  ;   [symbol]
  ; 
@@ -548,8 +483,6 @@ equvialent to (and (< r1 r2) (< r1 r3) ...). r1 is evaluated only once.
 #### GRPH:FIRST>
 
 ```
-equvialent to (and (> r1 r2) (> r1 r3) ...). r1 is evaluated only once.
-
  ; GRPH:FIRST>
  ;   [symbol]
  ; 
@@ -576,12 +509,6 @@ equvialent to (and (> r1 r2) (> r1 r3) ...). r1 is evaluated only once.
 #### GRPH:GRP
 
 ```
-for val = :black and s = :color, creates list of two props
-((:color :black) :black). this is useful for making both :colour and :black
-filterable via @prop or in queries.
-
-eg: (add! g a b (grp :black :color))
-
  ; GRPH:GRP
  ;   [symbol]
  ; 
@@ -658,8 +585,6 @@ eg: (add! g a b (grp :black :color))
 #### GRPH:INGEST-EDGES
 
 ```
-ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9)).
-
  ; GRPH:INGEST-EDGES
  ;   [symbol]
  ; 
@@ -674,8 +599,6 @@ ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9)).
 #### GRPH:ITR-ADJ
 
 ```
-iterate all adjacent verts, b, of a. use modes (-> <- >< <>).
-
  ; GRPH:ITR-ADJ
  ;   [symbol]
  ; 
@@ -689,8 +612,6 @@ iterate all adjacent verts, b, of a. use modes (-> <- >< <>).
 #### GRPH:ITR-EDGES
 
 ```
-iterate all edges, as either a=(v1 v2) or a=v1, b=v2.
-
  ; GRPH:ITR-EDGES
  ;   [symbol]
  ; 
@@ -704,8 +625,6 @@ iterate all edges, as either a=(v1 v2) or a=v1, b=v2.
 #### GRPH:ITR-VERTS
 
 ```
-iterate all connected verts, as a.
-
  ; GRPH:ITR-VERTS
  ;   [symbol]
  ; 
@@ -746,13 +665,6 @@ iterate all connected verts, as a.
 #### GRPH:LQRY
 
 ```
-compile and evaluate queries at runtime.
-ex:
-  (let ((g (grph))
-        (q '(or (?x ?p ?y) (?y ?p ?x))))
-    (add! g 1 2)
-    (print (lqry g :select '(?x ?p ?y) :where q)))
-
  ; GRPH:LQRY
  ;   [symbol]
  ; 
@@ -775,8 +687,6 @@ ex:
 #### GRPH:LSORT
 
 ```
-radix sort list of lists.
-
  ; GRPH:LSORT
  ;   [symbol]
  ; 
@@ -792,9 +702,6 @@ radix sort list of lists.
 #### GRPH:MATCH
 
 ```
-execute body with alist f as every bindable var for every fact in the graph
-that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
-
  ; GRPH:MATCH
  ;   [symbol]
  ; 
@@ -809,18 +716,6 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
 #### GRPH:MODIFY!
 
 ```
-batch modify g in a transaction. more efficient for loading a large number
-of edges and/or props. faster for larger batches. g will be available
-unchanged inside the context. and the changes are applied at the end. use
-:out to assign the result to a different variable.
-
-ex: (modify! (g mygrp)
-      (loop repeat 10
-            for a = (rnd:rndi n)
-            for b = (rnd:rndi n)
-            do (rnd:either (mygrp-> a b '(:x :c))
-                           (mygrp<> a b '(:y :d)))))
-
  ; GRPH:MODIFY!
  ;   [symbol]
  ; 
@@ -844,15 +739,13 @@ ex: (modify! (g mygrp)
 #### GRPH:MULTI-ISECTS
 
 ```
-vertices that have 2 or more adjacent vertices. ignores edge dir.
-
  ; GRPH:MULTI-ISECTS
  ;   [symbol]
  ; 
  ; MULTI-ISECTS names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
- ;     vertices that have 2 or more adjacent vertices. ignores edge dir.
+ ;     vertices that have 3 or more adjacent vertices. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -912,8 +805,6 @@ vertices that have 2 or more adjacent vertices. ignores edge dir.
 #### GRPH:NUM-EITHER
 
 ```
-number of adjacent vertices to ?x. ignores edge dir.
-
  ; GRPH:NUM-EITHER
  ;   [symbol]
  ; 
@@ -943,10 +834,6 @@ number of adjacent vertices to ?x. ignores edge dir.
 #### GRPH:PATH->EDGE-SET
 
 ```
-return edge set from cycle.
-ex: (1 2 3 4 5) -> ((1 2) (2 3) (3 4) (4 5))
-if closed is t, (1 5) will be included in the above output.
-
  ; GRPH:PATH->EDGE-SET
  ;   [symbol]
  ; 
@@ -992,28 +879,6 @@ if closed is t, (1 5) will be included in the above output.
 #### GRPH:QRY
 
 ```
-evaluate a trivial (datalog-like) query against g.
-:ex
-  (qry g :select (?x ?y)
-         :where (and (?x :c ?y)
-                     (not (or (?x :a 1)
-                              (?x :a 3)))))
-will return tuples (?x ?y) matching the query.
-other alternatives are (selected vars are available when using these keywords):
- - :pairs T; same as the default, but return the full result pairs
- - :collect [this]; same as default, but collect this instead of just the selected vars
- - :then [this]; execute this code, returns nil
- - :first [this]; execut this, but for the first match only.
-
-other modifiers:
- - :in [vars]; use values of vars bound outside the query.
- - :using [vars]; mutate the graph for every returned tuple, see examples
- - :res [symb]; bind query result to symb inside :collect, :then, :first
- - :itr [symb]; counter available inside :collect, :then, :first
- - :db T; print some useful debug info about the compiled query.
-
-see examples for more usage.
-
  ; GRPH:QRY
  ;   [symbol]
  ; 
@@ -1062,23 +927,6 @@ see examples for more usage.
 #### GRPH:RQRY
 
 ```
-evaluate simple datalog programs top-down. all rule names (with * prefix)
-are bound as variables that can be used in :then.
-
-ex:
-  (rqry g :rules ((*st-reach (?x ?y) (?x _ ?y)) ; trivial
-                  (*st-reach (?x ?y) (and (?x _ ?z) (*st-reach ?z ?y))) ; linear
-                  (*li-reach (?x ?u) (and (*st-reach ?x _) (?x ?u _))) ; simple
-                  (*ans-a (?y) (*st-reach 4 ?y)) ; simple (w/filter)
-                  (*ans-b (?u) (*li-reach 1 ?u))) ; simple (w/filter)
-          :then (print (list *st-reach *li-reach *ans-a *ans-b))
-
-note the difference between rule types:
- - trivial rules contain only queries that can be passed directly to qry
- - simple rules reference earlier rules, but not themselves
- - linear rules have (only) one self-reference (references to earlier
-  rules are allowed.)
-
  ; GRPH:RQRY
  ;   [symbol]
  ; 
@@ -1094,7 +942,7 @@ note the difference between rule types:
  ;                       (*li-reach (?x ?u) (and (*st-reach ?x _) (?x ?u _))) ; simple
  ;                       (*ans-a (?y) (*st-reach 4 ?y)) ; simple (w/filter)
  ;                       (*ans-b (?u) (*li-reach 1 ?u))) ; simple (w/filter)
- ;               :then (print (list *st-reach *li-reach *ans-a *ans-b))
+ ;               :then (print (list *st-reach *li-reach *ans-a *ans-b)))
  ;     
  ;     note the difference between rule types:
  ;      - trivial rules contain only queries that can be passed directly to qry
@@ -1102,6 +950,20 @@ note the difference between rule types:
  ;      - linear rules have (only) one self-reference (references to earlier
  ;       rules are allowed.)
  ;   Source file: /data/x/grph/src/qry-rules.lisp
+```
+
+#### GRPH:SEGMENT-ISECTS
+
+```
+ ; GRPH:SEGMENT-ISECTS
+ ;   [symbol]
+ ; 
+ ; SEGMENT-ISECTS names a macro:
+ ;   Lambda-list: (G &OPTIONAL (P _) Y)
+ ;   Documentation:
+ ;     vertices that do not have exactly 2 adjacent vertices. ie. the set of dead ends and multi isects.
+ ;     ignores edge dir.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:STOP
@@ -1125,6 +987,21 @@ note the difference between rule types:
  ;   Lambda-list: (INIT)
  ;   Derived type: (FUNCTION (LIST) (VALUES SIMPLE-VECTOR &OPTIONAL))
  ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:TWO-ISECTS
+
+```
+ ; GRPH:TWO-ISECTS
+ ;   [symbol]
+ ; 
+ ; TWO-ISECTS names a macro:
+ ;   Lambda-list: (G &OPTIONAL (P _) Y)
+ ;   Documentation:
+ ;     vertices that have exactly 2 adjacent vertex: [g-] ?y1-?x-?y2 [-g]
+ ;      ignores edge dir.
+ ; 
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:USING
@@ -1171,8 +1048,6 @@ note the difference between rule types:
 #### GRPH:WALK-EDGE-SET
 
 ```
-greedily walk the graph and return every edge exactly once. ignores edge dir.
-
  ; GRPH:WALK-EDGE-SET
  ;   [symbol]
  ; 
@@ -1187,8 +1062,6 @@ greedily walk the graph and return every edge exactly once. ignores edge dir.
 #### GRPH:WALK-GRPH
 
 ```
-walk graph via walk-edge-set.
-
  ; GRPH:WALK-GRPH
  ;   [symbol]
  ; 

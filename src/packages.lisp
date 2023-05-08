@@ -22,8 +22,8 @@
     #:grp #:distinct #:first< #:first> #:lsort
     #:walk-grph #:walk-edge-set
     #:dead-ends #:edge-set
-    #:filament-isects #:multi-isects
-    #:del-simple-filaments #:del-simple-filaments!
+    #:segment-isects #:multi-isects #:two-isects
+    #:del-dead-ends #:del-dead-ends!
     #:path->edge-set #:edge-set->path
     #:normalise-fold #:normalise-fold!
     #:using

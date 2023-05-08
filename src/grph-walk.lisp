@@ -22,7 +22,8 @@
 
 (defmacro dead-ends (g &optional (p :_) y)
   (declare (symbol g p) (boolean y))
-  "vertices that have exactly one adjacent vertices. ignores edge dir."
+  "vertices that have exactly one adjacent vertices: [g-] ?y-?x
+ignores edge dir."
   (if (any? p)
    `(qry ,g :select (?x ,(if y '?y))
             :where (and (or (?x _ ?y) (?y _ ?x)) (% (= (num-either ,g ?x) 1)))
@@ -32,9 +33,24 @@
               :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (= (num-either ,g ?x ?p) 1)))
               :collect ,(if y '(list ?x ?y) '?x)))))
 
-(defmacro filament-isects (g &optional (p :_) y)
+(defmacro two-isects (g &optional (p :_) y)
   (declare (symbol g p) (boolean y))
-  "vertices that do not have exactly 2 adjacent vertices. ignores edge dir."
+  "vertices that have exactly 2 adjacent vertex: [g-] ?y1-?x-?y2 [-g]
+ ignores edge dir.
+  "
+  (if (any? p)
+   `(qry ,g :select (?x ,(if y '?y))
+            :where (and (or (?x _ ?y) (?y _ ?x)) (% (= (num-either ,g ?x) 2)))
+            :collect ,(if y '(list ?x ?y) '?x))
+   `(let ((?p ,p))
+      (qry ,g :select (?x ,(if y '?y)) :in ?p
+              :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (= (num-either ,g ?x ?p) 2)))
+              :collect ,(if y '(list ?x ?y) '?x)))))
+
+(defmacro segment-isects (g &optional (p :_) y)
+  (declare (symbol g p) (boolean y))
+  "vertices that do not have exactly 2 adjacent vertices. ie. the set of dead ends and multi isects.
+ignores edge dir."
   (if (any? p)
    `(qry ,g :select (?x ,(if y '?y))
             :where (and (or (?x _ ?y) (?y _ ?x)) (% (/= (num-either ,g ?x) 2)))
@@ -46,7 +62,7 @@
 
 (defmacro multi-isects (g &optional (p :_) y)
   (declare (symbol g p) (boolean y))
-  "vertices that have 2 or more adjacent vertices. ignores edge dir."
+  "vertices that have 3 or more adjacent vertices. ignores edge dir."
   (if (any? p)
    `(qry ,g :select (?x ,(if y '?y))
             :where (and (or (?x _ ?y) (?y _ ?x)) (% (> (num-either ,g ?x) 2)))
@@ -56,7 +72,7 @@
               :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (> (num-either ,g ?x ?p) 2)))
               :collect ,(if y '(list ?x ?y) '?x)))))
 
-(defun del-simple-filaments (g &optional (p :_))
+(defun del-dead-ends (g &optional (p :_))
   "delete dead-ends until there are no more dead ends left. ignores edge dir."
   (labels ((-del (a b) (del! g a b) (del! g b a)))
     (loop for ee = (dead-ends g p)
@@ -105,6 +121,5 @@
 (defun walk-grph (g &optional (p :_))
   (declare (grph g) (symbol p))
   "walk graph via walk-edge-set."
-  (if (any? p) (walk-edge-set g (edge-set g))
-               (walk-edge-set g (edge-set g p))))
+  (walk-edge-set g (if (any? p) (edge-set g) (edge-set g p))))
 

@@ -156,7 +156,7 @@ inserted on the intersection; connected to the inside vert."
        (unless (inside ai) (rotatef ai bi) (setf rev t))
        (veq:f2let ((a (2@ pos ai))
                    (b (2@ pos bi))
-                   (ab (veq:f2- b a)))
+                   (ab (f2!@- b a)))
          (mvc #'values rev ; there appears to be a slight bug here for lines
            (veq:f2lerp a b ; that cross both a side and a top/bot
              (cond ((> (:vr b 0) rht) (/ (- rht (:vr a 0)) (:vr ab 0)))

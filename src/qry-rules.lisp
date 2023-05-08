@@ -56,7 +56,7 @@ ex:
                   (*li-reach (?x ?u) (and (*st-reach ?x _) (?x ?u _))) ; simple
                   (*ans-a (?y) (*st-reach 4 ?y)) ; simple (w/filter)
                   (*ans-b (?u) (*li-reach 1 ?u))) ; simple (w/filter)
-          :then (print (list *st-reach *li-reach *ans-a *ans-b))
+          :then (print (list *st-reach *li-reach *ans-a *ans-b)))
 
 note the difference between rule types:
  - trivial rules contain only queries that can be passed directly to qry

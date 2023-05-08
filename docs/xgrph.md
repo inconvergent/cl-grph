@@ -75,13 +75,6 @@
 #### XGRPH:2CUT-TO-AREA
 
 ```
-WRAPS: %2CUT-TO-AREA
-ARGS: (G POS &OPTIONAL (TOP 0.0) (LFT 0.0) (RHT 1000.0) (BOT 1000.0))
-DOCSTRING: removes all edges outside envelope.
-all edges intersecting the envelope will be deleted, a new vert will be
-inserted on the intersection; connected to the inside vert.
-defined via veq:FVDEF*
-
  ; XGRPH:2CUT-TO-AREA
  ;   [symbol]
  ; 
@@ -113,8 +106,6 @@ defined via veq:FVDEF*
 #### XGRPH:2INTERSECT-ALL
 
 ```
-creates intersections for all edges in g such that it becomes a planar graph.
-
  ; XGRPH:2INTERSECT-ALL
  ;   [symbol]
  ; 
@@ -294,8 +285,6 @@ creates intersections for all edges in g such that it becomes a planar graph.
 #### XGRPH:3CUT-ALL
 
 ```
-cut every edge where they intersect in 2d according to projection fx.
-
  ; XGRPH:3CUT-ALL
  ;   [symbol]
  ; 
@@ -428,8 +417,6 @@ cut every edge where they intersect in 2d according to projection fx.
 #### XGRPH:@VERT
 
 ```
-get vert i as values.
-
  ; XGRPH:@VERT
  ;   [symbol]
  ; 
@@ -443,8 +430,6 @@ get vert i as values.
 #### XGRPH:@VERTS
 
 ```
-get verts in l as fvec.
-
  ; XGRPH:@VERTS
  ;   [symbol]
  ; 
@@ -506,9 +491,6 @@ get verts in l as fvec.
 #### XGRPH:PATH!
 
 ```
-add path.
-dir-modes: (-> <- <>)
-
  ; XGRPH:PATH!
  ;   [symbol]
  ; 
@@ -523,8 +505,6 @@ dir-modes: (-> <- <>)
 #### XGRPH:POS
 
 ```
-initialze xgrph pos. d is the default fset:seq value.
-
  ; XGRPH:POS
  ;   [symbol]
  ; 
@@ -540,8 +520,6 @@ initialze xgrph pos. d is the default fset:seq value.
 #### XGRPH:SPLIT!
 
 ```
-delete edge (a b) and add edges (a x) (x b).
-
  ; XGRPH:SPLIT!
  ;   [symbol]
  ; 
@@ -555,9 +533,6 @@ delete edge (a b) and add edges (a x) (x b).
 #### XGRPH:TRIANGULATE-EDGE-SET
 
 ```
-triangulate the hull defined by edge set, using the fx provided where
-  (funcall fx i ... k) is (values pix piy ... pkx pky)
-
  ; XGRPH:TRIANGULATE-EDGE-SET
  ;   [symbol]
  ; 
@@ -573,30 +548,26 @@ triangulate the hull defined by edge set, using the fx provided where
 #### XGRPH:VERT!
 
 ```
-add vert.
-
  ; XGRPH:VERT!
  ;   [symbol]
  ; 
  ; VERT! names a macro:
  ;   Lambda-list: (DIM S &REST REST)
  ;   Documentation:
- ;     add vert.
+ ;     add vert. from these values.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:VERTS!
 
 ```
-add verts.
-
  ; XGRPH:VERTS!
  ;   [symbol]
  ; 
  ; VERTS! names a macro:
  ;   Lambda-list: (DIM S PATH)
  ;   Documentation:
- ;     add verts.
+ ;     add verts. from path of type fvec.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
