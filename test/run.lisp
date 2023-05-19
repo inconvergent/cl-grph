@@ -6,14 +6,16 @@
 (in-package #:grph-tests)
 
 (defun -run-tests (files)
-  (loop with fails = 0
-        for f in files
-        do (format t "~&~%starting tests in: ~a~%" (grph::mkstr f))
-           (unless (prove:run f :reporter :fiveam)
-                   (incf fails))
-           (format t "~&done: ~a~%" (grph::mkstr f))
-        finally (return (unless (< fails 1)
-                          (sb-ext:quit :unix-status 7)))))
+  (labels ((rel (f) (mapcar (lambda (p) (asdf:system-relative-pathname
+                                          "grph/tests" p))
+                            f)))
+    (loop with fails = 0
+          for f in (rel files)
+          do (format t "~&~%starting tests in: ~a~%" (grph::mkstr f))
+             (unless (prove:run f :reporter :fiveam)
+                     (incf fails))
+             (format t "~&done: ~a~%" (grph::mkstr f))
+          finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
   (-run-tests '(#P"test/grph.lisp" #P"test/qry.lisp"

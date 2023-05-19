@@ -1,6 +1,6 @@
 (asdf:defsystem #:grph
   :description "immutable graph data structure with Datalog query language"
-  :version "0.20.0"
+  :version "0.20.1"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :licence "MIT"
   :in-order-to ((asdf:test-op (asdf:test-op #:grph/tests)))
@@ -39,7 +39,8 @@
                (:file "xgrph-isect" :depends-on ("xgrph"))))
 
 (asdf:defsystem #:grph/tests
-  :depends-on (#:veq #:grph #:prove #+:grph-parallel #:lparallel)
+  :depends-on (#:veq #:grph #:prove #+:grph-parallel #:lparallel #:uiop #:asdf)
+  :version "0.20.1"
   :perform (asdf:test-op (o s)
              (uiop:symbol-call ':grph-tests
                #+:grph-parallel '#:p/run-tests
