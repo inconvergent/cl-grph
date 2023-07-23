@@ -12,7 +12,7 @@
     #:@verts #:@vcnt #:@vmax #:@prop #:@mem #:@inv
     #:add #:add! #:add*! #:del #:del! #:ldel! #:path! #:del-props #:modify!
     #:itr-edges #:itr-adj #:itr-verts
-    #:grph #:prt
+    #:grph #:make #:prt
     #:compile-query #:match
     #:qry #:lqry #:rqry
     #:stop #:cancel

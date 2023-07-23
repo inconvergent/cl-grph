@@ -22,6 +22,8 @@
 (defstruct (grph
   (:constructor grph (&optional (adj nilmap) (num-edges 0)
                                 (props nilmap) (mid nilmap)))
+  (:constructor make (&optional (adj nilmap) (num-edges 0)
+                                (props nilmap) (mid nilmap)))
   (:print-object prt))
   "create a graph instance.
 
