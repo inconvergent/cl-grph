@@ -699,6 +699,24 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT)
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
+#### GRPH:MAKE
+
+```
+:missing:todo:
+
+ ; GRPH:MAKE
+ ;   [symbol]
+ ; 
+ ; MAKE names a compiled function:
+ ;   Lambda-list: (&OPTIONAL (ADJ NILMAP) (NUM-EDGES 0) (PROPS NILMAP)
+ ;                 (MID NILMAP))
+ ;   Derived type: (FUNCTION
+ ;                  (&OPTIONAL FSET:MAP (UNSIGNED-BYTE 31) FSET:MAP
+ ;                   FSET:MAP)
+ ;                  (VALUES GRPH:GRPH &OPTIONAL))
+ ;   Source file: /data/x/grph/src/grph.lisp
+```
+
 #### GRPH:MATCH
 
 ```

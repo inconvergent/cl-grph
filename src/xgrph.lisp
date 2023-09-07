@@ -55,7 +55,7 @@
   (grph::awg (p res)
     `(let ((,p ,path) (,res (list)))
        (declare (veq:fvec ,p))
-       (veq:fvprogn (,(veq:vvsym :ff dim :x@vset :pkg :xgrph) ,p
+       (veq:fvprogn (,(veq:vvsym :ff dim :x@$vset :pkg :xgrph) ,p
                       ((i (:va ,dim x)) (declare (ignore i))
                        (push (vert! ,dim ,s x) ,res))))
        (reverse ,res))))
