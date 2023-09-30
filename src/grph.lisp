@@ -16,7 +16,7 @@
 ; this is silly, we should ensure that props accepts at least an fset:map
 (defun props-as-list (m &aux (res (list)))
   (unless m (return-from props-as-list nil))
-  (fset:do-map (k v m) (push (list k v) res))
+  (do-map (k v m) (push (list k v) res))
   res)
 
 (defstruct (grph

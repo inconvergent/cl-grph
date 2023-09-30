@@ -18,12 +18,14 @@
           finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
-  (-run-tests '(#P"test/grph.lisp" #P"test/qry.lisp"
+  (-run-tests '(#P"test/qry-runtime.lisp"
+                #P"test/grph.lisp" #P"test/qry.lisp"
                 #P"test/qry-2.lisp" #P"test/qry-3.lisp"
                 #P"test/xgrph.lisp"
                 #P"test/grph-walk.lisp")))
 (defun p/run-tests ()
-  (-run-tests '(#P"test/grph.lisp" #P"test/qry.lisp"
+  (-run-tests '(#P"test/qry-runtime.lisp"
+                #P"test/grph.lisp" #P"test/qry.lisp"
                 #P"test/qry-2.lisp" #P"test/qry-3.lisp"
                 #P"test/xgrph.lisp")))
 

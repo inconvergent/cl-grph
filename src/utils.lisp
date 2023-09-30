@@ -10,16 +10,12 @@
 (defun d? (f) (describe f))
 (defun i? (f) (inspect f))
 
-; from on lisp by pg
 (defun mkstr (&rest args)
   (with-output-to-string (s)
     (dolist (a args) (princ a s))))
 
-; from on lisp by pg
 (defun reread (&rest args) (values (read-from-string (apply #'mkstr args))))
 
-
-;from on lisp by pg
 (defmacro abbrev (short long)
   `(defmacro ,short (&rest args)
      `(,',long ,@args)))
@@ -31,7 +27,6 @@
 (abbrev awf alexandria:flatten)
 
 
-; from on lisp by pg
 (defun symb (&rest args) (values (intern (apply #'mkstr args))))
 
 (defun kv (s) (declare (symbol s)) (intern (string-upcase (symbol-name s)) :keyword))
@@ -59,8 +54,7 @@
 (defun -gensyms (name n)
   (declare (symbol name) (fixnum n))
   (loop with name = (string-upcase (string name))
-        repeat n
-        for x across "XYZWUVPQR"
+        for x across "XYZWUVPQR" repeat n
         collect (gensym (format nil "~a-~a-" name x))))
 
 (defun filter-by-predicate (l fx &key (key #'identity))
@@ -81,6 +75,24 @@
              (when r (setf res `(,@r ,@res))))
            res)))
 
+(defun tree-replace (tree from to &optional (comparefx #'equal))
+  "compares every tree to from (with comparefx),
+and replaces it with to when there is a match"
+  (cond ((funcall comparefx tree from) to)
+        ((null tree) nil) ((atom tree) tree)
+        (t (mapcar (lambda (x) (tree-replace x from to))
+                   tree))))
+
+(defun tree-replace-fx (tree fxmatch fxtransform )
+  "compares every tree to from (with comparefx),
+and replaces it with to when there is a match"
+  (cond ((funcall fxmatch tree)
+           (tree-replace-fx (funcall fxtransform tree) fxmatch fxtransform))
+        ((null tree) nil)
+        ((atom tree) tree)
+        (t (mapcar (lambda (x) (tree-replace-fx x fxmatch fxtransform))
+                   tree))))
+
 (defun split-string (x s &key prune)
   (declare (character x) (string s) (boolean prune))
   (labels
@@ -96,14 +108,13 @@
 ; https://rosettacode.org/wiki/Cartesian_product_of_two_or_more_lists#Common_Lisp
 (defun n-cartesian-product (l)
   (declare (optimize speed (safety 1)) (list l))
-  "recursively calculate the n-cartesian product of a list of lists (sets)"
+  "cartesian product of a list of lists (sets)"
   (if (null l)
       (list nil)
       (loop for x in (car l)
             nconc (loop for y in (n-cartesian-product (cdr l))
                         collect (cons x y)))))
 
-; modified from on lisp by pg
 (defun group (source n)
   (when (< n 1) (warn "GROUP: bad length: ~a," n))
   (labels ((rec (source acc)
@@ -158,4 +169,11 @@
                                 (group l 2) :key #'car)
         do (push (the keyword k) res) (push v res))
   (reverse res))
+
+(defun remove-nil (l)
+  "coerce to list, and remove any nils"
+  (remove-if-not #'identity (ensure-list l)))
+
+(defmacro fsize (v) `(the veq:pn (fset:size ,v)))
+(defmacro logic-set () `(empty-map (empty-set)))
 

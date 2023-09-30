@@ -7,7 +7,7 @@
   (let ((path (grph:to-vector (grph:edge-set->path edge-set)))
         (res (list)))
     (declare (vector path))
-    (labels ((ypos (v) (declare (grph:pn v)) (veq:fsel (:y) (funcall fx v)))
+    (labels ((ypos (v) (declare (grph:pn v)) (veq:fsel (:y) (f@fx v)))
              (ind-rotate (path ymost)
                (declare (vector path) (grph:pn ymost))
                (grph::vector-rearrange path (ymost nil) (0 ymost)))
@@ -19,15 +19,14 @@
                cv)
              (cross (path &aux (n (length path)))
                 "does any segment in path cross the line (aref path 1) (aref path -1)."
-                (veq:f2let ((a (funcall fx (aref path 1)))
-                            (b (funcall fx (grph::vector-last path))))
+                (veq:f2let ((a (f@fx (aref path 1)))
+                            (b (f@fx (grph::vector-last path))))
                   (loop for i from 0 below n
                         do ; weird precision issue. override veq eps
                            ; TODO: can we fix this somehow?
                            (let ((veq::*eps* (* 1000f0 veq::*eps*)))
-                             (when (veq:f2segx a b (funcall fx
-                                                      (aref path i)
-                                                      (aref path (mod (1+ i) n))))
+                             (when (veq:f2segx a b (f@fx (aref path i)
+                                                         (aref path (mod (1+ i) n))))
                                (return-from cross t)))))
                 nil)
              (uw-farthest (path &aux (n (length path)) dst (curr -1))
@@ -37,11 +36,11 @@
                      if ; TODO: this feels very sketchy
                        (let ((veq::*eps* (* 1000f0 veq::*eps*)))
                           (veq:f2in-triangle
-                            (funcall fx (aref path 0) (aref path 1)
-                                        (grph::vector-last path) (aref path i))))
-                     do (let ((d (veq:f2segdst
-                                   (funcall fx
-                                     (aref path 1) (grph::vector-last path) (aref path i)))))
+                            (f@fx (aref path 0) (aref path 1)
+                                  (grph::vector-last path) (aref path i))))
+                     do (let ((d (veq:f2segdst (f@fx (aref path 1)
+                                                     (grph::vector-last path)
+                                                     (aref path i)))))
                           (when (or (= curr -1) (> d dst)) (setf curr i dst d))))
                (values curr dst))
              (split-diag (path i)

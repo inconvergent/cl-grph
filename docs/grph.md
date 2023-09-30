@@ -13,7 +13,7 @@ valid spatial modes: (ABS REL)
 #### GRPH:\*VALID-CLAUSES\*
 
 ```
-valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT)
+valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
 ```
 
 #### GRPH:->
@@ -669,10 +669,10 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT)
  ;   [symbol]
  ; 
  ; LQRY names a compiled function:
- ;   Lambda-list: (G &KEY DB USING SELECT WHERE THEN COLLECT)
+ ;   Lambda-list: (G &KEY DB SELECT WHERE THEN COLLECT)
  ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH &KEY (:DB BOOLEAN) (:USING T) (:SELECT T)
- ;                             (:WHERE T) (:THEN T) (:COLLECT T))
+ ;                  (GRPH:GRPH &KEY (:DB BOOLEAN) (:SELECT T) (:WHERE T)
+ ;                             (:THEN T) (:COLLECT T))
  ;                  *)
  ;   Documentation:
  ;     compile and evaluate queries at runtime.
@@ -902,17 +902,16 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT)
  ; 
  ; QRY names a macro:
  ;   Lambda-list: (G &KEY DB IN USING SELECT WHERE COLLECT THEN FIRST
- ;                 PAIRS (PROC (QUOTE IDENTITY)) (ITR (GENSYM QRY-ITR))
- ;                 (RES (GENSYM QRY-RES)))
+ ;                 PAIRS)
  ;   Documentation:
  ;     evaluate a trivial (datalog-like) query against g.
- ;     :ex
- ;       (qry g :select (?x ?y)
- ;              :where (and (?x :c ?y)
- ;                          (not (or (?x :a 1)
- ;                                   (?x :a 3)))))
- ;     will return tuples (?x ?y) matching the query.
- ;     other alternatives are (selected vars are available when using these keywords):
+ ;     ex: (qry g :select (?x ?y)
+ ;                :where (and (?x :c ?y)
+ ;                            (not (or (?x :a 1)
+ ;                                     (?x :a 3)))))
+ ;     will return tuples (?x ?y) matching the query; all verts with :a property to
+ ;     either 1 or 3 other alternatives are (selected vars are available when using
+ ;     these keywords):
  ;      - :pairs T; same as the default, but return the full result pairs
  ;      - :collect [this]; same as default, but collect this instead of just the selected vars
  ;      - :then [this]; execute this code, returns nil
@@ -921,8 +920,6 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT)
  ;     other modifiers:
  ;      - :in [vars]; use values of vars bound outside the query.
  ;      - :using [vars]; mutate the graph for every returned tuple, see examples
- ;      - :res [symb]; bind query result to symb inside :collect, :then, :first
- ;      - :itr [symb]; counter available inside :collect, :then, :first
  ;      - :db T; print some useful debug info about the compiled query.
  ;     
  ;     see examples for more usage.

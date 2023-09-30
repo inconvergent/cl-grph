@@ -1,8 +1,8 @@
 (defpackage #:grph
   (:use #:common-lisp)
   (:nicknames #:cl-grph)
-  (:import-from #:fset
-    #:@ #:contains? #:less #:empty-set #:empty-map #:do-map #:do-set)
+  (:import-from #:fset #:@ #:contains? #:do-map #:do-set #:empty-map
+                #:empty-set #:less #:member?)
   (:export
     #:*dir-mode* #:*pos-mode* #:*valid-clauses*
     #:mvb #:dsb #:mvc
@@ -31,10 +31,9 @@
 
 (defpackage #:xgrph
   (:use #:common-lisp)
-  (:import-from #:fset
-    #:empty-seq #:seq)
+  (:import-from #:fset #:empty-seq #:seq)
   (:import-from #:grph
-    #:*dir-mode* #:*pos-mode* #:mvb #:dsb #:mvc #:pn #:add! #:del!)
+                #:*dir-mode* #:*pos-mode* #:mvb #:dsb #:mvc #:pn #:add! #:del!)
   (:export
     #:@verts #:2@verts #:3@verts
     #:@vert #:2@vert #:3@vert

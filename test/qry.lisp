@@ -1,22 +1,19 @@
 (in-package #:grph-tests)
 
-(plan 4)
+(plan 5)
 
 (subtest "qry preproc"
-  (is (grph::qry/preproc/kv
-        '(and (not (?b _ _))
-              (not (?c _ _))
-              (not-join (?a ?b) (?c _ _))
-              (not-join ?a (?c _ _))
-              (% #'/= ?c)
-              (?a _ ?b)
+  (is (grph:: qry/preproc/where/kv
+        '(and (not (?b _ _)) (not (?c _ _))
+              (not-join (?a ?b) (?c _ _)) (not-join ?a (?c _ _))
+              (% #'/= ?c) (?a _ ?b)
               (and (and (?a _ _) (or (_ ?a ?c) (_ _ 2))))
               (% #'/= ?b )
               (or-join ?a (?a _ ?b))
               (or-join (?a ?c) (?a _ ?b) (and (?xx ?h ?uu)))
-              (?c _ ?b)
-              (?a _ ?s)
-              (or (?a _ ?b) (?c _ _))))
+              (?c _ ?b) (?a _ ?s)
+              (or (?a _ ?b) (?c _ _))
+              (uniq ?a ?b)))
       '(:and (:not (:fact ?b _ _)) (:not (:fact ?c _ _))
              (:not-join (?a ?b) (:fact ?c _ _))
              (:not-join (?a) (:fact ?c _ _))
@@ -27,10 +24,9 @@
              (:or-join (?a) (:fact ?a _ ?b))
              (:or-join (?a ?c) (:fact ?a _ ?b)
                        (:and (:fact ?xx ?h ?uu)))
-             (:fact ?c _ ?b)
-             (:fact ?a _ ?s)
-             (:or (:fact ?a _ ?b)
-                  (:fact ?c _ _)))))
+             (:fact ?c _ ?b) (:fact ?a _ ?s)
+             (:or (:fact ?a _ ?b) (:fact ?c _ _))
+             (:uniq ?a ?b))))
 
 (subtest "qry basic"
   (let ((g (make-edge-set)))
@@ -101,10 +97,20 @@
         (ls '((0 1) (1 0) (1 2) (1 3)
               (2 1) (3 1) (5 4) (4 5))))
 
+    (is (grph:qry g :select (?x ?y) :where (or (?x :e ?y) (?x :a ?y))
+                    :first (list ?x ?y))
+        '(3 1))
 
-    (is (ls (grph:qry g :select (?r) :where (and (?r :a _) (?a :b _))))
-        (ls '((3) (2) (1) (0))))
+    (is (ls (grph:qry g :select (?x ?y)
+                        :where (and (?x ?c 1) (1 ?c ?y)
+                                    (f `(((?x . 0) (?y . 0))
+                                         ((?x . 0) (?y . 2))
+                                         ((?x . 2) (?y . 3))
+                                         ((?x 888) (?y . 77)))))))
+        (ls `((0 0) (0 2) (2 3))))))
 
+(subtest "joins"
+  (let ((g (make-edge-set)))
     (is (ls (grph:qry g :select (?x)
                         :where (and (or-join ?x (?x _ _) (_ _ ?x))
                                     (?x _ _)
@@ -130,14 +136,14 @@
                   :where (and (or (?b _ _) (_ _ ?b))
                               (not-join ?b (?a _ ?b) (?b _ ?c) (% (/= ?a ?c))))))
         (rs '(0 2 7 77 99)))
-
-    (is (ls (grph:qry g :select (?x ?y)
-                        :where (and (?x _ 1) (1 _ ?y)
-                                    (f `(((?x . 0) (?y . 0))
-                                         ((?x . 0) (?y . 2))
-                                         ((?x . 2) (?y . 3))
-                                         ((?x 888) (?y . 77)))))))
-        (ls `((0 0) (0 2) (2 3))))))
+    (is (rs (grph:qry g :select ?b
+                  :where (and (or (?b _ _) (_ _ ?b))
+                              (not-join ?b (?a _ ?b) (?b _ ?c) (uniq ?a ?c)))))
+        (rs '(0 2 7 77 99)))
+    (is (rs (grph:qry g :select ?b
+                  :where (and (or (?b _ _) (_ _ ?b))
+                              (not-join ?b (?a _ ?b) (?b _ ?c) (uniq ?a ?c ?b)))))
+        (rs '(0 2 7 77 99)))))
 
 (subtest "qry 2"
   (let ((g (grph:grph)))

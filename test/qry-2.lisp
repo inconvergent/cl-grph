@@ -1,6 +1,6 @@
 (in-package #:grph-tests)
 
-(plan 3)
+(plan 4)
 
 (subtest  "qry nested"
   (let ((g (make-edge-set)))
@@ -83,5 +83,39 @@
 ;     (is (ls (grph:@edges g))
 ;         (ls '((99 77) (5 4) (5 3) (4 5) (4 3) (3 4)
 ;               (3 1) (2 1) (1 3) (1 2) (1 0) (0 1))))))
+
+
+(subtest "aggs"
+ (let ((g (grph:ingest-edges (grph:make)
+            '((0 :a 1) (0 :a 3) (1 :a 2) (1 :a 3)
+              (3 :a 0) (3 :a 6) (4 :a 5) (6 :a 3)))))
+
+   (is (grph:qry g :select (?c (cnt ?x)) :where (?x ?c _)
+                   :collect (list ?c (cnt ?x)))
+       '((:A 5)))
+
+   (is (grph:qry g :select ((cnt ?y ?x)) :where (or (?x _ ?y) (?y _ ?x )))
+       '((12)))
+
+   (is (grph:qry g :select (?x (cnt ?y)) :where (?x _ ?y))
+       '((6 1) (4 1) (3 2) (1 2) (0 2)))
+
+   (is (grph:qry g :select (?y (cnt ?x)) :where (?x _ ?y))
+       '((3 3) (5 1) (6 1) (0 1) (2 1) (1 1)))
+
+  (is (grph:qry g :select (?x (grp ?y ?z))
+                  :where (and (?x :a ?y) (?y :a ?z)))
+      '((3 ((6 3) (0 3) (0 1)))
+        (0 ((3 6) (3 0) (1 3) (1 2)))
+        (1 ((3 6) (3 0)))
+        (6 ((3 6) (3 0)))))
+
+  (is (grph:qry g :select (?x (grp ?y ?z) (cnt ?y ?z))
+                  :where (and (?x :a ?y) (?y :a ?z)))
+      '((3 ((6 3) (0 3) (0 1)) 3)
+        (0 ((3 6) (3 0) (1 3) (1 2)) 4)
+        (1 ((3 6) (3 0)) 2)
+        (6 ((3 6) (3 0)) 2)))
+   ))
 
 (unless (finalize) (error "error in QRY ADVANCED."))

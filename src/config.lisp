@@ -28,7 +28,7 @@
 ;              (optimize (safety 1) (speed 3) debug space))
 
 (defparameter *valid-clauses* '(:and :not :or :or-join :not-join
-                                :q :% :f :fact))
+                                :q :% :f :fact :uniq))
 (map-docstring '*valid-clauses*
   (format nil "valid query clauses: ~a" *valid-clauses*) :nodesc)
 (defparameter *dir-mode* '(:-> :<- :<>))

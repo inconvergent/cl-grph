@@ -1,6 +1,6 @@
 (asdf:defsystem #:grph
   :description "immutable graph data structure with Datalog query language"
-  :version "0.20.1"
+  :version "0.21.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :licence "MIT"
   :in-order-to ((asdf:test-op (asdf:test-op #:grph/tests)))
@@ -19,6 +19,7 @@
                (:file "qry-utils" :depends-on ("grph"))
                (:file "qry-match" :depends-on ("qry-utils"))
                (:file "qry-runtime" :depends-on ("qry-match"))
+               (:file "qry-runtime-2" :depends-on ("qry-match"))
 
                ; parallel:
                #+:grph-parallel
@@ -40,7 +41,7 @@
 
 (asdf:defsystem #:grph/tests
   :depends-on (#:veq #:grph #:prove #+:grph-parallel #:lparallel #:uiop #:asdf)
-  :version "0.20.1"
+  :version "0.21.0"
   :perform (asdf:test-op (o s)
              (uiop:symbol-call ':grph-tests
                #+:grph-parallel '#:p/run-tests
