@@ -3,8 +3,17 @@
 (declaim (inline any? bindable? eq-car? eq-car? free? not? var? ^var? val? fx?
                  has-symchar? interned? get-var get-all-vars symlen no-dupes?))
 
-; TODO: move some things to config?
-(defvar *aggregate* (list :min :max :cnt :grp))
+(defmacro msg-if (msg a &aux (a* (gensym "A")))
+  `(let ((,a* ,a)) (when ,a* (,msg ,a*))))
+
+(defmacro with-messages (msgs &body body)
+  `(let (,@(loop for m in msgs collect `(,m (list))))
+     (labels (,@(loop for m in msgs
+                      collect `(,m (s &rest rest)
+                                 (push (mkstr ,(kv m) ": "
+                                         (apply #'format nil s rest))
+                                       ,m))))
+      (progn ,@body))))
 
 (defun gk (p k &optional silent &aux (hit (cdr (assoc k p))))
   (declare #.*opt* (list p) (keyword k))
@@ -75,6 +84,9 @@
   (declare (optimize speed) (list l))
   (= (length (the list (undup l nil))) (length l))) ; undup use is ok
 
+(defun aggr? (e) (and (listp e) (symbolp (car e))
+                      (member (kv (car e)) *aggregate*)))
+
 (defun rule-name? (n)
   (and (symbolp n) (has-symchar? n #\*) (> (symlen n) 1)))
 
@@ -88,35 +100,53 @@
         ((atom l) l)
         ((consp l) (cons (rec/get-var f (car l))
                          (rec/get-var f (cdr l))))
+        ; this is unreachable i think, but leave it in
         (t (error "REC/GET-VAR: unexpected value in rec/repl/var: ~s" l))))
 
 (defun get-all-vars (a)
   (declare (optimize speed) (list a))
   (reverse (tree-find-all a #'var?)))
 
-(defun get-bindable (a)
+(defun get-bindables (a)
   (declare (optimize speed) (list a))
   (reverse (tree-find-all a (lambda (c) (and (var? c) (bindable? c))))))
 
-(defun get-join-binds (qc)
-  (declare (list qc))
-  (let ((res (ensure-list (cadr qc))))
-    (unless (every #'var? res) (error "QRY: bad bind var in: ~a" qc))
-    res))
+(defun get-not-bindables (n &aux (s (car n)))
+  (ecase s (:not-join (ensure-list (second n)))
+           (:not (get-bindables n))
+           (:% (get-bindables n))))
 
-(defun qry/show (p &key (s (make-string-output-stream))
-                        (compiled-key :compiled))
-  (apply #'format s "
+; DEBUG / SHOW ----------------
+
+(defun qry/show (p &key (s (make-string-output-stream)) (mode :default))
+  (labels ((full (p) (gk p :compiled-full t))
+           (short (p) (gk p :compiled-full t))
+           (main (p) (third (gk p :compiled-full t)))
+           (default (p) (gk p :compiled t)))
+    (apply #'format s "
 ██ COMPILED ██████████████████████████
 ██ select:  ~a
 ██ where:   ~a
 ██ PROPS    ██████████████████████████~%" (gkk p :select :where))
-  (loop with ignores = '(:select :where :res-sym :itr-sym
-                         :compiled-full :compiled)
-        for (k . v) in p for k* = (string-downcase (mkstr k ":"))
-        if (and v (not (member k ignores)))
-        do (format s "~&██ ~8,,,' @<~d~> ~a~%" k* v))
-  (format s "~&██ OUTPUT   >>>>>~%██ ~a~%███████████ <<<<<~%"
-            (gk p compiled-key t))
+    (loop with ignores = '(:select :where :res-sym :itr-sym
+                           :compiled-full :compiled)
+          for (k . v) in p for k* = (string-downcase (mkstr k ":"))
+          if (and v (not (member k ignores)))
+          do (format s "~&██ ~8,,,' @<~d~> ~a~%" k* v))
+    (format s "~&██ OUTPUT   >>>>>~%██ ~a~%███████████ <<<<<~%"
+              (funcall (ccase mode (:full #'full) (t #'default) (:main #'main)) p))
+    (get-output-stream-string s)))
+
+(defun qry/compile/write-messages (&rest l &aux (s (make-string-output-stream)))
+  (loop for o in l do (format s "~&██ ~a~&" o))
   (get-output-stream-string s))
+
+
+(defun qry/compile/check/messages (p err wrn)
+  (cond ((and wrn (not err)) ; only warnings
+         (warn "~&~a~&" (apply #'qry/compile/write-messages "COMPILE WARN"
+                          (concatenate 'list wrn (list (qry/show p :mode t))))))
+        (err ; errors (and possibly warnings)
+          (error "~&~a~&" (apply #'qry/compile/write-messages "COMPILE ERROR"
+                            (concatenate 'list err wrn (list (qry/show p :mode t))))))))
 

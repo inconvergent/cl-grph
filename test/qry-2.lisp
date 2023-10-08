@@ -3,19 +3,26 @@
 (plan 4)
 
 (subtest  "qry nested"
-  (let ((g (make-edge-set)))
-    (is (ls (grph:qry g :select (?a)
-                        :where (and (?a _ _)
-                                    (q :select ?a
-                                       :where (?a :a _)))))
-      (ls '((0) (1) (2) (3))))
+  (let* ((gg (make-edge-set)) (xg gg))
+    (is (ls (grph:qry gg :select (?a)
+                         :where (and (?a _ _)
+                                     (q :select ?a
+                                        :where (?a :a _)))))
+        (ls '((0) (1) (2) (3))))
 
-    (is (rs (grph:qry g :select ?b
-                        :where (and (or (?b _ _) (_ _ ?b))
-                                    (not-join ?b
-                                      (q :select (?a ?b ?c)
-                                         :where (and (?a _ ?b) (?b _ ?c)
-                                                     (% (/= ?a ?b ?c))))))))
+    (is (rs (grph:qry gg :select ?b
+              :where (and (or (?b _ _) (_ _ ?b))
+                          (not-join ?b
+                            (q :select (?a ?b ?c)
+                               :where (and (?a _ ?b) (?b _ ?c)
+                                           (% (/= ?a ?b ?c))))))))
+        (rs '(0 2 7 77 99)))
+    (is (rs (grph:qry gg :select ?b
+              :where (and (or (?b _ _) (_ _ ?b))
+                          (not-join ?b
+                            (q xg :select (?a ?b ?c)
+                                  :where (and (?a _ ?b) (?b _ ?c)
+                                              (% (/= ?a ?b ?c))))))))
         (rs '(0 2 7 77 99)))))
 
 (subtest "qry using"

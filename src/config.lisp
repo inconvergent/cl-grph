@@ -31,9 +31,15 @@
                                 :q :% :f :fact :uniq))
 (map-docstring '*valid-clauses*
   (format nil "valid query clauses: ~a" *valid-clauses*) :nodesc)
+
+(defvar *aggregate* (list :cnt :grp))
+(map-docstring '*aggregate*
+  (format nil "valid agg clauses in qry: ~a" *aggregate*) :nodesc)
+
 (defparameter *dir-mode* '(:-> :<- :<>))
 (map-docstring '*dir-mode*
   (format nil"valid edge direction modes: ~a" *dir-mode*) :nodesc)
+
 (defparameter *pos-mode* '(:abs :rel))
 (map-docstring '*pos-mode*
   (format nil "valid spatial modes: ~a" *pos-mode*) :nodesc)

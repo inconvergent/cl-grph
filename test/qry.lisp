@@ -3,17 +3,19 @@
 (plan 5)
 
 (subtest "qry preproc"
-  (is (grph:: qry/preproc/where/kv
-        '(and (not (?b _ _)) (not (?c _ _))
-              (not-join (?a ?b) (?c _ _)) (not-join ?a (?c _ _))
-              (% #'/= ?c) (?a _ ?b)
-              (and (and (?a _ _) (or (_ ?a ?c) (_ _ 2))))
-              (% #'/= ?b )
-              (or-join ?a (?a _ ?b))
-              (or-join (?a ?c) (?a _ ?b) (and (?xx ?h ?uu)))
-              (?c _ ?b) (?a _ ?s)
-              (or (?a _ ?b) (?c _ _))
-              (uniq ?a ?b)))
+  (is (cdr (assoc :where
+             (grph::qry/preproc/in/where
+               '((:where .
+                   (and (not (?b _ _)) (not (?c _ _))
+                        (not-join (?a ?b) (?c _ _)) (not-join ?a (?c _ _))
+                        (% #'/= ?c) (?a _ ?b)
+                        (and (and (?a _ _) (or (_ ?a ?c) (_ _ 2))))
+                        (% #'/= ?b )
+                        (or-join ?a (?a _ ?b))
+                        (or-join (?a ?c) (?a _ ?b) (and (?xx ?h ?uu)))
+                        (?c _ ?b) (?a _ ?s)
+                        (or (?a _ ?b) (?c _ _))
+                        (uniq ?a ?b)))))))
       '(:and (:not (:fact ?b _ _)) (:not (:fact ?c _ _))
              (:not-join (?a ?b) (:fact ?c _ _))
              (:not-join (?a) (:fact ?c _ _))

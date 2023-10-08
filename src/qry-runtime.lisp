@@ -31,7 +31,7 @@
 ; TODO: it is bad to copy this stuff all the time. how can we avoid it?
 (declaim (inline psrt pkeys split-by-keys get-keys))
 (defun psrt (l &optional (fx #'car))
-  (declare (optimize speed (safety 1)) (list l))
+  (declare (optimize speed (safety 1)) (list l) (function fx))
   "sort pairs by first element."
   (sort (copy-list l) #'string< :key fx))
 
@@ -89,18 +89,10 @@
   (declare (optimize speed (safety 1)) (list l))
   (mapcar (lambda (row) (alist-get-values keys row)) l))
 
-(defun agg/max (l &rest keys)
-  (declare (optimize speed (safety 1)) (list l))
-  (mapcar
-    (lambda (row)
-            ; (alist-get-values keys row)
-            row
-
-            )
-    l))
-
 (defun agg/cnt (l &rest keys)
-  (declare (optimize speed (safety 1)) (list l))
+  (declare (optimize speed (safety 1)) (list l)
+           (ignore keys)
+           )
   (length l))
 
 (defun qry-and (aa bb)
@@ -120,7 +112,7 @@
                    if (gethash (psrt (get-keys common-keys b)) ht)
                    do (push (psrt b) res))
            res)
-           (isect-merge-2 (common aa bb &aux (ht (ht)) (res (list)))
+           (isect-merge-2 (common aa bb &aux (res (list)))
              (let ((lft (alists/collapse-keys/ht common aa))
                    (rht (alists/collapse-keys/ht common bb)))
                (when (> (hash-table-count lft) (hash-table-count rht)) (rotatef lft rht))
