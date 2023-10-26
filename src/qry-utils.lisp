@@ -85,7 +85,7 @@
   (= (length (the list (undup l nil))) (length l))) ; undup use is ok
 
 (defun aggr? (e) (and (listp e) (symbolp (car e))
-                      (member (kv (car e)) *aggregate*)))
+                      (member (kv (car e)) *aggregates*)))
 
 (defun rule-name? (n)
   (and (symbolp n) (has-symchar? n #\*) (> (symlen n) 1)))
@@ -94,7 +94,7 @@
   (declare (optimize speed) (symbol k) (list l))
   (cdr (find k l :key #'car :test #'eq)))
 
-(defun rec/get-var (f l) ; TODO: rename this mfer
+(defun rec/get-var (f l)
   (declare (symbol f))
   (cond ((var? l) `(get-var ',l ,f))
         ((atom l) l)
@@ -120,7 +120,6 @@
 
 (defun qry/show (p &key (s (make-string-output-stream)) (mode :default))
   (labels ((full (p) (gk p :compiled-full t))
-           (short (p) (gk p :compiled-full t))
            (main (p) (third (gk p :compiled-full t)))
            (default (p) (gk p :compiled t)))
     (apply #'format s "
@@ -134,7 +133,7 @@
           if (and v (not (member k ignores)))
           do (format s "~&██ ~8,,,' @<~d~> ~a~%" k* v))
     (format s "~&██ OUTPUT   >>>>>~%██ ~a~%███████████ <<<<<~%"
-              (funcall (ccase mode (:full #'full) (t #'default) (:main #'main)) p))
+              (funcall (ecase mode (:full #'full) (t #'default) (:main #'main)) p))
     (get-output-stream-string s)))
 
 (defun qry/compile/write-messages (&rest l &aux (s (make-string-output-stream)))

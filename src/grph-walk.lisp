@@ -3,6 +3,15 @@
 ; TODO: improve handing of (any ?p) in qry?
 ; TODO: macro fro (if any ...)?
 
+(defmacro connected-verts (g &optional (p :_))
+  (declare (symbol p))
+  "get all connected verts."
+  (with-symbs `(g ,g)
+  (if (any? p)
+      `(qry g :select ?x :where (or (?x _ _) (_ _ ?x)))
+      `(let ((?p ,p))
+         (qry g :select ?x :in ?p :where (or (?x ?p _) (_ ?p ?x)))))))
+
 ; this is a fx because that makes it easier to use in queries
 ; make two different fxs for ?p / not ?p?
 (defun num-either (g ?x &optional (?p :_))
@@ -12,81 +21,79 @@
                      (qry g :in ?x :select ?y :where (or (?x _ ?y) (?y _ ?x)))
                      (qry g :in (?x ?p) :select ?y :where (or (?x ?p ?y) (?y ?p ?x)))))))
 
+
 (defmacro edge-set (g &optional (p :_))
-  (declare (symbol g p))
+  (declare (symbol p))
   "get edge set. ignores edge dir."
+  (with-symbs `(g ,g)
   (if (any? p)
-   `(qry ,g :select (?x ?y) :where (and (% (< ?x ?y)) (or (?x _ ?y) (?y _ ?x))))
-   `(let ((?p ,p))
-      (qry ,g :select (?x ?y) :in ?p :where (and (% (< ?x ?y)) (or (?x ?p ?y) (?y ?p ?x)))))))
+      `(qry g :select (?x ?y) :where (and (% (< ?x ?y)) (or (?x _ ?y) (?y _ ?x))))
+      `(let ((?p ,p))
+         (qry g :select (?x ?y) :in ?p :where (and (% (< ?x ?y)) (or (?x ?p ?y) (?y ?p ?x))))))))
 
 (defmacro dead-ends (g &optional (p :_) y)
-  (declare (symbol g p) (boolean y))
-  "vertices that have exactly one adjacent vertices: [g-] ?y-?x
-ignores edge dir."
-  (if (any? p)
-   `(qry ,g :select (?x ,(if y '?y))
-            :where (and (or (?x _ ?y) (?y _ ?x)) (% (= (num-either ,g ?x) 1)))
-            :collect ,(if y '(list ?x ?y) '?x))
-   `(let ((?p ,p))
-      (qry ,g :select (?x ,(if y '?y)) :in ?p
-              :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (= (num-either ,g ?x ?p) 1)))
-              :collect ,(if y '(list ?x ?y) '?x)))))
+  (declare (symbol p) (boolean y))
+  "vertices that have exactly one adjacent vertices: [g-] ?y-?x ignores edge dir."
+   (with-symbs `(g ,g)
+   (if (any? p)
+       `(qry g :select (?x ,(if y '?y))
+               :where (and (or (?x _ ?y) (?y _ ?x)) (% (= (num-either g ?x) 1)))
+               :collect ,(if y '(list ?x ?y) '?x))
+       `(let ((?p ,p))
+          (qry g :select (?x ,(if y '?y)) :in ?p
+                 :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (= (num-either g ?x ?p) 1)))
+                 :collect ,(if y '(list ?x ?y) '?x))))))
 
 (defmacro two-isects (g &optional (p :_) y)
-  (declare (symbol g p) (boolean y))
-  "vertices that have exactly 2 adjacent vertex: [g-] ?y1-?x-?y2 [-g]
- ignores edge dir.
-  "
+  (declare (symbol p) (boolean y))
+  "vertices that have exactly 2 adjacent vertex: [g-] ?y1-?x-?y2 [-g] ignores edge dir."
+  (with-symbs `(g ,g)
   (if (any? p)
-   `(qry ,g :select (?x ,(if y '?y))
-            :where (and (or (?x _ ?y) (?y _ ?x)) (% (= (num-either ,g ?x) 2)))
-            :collect ,(if y '(list ?x ?y) '?x))
-   `(let ((?p ,p))
-      (qry ,g :select (?x ,(if y '?y)) :in ?p
-              :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (= (num-either ,g ?x ?p) 2)))
-              :collect ,(if y '(list ?x ?y) '?x)))))
+      `(qry g :select (?x ,(if y '?y))
+              :where (and (or (?x _ ?y) (?y _ ?x)) (% (= (num-either g ?x) 2)))
+              :collect ,(if y '(list ?x ?y) '?x))
+      `(let ((?p ,p))
+         (qry g :select (?x ,(if y '?y)) :in ?p
+                :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (= (num-either g ?x ?p) 2)))
+                :collect ,(if y '(list ?x ?y) '?x))))))
 
 (defmacro segment-isects (g &optional (p :_) y)
-  (declare (symbol g p) (boolean y))
-  "vertices that do not have exactly 2 adjacent vertices. ie. the set of dead ends and multi isects.
-ignores edge dir."
+  (declare (symbol p) (boolean y))
+  "vertices that do not have exactly 2 adjacent vertices. ie. the set of dead
+ends and multi isects. ignores edge dir."
+  (with-symbs `(g ,g)
   (if (any? p)
-   `(qry ,g :select (?x ,(if y '?y))
-            :where (and (or (?x _ ?y) (?y _ ?x)) (% (/= (num-either ,g ?x) 2)))
-            :collect ,(if y '(list ?x ?y) '?x))
-   `(let ((?p ,p))
-      (qry ,g :select (?x ,(if y '?y)) :in ?p
-              :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (/= (num-either ,g ?x ?p) 2)))
-              :collect ,(if y '(list ?x ?y) '?x)))))
+      `(qry g :select (?x ,(if y '?y))
+              :where (and (or (?x _ ?y) (?y _ ?x)) (% (/= (num-either g ?x) 2)))
+              :collect ,(if y '(list ?x ?y) '?x))
+      `(let ((?p ,p))
+         (qry g :select (?x ,(if y '?y)) :in ?p
+                :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (/= (num-either g ?x ?p) 2)))
+                :collect ,(if y '(list ?x ?y) '?x))))))
 
 (defmacro multi-isects (g &optional (p :_) y)
-  (declare (symbol g p) (boolean y))
+  (declare (symbol p) (boolean y))
   "vertices that have 3 or more adjacent vertices. ignores edge dir."
+  (with-symbs `(g ,g)
   (if (any? p)
-   `(qry ,g :select (?x ,(if y '?y))
-            :where (and (or (?x _ ?y) (?y _ ?x)) (% (> (num-either ,g ?x) 2)))
-            :collect ,(if y '(list ?x ?y) '?x))
-   `(let ((?p ,p))
-      (qry ,g :select (?x ,(if y '?y)) :in ?p
-              :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (> (num-either ,g ?x ?p) 2)))
-              :collect ,(if y '(list ?x ?y) '?x)))))
+      `(qry g :select (?x ,(if y '?y))
+              :where (and (or (?x _ ?y) (?y _ ?x)) (% (> (num-either g ?x) 2)))
+              :collect ,(if y '(list ?x ?y) '?x))
+      `(let ((?p ,p))
+         (qry g :select (?x ,(if y '?y)) :in ?p
+                :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (> (num-either g ?x ?p) 2)))
+                :collect ,(if y '(list ?x ?y) '?x))))))
 
 (defun del-dead-ends (g &optional (p :_))
   "delete dead-ends until there are no more dead ends left. ignores edge dir."
   (labels ((-del (a b) (del! g a b) (del! g b a)))
-    (loop for ee = (dead-ends g p)
-          while ee do (loop for (a b) in ee do (-del a b))))
+    (loop for ee = (dead-ends g p t)
+          while ee do (veq:vpr ee) (loop for (a b) in ee do (-del a b))))
   g)
 
-(defun edges-ht (es &aux (ht (make-hash-table :test #'equal)))
-  "convert edge set to hash table."
-  (labels ((-srt (e) (if (apply #'< e) e (reverse e))))
-    (loop for e in es do (setf (gethash (-srt e) ht) t)))
-  ht)
 
 ; TODO: start in multi isects
-(defun walk-edge-set (g es &aux (edges (edges-ht es)))
+(defun walk-edge-set (g es &aux (edges (edge-set->ht es)))
   (declare (grph g) (list es) (hash-table edges))
   "greedily walk the graph and return every edge exactly once. ignores edge dir."
   (labels

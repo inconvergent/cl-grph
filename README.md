@@ -6,9 +6,7 @@
 `grph` is an in-memory immutable graph structure with
 [Datalog](https://en.wikipedia.org/wiki/Datalog) query language. The data
 structure and interfaces are generic, but it is primarily intended to
-be used in my generative art experiments.. It builds on several of the ideas
-and issues I encountered when writing the `weir` system, which is a part of
-[weird](https://github.com/inconvergent/weird).
+be used in my generative art experiments.
 
 The main features is that the graph data structure builds on
 [fset](https://fset.common-lisp.dev/) in order to be immutable. Furthermore, in
@@ -98,8 +96,8 @@ folder](examples).
     queries can be significantly faster when `grph` is loaded with
     `:grph-parallel` in `*feautures*`; in which case `lparallel` will be
     automatically installed via quicklisp.
-  - [weird](https://github.com/inconvergent/weird). Some of the examples depend
-    on `weird`. But the `grph` system does not require `weird` directly.
+  - [auxin](https://github.com/inconvergent/auxin). Some of the examples depend
+    on `auxin`. But the `grph` system does not require `auxin` directly.
 
 
 ## Tests

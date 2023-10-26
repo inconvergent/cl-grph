@@ -1,5 +1,27 @@
 (in-package :grph)
 
+(defun list->fset (ll &optional (fx #'identity))
+  (declare (list ll) (function fx))
+  "make an fset with every (fx o) for every o in ll. see fset->list."
+  (loop with res = (fset:empty-set)
+        for l in ll do (setf res (fset:with res (funcall fx l)))
+        finally (return res)))
+
+(defun fset->list (ss &optional (fx #'identity) &aux (res (list)))
+  (declare (fset:set ss) (function fx))
+  "inverse of list->fset."
+  (do-set (o ss) (push (funcall fx o) res)) res)
+
+(defun edge-set->ht (es &optional (ht (make-hash-table :test #'equal)))
+  (declare (list es) (hash-table ht))
+  "convert edge set to hash table."
+  (loop for (a b) in es
+        do (setf (gethash (if (< a b) `(,a ,b) `(,b ,a)) ht) t))
+  ht)
+(defun ht->edge-set (ht)
+  (declare (hash-table ht))
+  "inverse of edge-set->ht."
+  (loop for e being the hash-keys of ht collect e))
 
 (defun path->edge-set (path &key closed)
   (declare (list path) (boolean closed))

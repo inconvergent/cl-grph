@@ -20,10 +20,8 @@
   res)
 
 (defstruct (grph
-  (:constructor grph (&optional (adj nilmap) (num-edges 0)
-                                (props nilmap) (mid nilmap)))
-  (:constructor make (&optional (adj nilmap) (num-edges 0)
-                                (props nilmap) (mid nilmap)))
+  (:constructor grph (&optional (adj nilmap) (num-edges 0) (props nilmap) (mid nilmap)))
+  (:constructor make (&optional (adj nilmap) (num-edges 0) (props nilmap) (mid nilmap)))
   (:print-object prt))
   "create a graph instance.
 
@@ -42,8 +40,7 @@ the following terminology is used:
   - bcduyx(b) is a cycle.
   - b and d are multi intersection points/vertices
   - a, y, l are dead-ends.
-  - a, b, c, y are incident of b
-"
+  - a, b, c, y are incident of b"
   (adj nilmap :type fset:map :read-only t)
   (props nilmap :type fset:map :read-only t)
   (mid nilmap :type fset:map :read-only t)
@@ -64,7 +61,7 @@ the following terminology is used:
 
 (defun @mid (g k &optional p)
   (declare (grph g))
-  "get val of prop, p, for key, k. should be an edge k=(a b)"
+  "get val of prop, p, for key, k. should be an edge k=(a b)."
   (if p (get-multi-rel (mid g) k :prop p)
         (get-multi-rel (mid g) k)))
 
@@ -139,18 +136,16 @@ the following terminology is used:
         (1+ (grph-num-edges g))
         (props g) (mid g)))
 
-; alter all refs to add
 (defun add (g a b &optional props) ; option to force set prop?
   (declare #.*opt* (grph g) (pn a b) (list props))
   "new edge (a b). optionally set prop, p, (with val).
 returns: (values g created?)"
-  (when (= a b) ;(warn "ADD: ignoring incorrect edge: (~a ~a)." a b)
-                (return-from add (values g nil)))
+  (when (= a b) (return-from add (values g nil)))
   (if (@mem g a b) (values (prop g (list a b) props) nil)
                    (values (prop (-add g a b) (list a b) props) t)))
 
 (defun -del-adj-both (adj ea eb a b)
-  (declare #.*opt* (fset:map ea eb) (veq:pn a b))
+  (declare #.*opt* (fset:map ea eb) (pn a b))
   (let* ((ea (fset:less ea b))
          (eb (fset:less eb a))
          (nila (fset:empty? ea))
@@ -163,7 +158,7 @@ returns: (values g created?)"
 
 ; this EXPECTS a->b to exits. but handles the possibility that b<-a exists too
 (defun -del-adj (adj a b)
-  (declare #.*opt* (fset:map adj) (veq:pn a b))
+  (declare #.*opt* (fset:map adj) (pn a b))
   (let ((ea (@ adj a)) (eb (@ adj b)))
     (declare (fset:map ea eb))
     (if (@ eb a) (fset:with adj a (fset:with ea b nil)) ; a <> b. now set a->b to nil, keep ba
@@ -192,8 +187,7 @@ returns: (values g deleted?)"
 (defun -del-prop (g ab prop)
   (declare #.*opt* (grph g) (list ab) (symbol prop))
   (if (@prop g ab prop)
-      (values (grph (adj g)
-                    (grph-num-edges g)
+      (values (grph (adj g) (grph-num-edges g)
                     (del-multi-rel (props g) ab prop)
                     (del-multi-rel (mid g) prop ab))
               t)
@@ -205,7 +199,7 @@ returns: (values g deleted?)"
         for p in props
         do (mvb (g* del?) (-del-prop g ab p)
              (setf g g* deleted? (or del? deleted?)))
-        finally (return-from del-props (veq:vpr (values g deleted?)))))
+        finally (return-from del-props (values g deleted?))))
 
 ; VARIOUS ---
 

@@ -11,6 +11,7 @@
 ;             #+LISPWORKS (lispworks:environment-variable name)
 ;             default))
 
+; TODO: configure *opt*
 ; (defmacro init-config (dev-vals vals)
 ;   (if (> (length (string-downcase (vgetenv "DEV" ""))) 0)
 ;     `(progn (defvar *dev* t)
@@ -27,23 +28,29 @@
 ; (init-config (optimize safety (speed 1) debug (space 2))
 ;              (optimize (safety 1) (speed 3) debug space))
 
-(defparameter *valid-clauses* '(:and :not :or :or-join :not-join
+(defparameter *clauses* '(:and :not :or :or-join :not-join
                                 :q :% :f :fact :uniq))
-(map-docstring '*valid-clauses*
-  (format nil "valid query clauses: ~a" *valid-clauses*) :nodesc)
+(map-docstring '*clauses*
+  (format nil "valid query clauses: ~a" *clauses*) :nodesc)
 
-(defvar *aggregate* (list :cnt :grp))
-(map-docstring '*aggregate*
-  (format nil "valid agg clauses in qry: ~a" *aggregate*) :nodesc)
+(defparameter *aggregates* '(:cnt :grp))
+(map-docstring '*aggregates*
+  (format nil "valid aggregate clauses in qry: ~a" *aggregates*) :nodesc)
 
-(defparameter *dir-mode* '(:-> :<- :<>))
-(map-docstring '*dir-mode*
-  (format nil"valid edge direction modes: ~a" *dir-mode*) :nodesc)
+(defparameter *dir-modes* '(:-> :<- :<> :><))
+(map-docstring '*dir-modes*
+  (format nil"valid edge direction modes: ~a" *dir-modes*) :nodesc)
 
-(defparameter *pos-mode* '(:abs :rel))
-(map-docstring '*pos-mode*
-  (format nil "valid spatial modes: ~a" *pos-mode*) :nodesc)
+(defparameter *pos-modes* '(:abs :rel))
+(map-docstring '*pos-modes*
+  (format nil "valid spatial modes: ~a" *pos-modes*) :nodesc)
 
+; (mapcar (lambda (s) (map-docstring s "edge direction mode" :nodesc)) '(-> <- <> ><))
+
+(map-docstring 'cancel "(cancel) can be used in some contexts (using, qry) to cancel
+the transaction and discard all changes" :nodesc)
+(map-docstring 'stop "(stop) can be used in some contexts (using, qry) to stop
+the transaction, but keep the changes" :nodesc)
 
 (defun psel (k)
   #+:grph-parallel

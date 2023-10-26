@@ -63,13 +63,51 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2APPEND-INV!
+#### XGRPH:2CENTER-CONNECTED
 
 ```
-:missing:todo:
-
- ; XGRPH:2APPEND-INV!
+ ; XGRPH:2CENTER-CONNECTED
  ;   [symbol]
+ ; 
+ ; 2CENTER-CONNECTED names a macro:
+ ;   Lambda-list: (&REST REST)
+ ;   Documentation:
+ ;     WRAPS: %2CENTER-CONNECTED
+ ;     ARGS: (G POS &OPTIONAL (X 0.0) (Y 0.0) MAX-SIDE)
+ ;     DOCSTRING: [none]
+ ;     defined via veq:FVDEF*
+ ;   Source file: /data/x/grph/src/xgrph.lisp
+```
+
+#### XGRPH:2CUT
+
+```
+ ; XGRPH:2CUT
+ ;   [symbol]
+ ; 
+ ; 2CUT names a macro:
+ ;   Lambda-list: (&REST REST)
+ ;   Documentation:
+ ;     WRAPS: %2CUT
+ ;     ARGS: (G POS (VA 4 LINE))
+ ;     DOCSTRING: cut g/pos along line. returns g, pos and a list of (vi si) where vi is a new
+ ;     vertex index in pos and s is the lerp along line
+ ;     defined via veq:FVDEF*
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
+```
+
+#### XGRPH:2CUT!
+
+```
+ ; XGRPH:2CUT!
+ ;   [symbol]
+ ; 
+ ; 2CUT! names a macro:
+ ;   Lambda-list: (G POS &REST REST)
+ ;   Documentation:
+ ;     cut g/pos along line. returns a list of (vi si) where vi is a new vertex
+ ;     index in pos and s is the lerp along line
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
 #### XGRPH:2CUT-TO-AREA
@@ -111,7 +149,8 @@
  ; 
  ; 2INTERSECT-ALL names a compiled function:
  ;   Lambda-list: (G POS)
- ;   Derived type: (FUNCTION (GRPH:GRPH T) (VALUES GRPH:GRPH T &OPTIONAL))
+ ;   Derived type: (FUNCTION (GRPH:GRPH FSET:SEQ)
+ ;                  (VALUES GRPH:GRPH FSET:SEQ &OPTIONAL))
  ;   Documentation:
  ;     creates intersections for all edges in g such that it becomes a planar graph.
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
@@ -126,6 +165,49 @@
  ;   [symbol]
  ; 
  ; 2INTERSECT-ALL! names a macro:
+ ;   Lambda-list: (G POS &REST REST)
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
+```
+
+#### XGRPH:2L@
+
+```
+:missing:todo:
+
+ ; XGRPH:2L@
+ ;   [symbol]
+ ; 
+ ; 2L@ names a macro:
+ ;   Lambda-list: (&REST REST)
+ ;   Source file: /data/x/grph/src/xgrph.lisp
+```
+
+#### XGRPH:2MIRROR
+
+```
+ ; XGRPH:2MIRROR
+ ;   [symbol]
+ ; 
+ ; 2MIRROR names a macro:
+ ;   Lambda-list: (&REST REST)
+ ;   Documentation:
+ ;     WRAPS: %2MIRROR
+ ;     ARGS: (G POS (VA 2 A B) &OPTIONAL SIDEFX)
+ ;     DOCSTRING: mirror around line ab.
+ ;     optionally delete edges on the side of ab where (sidefx (cross ab va) 0f0)
+ ;     defined via veq:FVDEF*
+ ;   Source file: /data/x/grph/src/xgrph-isect.lisp
+```
+
+#### XGRPH:2MIRROR!
+
+```
+:missing:todo:
+
+ ; XGRPH:2MIRROR!
+ ;   [symbol]
+ ; 
+ ; 2MIRROR! names a macro:
  ;   Lambda-list: (G POS &REST REST)
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
@@ -273,15 +355,6 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3APPEND-INV!
-
-```
-:missing:todo:
-
- ; XGRPH:3APPEND-INV!
- ;   [symbol]
-```
-
 #### XGRPH:3CUT-ALL
 
 ```
@@ -290,8 +363,8 @@
  ; 
  ; 3CUT-ALL names a compiled function:
  ;   Lambda-list: (G POS FX)
- ;   Derived type: (FUNCTION (GRPH:GRPH T T)
- ;                  (VALUES GRPH:GRPH T &OPTIONAL))
+ ;   Derived type: (FUNCTION (GRPH:GRPH FSET:SEQ FUNCTION)
+ ;                  (VALUES GRPH:GRPH FSET:SEQ &OPTIONAL))
  ;   Documentation:
  ;     cut every edge where they intersect in 2d according to projection fx.
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
@@ -308,6 +381,19 @@
  ; 3CUT-ALL! names a macro:
  ;   Lambda-list: (G POS FX)
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
+```
+
+#### XGRPH:3L@
+
+```
+:missing:todo:
+
+ ; XGRPH:3L@
+ ;   [symbol]
+ ; 
+ ; 3L@ names a macro:
+ ;   Lambda-list: (&REST REST)
+ ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3MOVE!
@@ -453,15 +539,6 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:APPEND-INV!
-
-```
-:missing:todo:
-
- ; XGRPH:APPEND-INV!
- ;   [symbol]
-```
-
 #### XGRPH:FXPOS!
 
 ```
@@ -472,6 +549,19 @@
  ; 
  ; FXPOS! names a macro:
  ;   Lambda-list: ((G POS I) &BODY BODY)
+ ;   Source file: /data/x/grph/src/xgrph.lisp
+```
+
+#### XGRPH:L@
+
+```
+:missing:todo:
+
+ ; XGRPH:L@
+ ;   [symbol]
+ ; 
+ ; L@ names a macro:
+ ;   Lambda-list: (DIM S &REST REST)
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -497,8 +587,7 @@
  ; PATH! names a macro:
  ;   Lambda-list: (DIM G S PATH &OPTIONAL MODES PROPS)
  ;   Documentation:
- ;     add path.
- ;     dir-modes: (-> <- <>)
+ ;     add path. modes: (-> <- <>)
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -515,6 +604,10 @@
  ;   Documentation:
  ;     initialze xgrph pos. d is the default fset:seq value.
  ;   Source file: /data/x/grph/src/xgrph.lisp
+ ; 
+ ; POS names a type-specifier:
+ ;   Lambda-list: ()
+ ;   Expansion: FSET:SEQ
 ```
 
 #### XGRPH:SPLIT!

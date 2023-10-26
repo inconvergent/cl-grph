@@ -1,6 +1,5 @@
 (in-package #:grph)
 
-(deftype pn (&optional (bits 31)) `(unsigned-byte ,bits))
 (defvar *opt* '(optimize (safety 1) (speed 3) debug space))
 
 (defun v? (&optional (silent t)
@@ -15,17 +14,6 @@
     (dolist (a args) (princ a s))))
 
 (defun reread (&rest args) (values (read-from-string (apply #'mkstr args))))
-
-(defmacro abbrev (short long)
-  `(defmacro ,short (&rest args)
-     `(,',long ,@args)))
-
-(abbrev mvc multiple-value-call)
-(abbrev mvb multiple-value-bind)
-(abbrev dsb destructuring-bind)
-(abbrev awg alexandria:with-gensyms)
-(abbrev awf alexandria:flatten)
-
 
 (defun symb (&rest args) (values (intern (apply #'mkstr args))))
 (defun kv (s) (declare (symbol s)) (intern (string-upcase (symbol-name s)) :keyword))
@@ -51,7 +39,7 @@
   (<= (length (remove-if-not #'identity rest)) n))
 
 (defun -gensyms (name n)
-  (declare (symbol name) (fixnum n))
+  (declare (symbol name) (pn n))
   (loop with name = (string-upcase (string name))
         for x across "XYZWUVPQR" repeat n
         collect (gensym (format nil "~a-~a-" name x))))
@@ -66,6 +54,7 @@
 
 (defun tree-find-all (root fx &optional (res (list)))
   (declare (optimize speed) (function fx) (list res))
+  "find all instances where fx is t in root."
   (cond ((funcall fx root) (return-from tree-find-all (cons root res)))
         ((atom root) nil)
         (t (let ((l (tree-find-all (car root) fx res))
@@ -92,8 +81,29 @@ and replaces it with to when there is a match"
         (t (mapcar (lambda (x) (tree-replace-fx x fxmatch fxtransform))
                    tree))))
 
+(defun replace-pairs (body pairs)
+  (declare (list body pairs))
+  "replace ((ato afrom) (bto bfrom) ...) in body."
+  (loop for (to from) in pairs do (setf body (tree-replace body from to)))
+  body)
+
+(defun with-symbs (ss body)
+  (declare (list ss body))
+  "bind these symbols outside body and replace inside body. eg:
+  (with-symbs `(g ,g ...)
+    (qry g :select ... )) ; equals:
+  (let ((gg ,g))          ; gg is a gensym
+    (qry gg :select ...))"
+  (let ((s* (loop for (var expr) in (grph::group ss 2) ; gs expr var
+                  collect (list (gensym (mkstr var)) expr var))))
+    `(let (,@(loop for s in s* collect (subseq s 0 2)))
+       (progn ,(replace-pairs body
+                 (loop for s in s* collect (list (first s) (third s))))))))
+
+
 (defun split-string (x s &key prune)
   (declare (character x) (string s) (boolean prune))
+  "split s at all instances of character x."
   (labels
     ((splt (s)
        (loop for c across s for i from 0
@@ -114,16 +124,20 @@ and replaces it with to when there is a match"
             nconc (loop for y in (n-cartesian-product (cdr l))
                         collect (cons x y)))))
 
-(defun group (source n)
+(defun group (l n)
+  (declare (list l) (pn n))
+  "group l into groups of n. see ungroup."
   (when (< n 1) (warn "GROUP: bad length: ~a," n))
-  (labels ((rec (source acc)
-             (let ((rest (nthcdr n source)))
-               (if (consp rest) (rec rest (cons (subseq source 0 n) acc))
-                                (nreverse (cons source acc))))))
-    (when source (rec source nil))))
+  (labels ((rec (l acc)
+             (let ((rest (nthcdr n l)))
+               (if (consp rest) (rec rest (cons (subseq l 0 n) acc))
+                                (nreverse (cons l acc))))))
+    (when l (rec l nil))))
 
-(defun ungroup (source &aux (res (list)))
-  (loop for s in source do (loop for k in s do (push k res)))
+(defun ungroup (l &aux (res (list)))
+  (declare (list l res))
+  "invorse of group."
+  (loop for s in l do (loop for k in s do (push k res)))
   (reverse res))
 
 (defun ensure-list (l)
@@ -173,6 +187,31 @@ and replaces it with to when there is a match"
   "coerce to list, and remove any nils"
   (remove-if-not #'identity (ensure-list l)))
 
-(defmacro fsize (v) `(the veq:pn (fset:size ,v)))
+(defmacro fsize (v) `(the pn (fset:size ,v)))
 (defmacro logic-set () `(empty-map (empty-set)))
+
+(defun memo (fx &aux (ht (make-hash-table :test #'equal)))
+  (declare (function fx) (hash-table ht))
+  "return a functiont that memoizes calls to fx."
+  (labels ((memo-wrap (&rest rest)
+            (let ((v (gethash rest ht)))
+              (if v v (let ((res (apply fx rest)))
+                        (setf (gethash rest ht) res)
+                        res)))))
+          #'memo-wrap))
+
+(veq:fvdef relneigh (inds dstfx &aux (res (list)))
+  (declare (list inds res) (function dstfx))
+  "create list of edges in the relative neigborhood graph of inds according to
+(dstfx i j) for indices i,j in inds."
+  (labels ((relneigh? (i j)
+             (loop for k in inds
+                   if (< (max (f@dstfx i k) (f@dstfx j k))
+                         (f@dstfx i j))
+                   do (return-from relneigh? nil))
+             t))
+    (loop for i in inds
+          do (loop for j in inds if (and (< i j) (relneigh? i j))
+                                 do (push (list i j) res)))
+    res))
 

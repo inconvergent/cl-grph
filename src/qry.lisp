@@ -48,7 +48,7 @@ because gensyms have no symbol-package. as a result :in vals are not free."
                ((clause? qc :not-join)
                   `(:not-join ,(ensure-list (cadr qc)) ,@(rec/map (cddr qc))))
                ((and (listp qc) (symbolp (car qc))
-                     (member (kv (car qc)) *valid-clauses*))
+                     (member (kv (car qc)) *clauses*))
                   `(,(kv (car qc)) ,@(rec/map (cdr qc))))
                (t (unless (fact? qc) (err "bad qry clause: ~a." qc))
                   `(:fact ,@qc)))) ; <--- kv-rec
@@ -192,7 +192,9 @@ because gensyms have no symbol-package. as a result :in vals are not free."
        (select-agg-transform (c)
          (let ((agg (car c))) ; c = (grp ?a ?b)
            (ecase (kv agg) (:grp `(agg/grp ?agg ,@(mapqt (cdr c)))) ; is max, min, usefull?
-                           (:cnt `(agg/cnt ?agg)) )))
+                           (:cnt `(agg/cnt ?agg))
+                           (:max `(agg/max ?agg ,@(mapqt (cdr c))))
+                           )))
        (replace-agg (s &aux (aggr (gk p :aggr t)))
          (if aggr (tree-replace-fx s (lambda (c) (member c aggr :test #'equal))
                                      (lambda (c) (select-agg-transform c)))

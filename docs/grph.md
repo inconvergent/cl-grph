@@ -1,55 +1,25 @@
-#### GRPH:\*DIR-MODE\*
+#### GRPH:\*AGGREGATES\*
 
 ```
-valid edge direction modes: (-> <- <>)
+valid aggregate clauses in qry: (CNT GRP)
 ```
 
-#### GRPH:\*POS-MODE\*
-
-```
-valid spatial modes: (ABS REL)
-```
-
-#### GRPH:\*VALID-CLAUSES\*
+#### GRPH:\*CLAUSES\*
 
 ```
 valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
 ```
 
-#### GRPH:->
+#### GRPH:\*DIR-MODES\*
 
 ```
-:missing:todo:
-
- ; GRPH:->
- ;   [symbol]
+valid edge direction modes: (-> <- <> ><)
 ```
 
-#### GRPH:<-
+#### GRPH:\*POS-MODES\*
 
 ```
-:missing:todo:
-
- ; GRPH:<-
- ;   [symbol]
-```
-
-#### GRPH:<>
-
-```
-:missing:todo:
-
- ; GRPH:<>
- ;   [symbol]
-```
-
-#### GRPH:><
-
-```
-:missing:todo:
-
- ; GRPH:><
- ;   [symbol]
+valid spatial modes: (ABS REL)
 ```
 
 #### GRPH:@BOTH
@@ -60,7 +30,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; 
  ; @BOTH names a compiled function:
  ;   Lambda-list: (G A &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 31))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 32))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list all verts of a that are bi-directional.
@@ -89,7 +59,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; 
  ; @EITHER names a compiled function:
  ;   Lambda-list: (G A &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 31))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 32))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list both inbound and outbond verts of a.
@@ -105,7 +75,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; @ENUM names a compiled function:
  ;   Lambda-list: (G)
  ;   Derived type: (FUNCTION (GRPH:GRPH)
- ;                  (VALUES (UNSIGNED-BYTE 31) &OPTIONAL))
+ ;                  (VALUES (UNSIGNED-BYTE 32) &OPTIONAL))
  ;   Documentation:
  ;     total number of edges in graph.
  ;   Source file: /data/x/grph/src/grph.lisp
@@ -119,20 +89,11 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; 
  ; @IN names a compiled function:
  ;   Lambda-list: (G A &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 31))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 32))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list all outboud verts of a.
  ;   Source file: /data/x/grph/src/grph.lisp
-```
-
-#### GRPH:@INV
-
-```
-:missing:todo:
-
- ; GRPH:@INV
- ;   [symbol]
 ```
 
 #### GRPH:@MEM
@@ -144,7 +105,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; @MEM names a compiled function:
  ;   Lambda-list: (G A B &AUX (ESET (@ (ADJ G) A)))
  ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (UNSIGNED-BYTE 31) (UNSIGNED-BYTE 31)) *)
+ ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) (UNSIGNED-BYTE 32)) *)
  ;   Documentation:
  ;     t if edge (a b) exists.
  ;   Source file: /data/x/grph/src/grph.lisp
@@ -158,7 +119,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; 
  ; @OUT names a compiled function:
  ;   Lambda-list: (G A &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 31))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 32))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list all outboud verts of a.
@@ -189,7 +150,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; @VCNT names a compiled function:
  ;   Lambda-list: (G &AUX (RES 0))
  ;   Derived type: (FUNCTION (GRPH:GRPH)
- ;                  (VALUES (UNSIGNED-BYTE 31) &OPTIONAL))
+ ;                  (VALUES (UNSIGNED-BYTE 32) &OPTIONAL))
  ;   Documentation:
  ;     count all connected verts.
  ;   Source file: /data/x/grph/src/grph.lisp
@@ -218,7 +179,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; @VMAX names a compiled function:
  ;   Lambda-list: (G &AUX (RES 0))
  ;   Derived type: (FUNCTION (GRPH:GRPH)
- ;                  (VALUES (UNSIGNED-BYTE 31) &OPTIONAL))
+ ;                  (VALUES (UNSIGNED-BYTE 32) &OPTIONAL))
  ;   Documentation:
  ;     get highest vertex index.
  ;   Source file: /data/x/grph/src/grph.lisp
@@ -233,7 +194,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; ADD names a compiled function:
  ;   Lambda-list: (G A B &OPTIONAL PROPS)
  ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (UNSIGNED-BYTE 31) (UNSIGNED-BYTE 31)
+ ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) (UNSIGNED-BYTE 32)
  ;                             &OPTIONAL LIST)
  ;                  (VALUES GRPH:GRPH BOOLEAN &OPTIONAL))
  ;   Documentation:
@@ -264,17 +225,15 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; ADD*! names a macro:
  ;   Lambda-list: (G A B &OPTIONAL (MODES ->) PROPS)
  ;   Documentation:
- ;     add edge edge and re-bind. returns: (a b) or nil.
+ ;     add edge edge and re-bind. returns: (a b) or nil. modes: (-> <- <>)
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
 #### GRPH:CANCEL
 
 ```
-:missing:todo:
-
- ; GRPH:CANCEL
- ;   [symbol]
+(cancel) can be used in some contexts (using, qry) to cancel
+the transaction and discard all changes
 ```
 
 #### GRPH:COLLECT-WHILE
@@ -287,8 +246,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; 
  ; COLLECT-WHILE names a macro:
  ;   Lambda-list: ((&KEY (INIT (QUOTE (LIST))) (TEST (QUOTE NOT))
- ;                  (LIM 1000) (CRES (GENSYM COLLECT-RES))
- ;                  (CITR (GENSYM COLLECT-ITR)))
+ ;                  (LIM 1000) (CRES (GENSYM CRES)) (CITR (GENSYM CITR)))
  ;                 &BODY BODY)
  ;   Source file: /data/x/grph/src/qry-extra.lisp
 ```
@@ -302,6 +260,19 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   [symbol]
 ```
 
+#### GRPH:CONNECTED-VERTS
+
+```
+ ; GRPH:CONNECTED-VERTS
+ ;   [symbol]
+ ; 
+ ; CONNECTED-VERTS names a macro:
+ ;   Lambda-list: (G &OPTIONAL (P _))
+ ;   Documentation:
+ ;     get all connected verts.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
 #### GRPH:DEAD-ENDS
 
 ```
@@ -311,8 +282,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; DEAD-ENDS names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
- ;     vertices that have exactly one adjacent vertices: [g-] ?y-?x
- ;     ignores edge dir.
+ ;     vertices that have exactly one adjacent vertices: [g-] ?y-?x ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -325,7 +295,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; DEL names a compiled function:
  ;   Lambda-list: (G A B)
  ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (UNSIGNED-BYTE 31) (UNSIGNED-BYTE 31))
+ ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) (UNSIGNED-BYTE 32))
  ;                  (VALUES GRPH:GRPH BOOLEAN &OPTIONAL))
  ;   Documentation:
  ;     delete edge (a b). deletes associated props.
@@ -354,7 +324,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; 
  ; DEL-DEAD-ENDS names a compiled function:
  ;   Lambda-list: (G &OPTIONAL (P _))
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
  ;     delete dead-ends until there are no more dead ends left. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
@@ -379,7 +349,8 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; 
  ; DEL-PROPS names a compiled function:
  ;   Lambda-list: (G AB PROPS)
- ;   Derived type: (FUNCTION (GRPH:GRPH LIST LIST) *)
+ ;   Derived type: (FUNCTION (GRPH:GRPH LIST LIST)
+ ;                  (VALUES GRPH:GRPH T &OPTIONAL))
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
@@ -397,19 +368,6 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
-#### GRPH:DSB
-
-```
-:missing:todo:
-
- ; GRPH:DSB
- ;   [symbol]
- ; 
- ; DSB names a macro:
- ;   Lambda-list: (&REST ARGS)
- ;   Source file: /data/x/grph/src/utils.lisp
-```
-
 #### GRPH:EDGE-SET
 
 ```
@@ -421,6 +379,22 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   Documentation:
  ;     get edge set. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
+#### GRPH:EDGE-SET->HT
+
+```
+ ; GRPH:EDGE-SET->HT
+ ;   [symbol]
+ ; 
+ ; EDGE-SET->HT names a compiled function:
+ ;   Lambda-list: (ES &OPTIONAL
+ ;                 (HT (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
+ ;   Derived type: (FUNCTION (LIST &OPTIONAL HASH-TABLE)
+ ;                  (VALUES HASH-TABLE &OPTIONAL))
+ ;   Documentation:
+ ;     convert edge set to hash table.
+ ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
 #### GRPH:EDGE-SET->PATH
@@ -493,6 +467,21 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
+#### GRPH:FSET->LIST
+
+```
+ ; GRPH:FSET->LIST
+ ;   [symbol]
+ ; 
+ ; FSET->LIST names a compiled function:
+ ;   Lambda-list: (SS &OPTIONAL (FX (FUNCTION IDENTITY)) &AUX (RES (LIST)))
+ ;   Derived type: (FUNCTION (FSET:SET &OPTIONAL FUNCTION)
+ ;                  (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     inverse of list->fset.
+ ;   Source file: /data/x/grph/src/edge-set.lisp
+```
+
 #### GRPH:GATHER-MATCH
 
 ```
@@ -537,7 +526,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   Lambda-list: (&OPTIONAL (ADJ NILMAP) (NUM-EDGES 0) (PROPS NILMAP)
  ;                 (MID NILMAP))
  ;   Derived type: (FUNCTION
- ;                  (&OPTIONAL FSET:MAP (UNSIGNED-BYTE 31) FSET:MAP
+ ;                  (&OPTIONAL FSET:MAP (UNSIGNED-BYTE 32) FSET:MAP
  ;                   FSET:MAP)
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Inline proclamation: INLINE (inline expansion available)
@@ -563,7 +552,6 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;       - b and d are multi intersection points/vertices
  ;       - a, y, l are dead-ends.
  ;       - a, b, c, y are incident of b
- ; 
  ;   Class precedence-list: GRPH, STRUCTURE-OBJECT, SB-PCL::SLOT-OBJECT, T
  ;   Direct superclasses: STRUCTURE-OBJECT
  ;   No subclasses.
@@ -578,8 +566,22 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;       Type: FSET:MAP
  ;       Initform: NILMAP
  ;     NUM-EDGES
- ;       Type: GRPH:PN
+ ;       Type: VEQ:PN
  ;       Initform: 0
+```
+
+#### GRPH:HT->EDGE-SET
+
+```
+ ; GRPH:HT->EDGE-SET
+ ;   [symbol]
+ ; 
+ ; HT->EDGE-SET names a compiled function:
+ ;   Lambda-list: (HT)
+ ;   Derived type: (FUNCTION (HASH-TABLE) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     inverse of edge-set->ht.
+ ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
 #### GRPH:INGEST-EDGES
@@ -605,7 +607,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; ITR-ADJ names a macro:
  ;   Lambda-list: ((G A B &OPTIONAL (MODES ->)) &BODY BODY)
  ;   Documentation:
- ;     iterate all adjacent verts, b, of a. use modes (-> <- >< <>).
+ ;     iterate all adjacent verts, b, of a. modes: (-> <- >< <>).
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
@@ -652,14 +654,29 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
 #### GRPH:LDEL!
 
 ```
-:missing:todo:
-
  ; GRPH:LDEL!
  ;   [symbol]
  ; 
  ; LDEL! names a macro:
  ;   Lambda-list: (G AB &REST REST)
+ ;   Documentation:
+ ;     del edge ab=(a b) and re-bind. returns: deleted?
  ;   Source file: /data/x/grph/src/macros.lisp
+```
+
+#### GRPH:LIST->FSET
+
+```
+ ; GRPH:LIST->FSET
+ ;   [symbol]
+ ; 
+ ; LIST->FSET names a compiled function:
+ ;   Lambda-list: (LL &OPTIONAL (FX (FUNCTION IDENTITY)))
+ ;   Derived type: (FUNCTION (LIST &OPTIONAL FUNCTION)
+ ;                  (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     make an fset with every (fx o) for every o in ll. see fset->list.
+ ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
 #### GRPH:LQRY
@@ -711,7 +728,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   Lambda-list: (&OPTIONAL (ADJ NILMAP) (NUM-EDGES 0) (PROPS NILMAP)
  ;                 (MID NILMAP))
  ;   Derived type: (FUNCTION
- ;                  (&OPTIONAL FSET:MAP (UNSIGNED-BYTE 31) FSET:MAP
+ ;                  (&OPTIONAL FSET:MAP (UNSIGNED-BYTE 32) FSET:MAP
  ;                   FSET:MAP)
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Source file: /data/x/grph/src/grph.lisp
@@ -731,6 +748,20 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   Source file: /data/x/grph/src/qry-match.lisp
 ```
 
+#### GRPH:MEMO
+
+```
+ ; GRPH:MEMO
+ ;   [symbol]
+ ; 
+ ; MEMO names a compiled function:
+ ;   Lambda-list: (FX &AUX (HT (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
+ ;   Derived type: (FUNCTION (FUNCTION) (VALUES FUNCTION &OPTIONAL))
+ ;   Documentation:
+ ;     return a functiont that memoizes calls to fx.
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
 #### GRPH:MODIFY!
 
 ```
@@ -743,13 +774,14 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;     batch modify g in a transaction. more efficient for loading a large number
  ;     of edges and/or props. faster for larger batches. g will be available
  ;     unchanged inside the context. and the changes are applied at the end. use
- ;     :out to assign the result to a different variable.
+ ;     :out to bind the result to a different variable.
  ;     
  ;     ex: (modify! (g mygrp)
- ;           (loop repeat 10
- ;                 for a = (rnd:rndi n)
- ;                 for b = (rnd:rndi n)
- ;                 do (rnd:either (mygrp-> a b '(:x :c))
+ ;           (loop for a = (rnd:rndi n) for b = (rnd:rndi n) repeat 10
+ ;                 do ; NOTE:
+ ;                    ; (mygrp-cancel) aborts the transaction,
+ ;                    ; (mygrp-stop) stops the transaction, but keeps the changes,
+ ;                    (rnd:either (mygrp-> a b '(:x :c))
  ;                                (mygrp<> a b '(:y :d)))))
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
@@ -767,56 +799,32 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:MVB
-
-```
-:missing:todo:
-
- ; GRPH:MVB
- ;   [symbol]
- ; 
- ; MVB names a macro:
- ;   Lambda-list: (&REST ARGS)
- ;   Source file: /data/x/grph/src/utils.lisp
-```
-
-#### GRPH:MVC
-
-```
-:missing:todo:
-
- ; GRPH:MVC
- ;   [symbol]
- ; 
- ; MVC names a macro:
- ;   Lambda-list: (&REST ARGS)
- ;   Source file: /data/x/grph/src/utils.lisp
-```
-
 #### GRPH:NORMALISE-FOLD
 
 ```
-:missing:todo:
-
  ; GRPH:NORMALISE-FOLD
  ;   [symbol]
  ; 
  ; NORMALISE-FOLD names a compiled function:
  ;   Lambda-list: (G)
  ;   Derived type: (FUNCTION (GRPH:GRPH) (VALUES GRPH:GRPH &OPTIONAL))
+ ;   Documentation:
+ ;     remove all edges (a b) where a > b, and create edge (b a) if it does not exist.
+ ;     also moves all properties from (a b) to (b a).
  ;   Source file: /data/x/grph/src/qry-extra.lisp
 ```
 
 #### GRPH:NORMALISE-FOLD!
 
 ```
-:missing:todo:
-
  ; GRPH:NORMALISE-FOLD!
  ;   [symbol]
  ; 
  ; NORMALISE-FOLD! names a macro:
  ;   Lambda-list: (G)
+ ;   Documentation:
+ ;     remove all edges (a b) where a > b, and create edge (b a) if it does not exist.
+ ;     also moves all properties from (a b) to (b a).
  ;   Source file: /data/x/grph/src/qry-extra.lisp
 ```
 
@@ -829,7 +837,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; NUM-EITHER names a compiled function:
  ;   Lambda-list: (G ?X &OPTIONAL (?P _))
  ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (UNSIGNED-BYTE 31) &OPTIONAL SYMBOL)
+ ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) &OPTIONAL SYMBOL)
  ;                  (VALUES (MOD 4611686018427387901) &OPTIONAL))
  ;   Documentation:
  ;     number of adjacent vertices to ?x. ignores edge dir.
@@ -839,13 +847,13 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
 #### GRPH:PATH!
 
 ```
-:missing:todo:
-
  ; GRPH:PATH!
  ;   [symbol]
  ; 
  ; PATH! names a macro:
  ;   Lambda-list: (G PATH &OPTIONAL (MODES (QUOTE (OPEN ->))) PROPS)
+ ;   Documentation:
+ ;     add path (a b c ...). modes (-> <- <> open closed)
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
@@ -866,17 +874,13 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
-#### GRPH:PN
+#### GRPH:PDEL!
 
 ```
 :missing:todo:
 
- ; GRPH:PN
+ ; GRPH:PDEL!
  ;   [symbol]
- ; 
- ; PN names a type-specifier:
- ;   Lambda-list: (&OPTIONAL (BITS 31))
- ;   Expansion: (UNSIGNED-BYTE 31)
 ```
 
 #### GRPH:PRT
@@ -929,14 +933,37 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
 #### GRPH:QRY-COLLECT-WHILE
 
 ```
-:missing:todo:
-
  ; GRPH:QRY-COLLECT-WHILE
  ;   [symbol]
  ; 
  ; QRY-COLLECT-WHILE names a macro:
  ;   Lambda-list: (G &REST REST)
+ ;   Documentation:
+ ;     
+ ;       (let ((?a 2) (?b 1))
+ ;       (grph:qry-collect-while g
+ ;          :init (list ?a ?b) :in ?b
+ ;          :select ?n
+ ;          :where (and (or (?b _ ?n) (?n _ ?b))
+ ;                      (% (not (member ?n cres))))
+ ;          :first (progn (setf ?b ?n) ?n)
+ ;          :cres cres))
  ;   Source file: /data/x/grph/src/qry-extra.lisp
+```
+
+#### GRPH:RELNEIGH
+
+```
+ ; GRPH:RELNEIGH
+ ;   [symbol]
+ ; 
+ ; RELNEIGH names a compiled function:
+ ;   Lambda-list: (INDS DSTFX &AUX (RES (LIST)))
+ ;   Derived type: (FUNCTION (LIST FUNCTION) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     create list of edges in the relative neigborhood graph of inds according to
+ ;     (dstfx i j) for indices i,j in inds.
+ ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
 #### GRPH:RQRY
@@ -976,18 +1003,36 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; SEGMENT-ISECTS names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
- ;     vertices that do not have exactly 2 adjacent vertices. ie. the set of dead ends and multi isects.
- ;     ignores edge dir.
+ ;     vertices that do not have exactly 2 adjacent vertices. ie. the set of dead
+ ;     ends and multi isects. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
+#### GRPH:SPLIT!
+
+```
+ ; GRPH:SPLIT!
+ ;   [symbol]
+ ; 
+ ; SPLIT! names a macro:
+ ;   Lambda-list: (G A B C &OPTIONAL (MODES (QUOTE (->))))
+ ;   Documentation:
+ ;     delete edge and insert c according to mode c is only evaluated once, and
+ ;     only if the mode is triggered. returns nil if nothing happens otherwise
+ ;     returns what c evaluates to.
+ ;     
+ ;     modes:
+ ;       ->, <- : delete ab or ba if it exists and create either acb or bca
+ ;       <>     : deletes both edges if both exist and creates acb and bca
+ ;       ><     : does -> or <- or both
+ ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
 #### GRPH:STOP
 
 ```
-:missing:todo:
-
- ; GRPH:STOP
- ;   [symbol]
+(stop) can be used in some contexts (using, qry) to stop
+the transaction, but keep the changes
 ```
 
 #### GRPH:TO-VECTOR
@@ -1013,22 +1058,34 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ; TWO-ISECTS names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
- ;     vertices that have exactly 2 adjacent vertex: [g-] ?y1-?x-?y2 [-g]
- ;      ignores edge dir.
- ; 
+ ;     vertices that have exactly 2 adjacent vertex: [g-] ?y1-?x-?y2 [-g] ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:USING
 
 ```
-:missing:todo:
-
  ; GRPH:USING
  ;   [symbol]
  ; 
  ; USING names a macro:
  ;   Lambda-list: ((&REST USING) &BODY BODY)
+ ;   Documentation:
+ ;     transaction context:
+ ;     
+ ;       (let ((a (list)))
+ ;         (grph:using (^a) ; ^[var] prefix is required, and [var] must be bound outside
+ ;           (push 1 ^a)    ; ^a is now '(1)
+ ;           (push 2 ^a)    ; ^a is now '(2 1)
+ ;           (print a))     ;  a is still nil
+ ;         (print a))       ; ^a is bound to a, so a is now (2 1)
+ ;     
+ ;     (grph:cancel) and (grph:stop) can be used inside the macro to stop and discard
+ ;     or keep changes respectively.
+ ;     
+ ;     NOTE: this behaviour is only guaranteed for immutable data structures
+ ;     (eg grph, fset); or for operations that do not mutate their operands, such as
+ ;     push.
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
@@ -1067,7 +1124,7 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
  ;   [symbol]
  ; 
  ; WALK-EDGE-SET names a compiled function:
- ;   Lambda-list: (G ES &AUX (EDGES (EDGES-HT ES)))
+ ;   Lambda-list: (G ES &AUX (EDGES (EDGE-SET->HT ES)))
  ;   Derived type: (FUNCTION (GRPH:GRPH LIST) (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     greedily walk the graph and return every edge exactly once. ignores edge dir.

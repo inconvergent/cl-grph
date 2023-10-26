@@ -90,10 +90,18 @@
   (mapcar (lambda (row) (alist-get-values keys row)) l))
 
 (defun agg/cnt (l &rest keys)
-  (declare (optimize speed (safety 1)) (list l)
-           (ignore keys)
-           )
+  (declare (optimize speed (safety 1)) (list l) (ignore keys))
   (length l))
+
+; (defun agg/max (l key)
+;   (declare (optimize speed (safety 1)) (list l) (ignore keys))
+;   ; (length l)
+;   (let ((mx (car l)))
+;     (declare (pn mx))
+;     (map nil (lambda (row) (setf mx (max mx (get-var k row))))
+;              (cdr l))
+;     mx
+;     ))
 
 (defun qry-and (aa bb)
   (declare (optimize speed (safety 1)) (list aa bb))
