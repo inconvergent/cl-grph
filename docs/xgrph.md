@@ -1,65 +1,65 @@
 #### XGRPH:2@
 
 ```
-:missing:todo:
-
  ; XGRPH:2@
  ;   [symbol]
  ; 
  ; 2@ names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S &REST INDS)
+ ;   Documentation:
+ ;     get these inds as values.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:2@NUM
 
 ```
-:missing:todo:
-
  ; XGRPH:2@NUM
  ;   [symbol]
  ; 
  ; 2@NUM names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S)
+ ;   Documentation:
+ ;     number of 2d elements in s.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:2@VERT
 
 ```
-:missing:todo:
-
  ; XGRPH:2@VERT
  ;   [symbol]
  ; 
  ; 2@VERT names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S I)
+ ;   Documentation:
+ ;     get vert i as 2 values.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:2@VERTS
 
 ```
-:missing:todo:
-
  ; XGRPH:2@VERTS
  ;   [symbol]
  ; 
  ; 2@VERTS names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S L)
+ ;   Documentation:
+ ;     get verts in l as fvec.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:2APPEND!
 
 ```
-:missing:todo:
-
  ; XGRPH:2APPEND!
  ;   [symbol]
  ; 
  ; 2APPEND! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (G S I X &OPTIONAL MODES PROPS)
+ ;   Documentation:
+ ;     append edge from vert i to pos x. returns new vert. modes: (rel abs -> <- <>).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -172,13 +172,13 @@
 #### XGRPH:2L@
 
 ```
-:missing:todo:
-
  ; XGRPH:2L@
  ;   [symbol]
  ; 
  ; 2L@ names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S &REST INDS)
+ ;   Documentation:
+ ;     get these inds as list.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -215,143 +215,143 @@
 #### XGRPH:2MOVE!
 
 ```
-:missing:todo:
-
  ; XGRPH:2MOVE!
  ;   [symbol]
  ; 
  ; 2MOVE! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S I POS &OPTIONAL (MODE REL))
+ ;   Documentation:
+ ;     move vert i to pos. modes: (rel abs).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:2PATH!
 
 ```
-:missing:todo:
-
  ; XGRPH:2PATH!
  ;   [symbol]
  ; 
  ; 2PATH! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (G S PATH &OPTIONAL MODES PROPS)
+ ;   Documentation:
+ ;     add path. modes: (-> <- <>).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:2SPLIT!
 
 ```
-:missing:todo:
-
  ; XGRPH:2SPLIT!
  ;   [symbol]
  ; 
  ; 2SPLIT! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (G S A B X)
+ ;   Documentation:
+ ;     delete edge (a b) and add edges (a x) (x b).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:2VERT!
 
 ```
-:missing:todo:
-
  ; XGRPH:2VERT!
  ;   [symbol]
  ; 
  ; 2VERT! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S &REST POS)
+ ;   Documentation:
+ ;     add vert from values (pos).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:2VERTS!
 
 ```
-:missing:todo:
-
  ; XGRPH:2VERTS!
  ;   [symbol]
  ; 
  ; 2VERTS! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S PATH)
+ ;   Documentation:
+ ;     add verts from path.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:2VSET!
 
 ```
-:missing:todo:
-
  ; XGRPH:2VSET!
  ;   [symbol]
  ; 
  ; 2VSET! names a macro:
- ;   Lambda-list: (S I POS)
+ ;   Lambda-list: (S I &REST POS)
+ ;   Documentation:
+ ;     set i to pos.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3@
 
 ```
-:missing:todo:
-
  ; XGRPH:3@
  ;   [symbol]
  ; 
  ; 3@ names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S &REST INDS)
+ ;   Documentation:
+ ;     get these inds as values.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3@NUM
 
 ```
-:missing:todo:
-
  ; XGRPH:3@NUM
  ;   [symbol]
  ; 
  ; 3@NUM names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S)
+ ;   Documentation:
+ ;     number of 3d elements in s.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3@VERT
 
 ```
-:missing:todo:
-
  ; XGRPH:3@VERT
  ;   [symbol]
  ; 
  ; 3@VERT names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S I)
+ ;   Documentation:
+ ;     get vert i as 3 values.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3@VERTS
 
 ```
-:missing:todo:
-
  ; XGRPH:3@VERTS
  ;   [symbol]
  ; 
  ; 3@VERTS names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S L)
+ ;   Documentation:
+ ;     get verts in l as fvec.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3APPEND!
 
 ```
-:missing:todo:
-
  ; XGRPH:3APPEND!
  ;   [symbol]
  ; 
  ; 3APPEND! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (G S I X &OPTIONAL MODES PROPS)
+ ;   Documentation:
+ ;     append edge from vert i to pos x. returns new vert. modes: (rel abs -> <- <>).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -386,117 +386,117 @@
 #### XGRPH:3L@
 
 ```
-:missing:todo:
-
  ; XGRPH:3L@
  ;   [symbol]
  ; 
  ; 3L@ names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S &REST INDS)
+ ;   Documentation:
+ ;     get these inds as list.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3MOVE!
 
 ```
-:missing:todo:
-
  ; XGRPH:3MOVE!
  ;   [symbol]
  ; 
  ; 3MOVE! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S I POS &OPTIONAL (MODE REL))
+ ;   Documentation:
+ ;     move vert i to pos. modes: (rel abs).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3PATH!
 
 ```
-:missing:todo:
-
  ; XGRPH:3PATH!
  ;   [symbol]
  ; 
  ; 3PATH! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (G S PATH &OPTIONAL MODES PROPS)
+ ;   Documentation:
+ ;     add path. modes: (-> <- <>).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3SPLIT!
 
 ```
-:missing:todo:
-
  ; XGRPH:3SPLIT!
  ;   [symbol]
  ; 
  ; 3SPLIT! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (G S A B X)
+ ;   Documentation:
+ ;     delete edge (a b) and add edges (a x) (x b).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3VERT!
 
 ```
-:missing:todo:
-
  ; XGRPH:3VERT!
  ;   [symbol]
  ; 
  ; 3VERT! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S &REST POS)
+ ;   Documentation:
+ ;     add vert from values (pos).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3VERTS!
 
 ```
-:missing:todo:
-
  ; XGRPH:3VERTS!
  ;   [symbol]
  ; 
  ; 3VERTS! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S PATH)
+ ;   Documentation:
+ ;     add verts from path.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:3VSET!
 
 ```
-:missing:todo:
-
  ; XGRPH:3VSET!
  ;   [symbol]
  ; 
  ; 3VSET! names a macro:
- ;   Lambda-list: (S I POS)
+ ;   Lambda-list: (S I &REST POS)
+ ;   Documentation:
+ ;     set i to pos.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:@
 
 ```
-:missing:todo:
-
  ; XGRPH:@
  ;   [symbol]
  ; 
  ; @ names a macro:
- ;   Lambda-list: (DIM S &REST REST)
+ ;   Lambda-list: (DIM S &REST INDS)
+ ;   Documentation:
+ ;     get these inds as values.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:@NUM
 
 ```
-:missing:todo:
-
  ; XGRPH:@NUM
  ;   [symbol]
  ; 
  ; @NUM names a macro:
  ;   Lambda-list: (DIM S)
+ ;   Documentation:
+ ;     number of nd elements in s.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -509,7 +509,7 @@
  ; @VERT names a macro:
  ;   Lambda-list: (DIM S I)
  ;   Documentation:
- ;     get vert i as values.
+ ;     get vert i as dim values.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -529,52 +529,52 @@
 #### XGRPH:APPEND!
 
 ```
-:missing:todo:
-
  ; XGRPH:APPEND!
  ;   [symbol]
  ; 
  ; APPEND! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (G S I X &OPTIONAL MODES PROPS)
+ ;   Documentation:
+ ;     append edge from vert i to pos x. returns new vert. modes: (rel abs -> <- <>).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:FXPOS!
+#### XGRPH:ITR-VSET!
 
 ```
-:missing:todo:
-
- ; XGRPH:FXPOS!
+ ; XGRPH:ITR-VSET!
  ;   [symbol]
  ; 
- ; FXPOS! names a macro:
+ ; ITR-VSET! names a macro:
  ;   Lambda-list: ((G POS I) &BODY BODY)
+ ;   Documentation:
+ ;     iterate all verts as i and set it to the result of body.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:L@
 
 ```
-:missing:todo:
-
  ; XGRPH:L@
  ;   [symbol]
  ; 
  ; L@ names a macro:
- ;   Lambda-list: (DIM S &REST REST)
+ ;   Lambda-list: (DIM S &REST INDS)
+ ;   Documentation:
+ ;     get these inds as list.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:MOVE!
 
 ```
-:missing:todo:
-
  ; XGRPH:MOVE!
  ;   [symbol]
  ; 
  ; MOVE! names a macro:
- ;   Lambda-list: (&REST REST)
+ ;   Lambda-list: (S I POS &OPTIONAL (MODE REL))
+ ;   Documentation:
+ ;     move vert i to pos. modes: (rel abs).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -587,7 +587,7 @@
  ; PATH! names a macro:
  ;   Lambda-list: (DIM G S PATH &OPTIONAL MODES PROPS)
  ;   Documentation:
- ;     add path. modes: (-> <- <>)
+ ;     add path. modes: (-> <- <>).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -598,11 +598,11 @@
  ;   [symbol]
  ; 
  ; POS names a compiled function:
- ;   Lambda-list: (&OPTIONAL (D 0.0))
+ ;   Lambda-list: (&OPTIONAL (V 0.0))
  ;   Derived type: (FUNCTION (&OPTIONAL SINGLE-FLOAT)
  ;                  (VALUES FSET:WB-SEQ &OPTIONAL))
  ;   Documentation:
- ;     initialze xgrph pos. d is the default fset:seq value.
+ ;     initialze pos (fset:seq), v is the default value.
  ;   Source file: /data/x/grph/src/xgrph.lisp
  ; 
  ; POS names a type-specifier:
@@ -645,9 +645,9 @@
  ;   [symbol]
  ; 
  ; VERT! names a macro:
- ;   Lambda-list: (DIM S &REST REST)
+ ;   Lambda-list: (DIM S &REST POS)
  ;   Documentation:
- ;     add vert. from these values.
+ ;     add vert from values (pos).
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
@@ -660,20 +660,20 @@
  ; VERTS! names a macro:
  ;   Lambda-list: (DIM S PATH)
  ;   Documentation:
- ;     add verts. from path of type fvec.
+ ;     add verts from path.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
 #### XGRPH:VSET!
 
 ```
-:missing:todo:
-
  ; XGRPH:VSET!
  ;   [symbol]
  ; 
  ; VSET! names a macro:
- ;   Lambda-list: (S I POS)
+ ;   Lambda-list: (S I &REST POS)
+ ;   Documentation:
+ ;     set i to pos.
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 

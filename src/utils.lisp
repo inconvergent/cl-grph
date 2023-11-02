@@ -9,6 +9,26 @@
 (defun d? (f) (describe f))
 (defun i? (f) (inspect f))
 
+;https://github.com/inconvergent/weir/pull/1/commits/4a1df51914800c78cb34e8194222185ebde12388
+; (defmacro define-struct-load-form (name)
+;   "allow the struct name to be dumped to FASL files."
+;   `(defmethod make-load-form ((o ,name) &optional env)
+;      (make-load-form-saving-slots o :environment env)))
+
+(defmacro lst->set (f) "convert list to fset:set." `(fset:convert 'fset:set (the list ,f)))
+(defmacro lst->map (f) "convert fset:map to list." `(fset:convert 'fset:map (the list ,f)))
+(defmacro set->lst (f) "convert fset:set to list." `(fset:convert 'list (the fset:set ,f)))
+(defmacro map->lst (f) "convert fset:map to list." `(fset:convert 'list (the fset:map ,f)))
+(defun lst->set-fx (ll &optional (fx #'identity))
+  (declare (list ll) (function fx))
+  "make an fset:set with (fx o) for every o in ll. see set->lst-fx."
+  (loop with res = (fset:empty-set)
+        for l in ll do (setf res (fset:with res (funcall fx l)))
+        finally (return res)))
+(defun set->lst-fx (ss &optional (fx #'identity) &aux (res (list)))
+  (declare (fset:set ss) (function fx)) "inverse of lst->set-fx."
+  (do-set (o ss) (push (funcall fx o) res)) res)
+
 (defun mkstr (&rest args)
   (with-output-to-string (s)
     (dolist (a args) (princ a s))))
@@ -82,8 +102,7 @@ and replaces it with to when there is a match"
                    tree))))
 
 (defun replace-pairs (body pairs)
-  (declare (list body pairs))
-  "replace ((ato afrom) (bto bfrom) ...) in body."
+  (declare (list body pairs)) "replace ((ato afrom) (bto bfrom) ...) in body."
   (loop for (to from) in pairs do (setf body (tree-replace body from to)))
   body)
 
@@ -125,18 +144,15 @@ and replaces it with to when there is a match"
                         collect (cons x y)))))
 
 (defun group (l n)
-  (declare (list l) (pn n))
-  "group l into groups of n. see ungroup."
+  (declare (list l) (pn n)) "group l into groups of n. see ungroup."
   (when (< n 1) (warn "GROUP: bad length: ~a," n))
-  (labels ((rec (l acc)
-             (let ((rest (nthcdr n l)))
-               (if (consp rest) (rec rest (cons (subseq l 0 n) acc))
-                                (nreverse (cons l acc))))))
+  (labels ((rec (l acc &aux (rest (nthcdr n l)))
+             (if (consp rest) (rec rest (cons (subseq l 0 n) acc))
+                              (nreverse (cons l acc)))))
     (when l (rec l nil))))
 
 (defun ungroup (l &aux (res (list)))
-  (declare (list l res))
-  "invorse of group."
+  (declare (list l res)) "inverse of group."
   (loop for s in l do (loop for k in s do (push k res)))
   (reverse res))
 
@@ -193,11 +209,10 @@ and replaces it with to when there is a match"
 (defun memo (fx &aux (ht (make-hash-table :test #'equal)))
   (declare (function fx) (hash-table ht))
   "return a functiont that memoizes calls to fx."
-  (labels ((memo-wrap (&rest rest)
-            (let ((v (gethash rest ht)))
-              (if v v (let ((res (apply fx rest)))
-                        (setf (gethash rest ht) res)
-                        res)))))
+  (labels ((memo-wrap (&rest rest &aux (v (gethash rest ht)))
+             (if v v (let ((res (apply fx rest)))
+                       (setf (gethash rest ht) res)
+                       res))))
           #'memo-wrap))
 
 (veq:fvdef relneigh (inds dstfx &aux (res (list)))

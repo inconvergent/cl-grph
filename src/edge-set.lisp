@@ -1,17 +1,5 @@
 (in-package :grph)
 
-(defun list->fset (ll &optional (fx #'identity))
-  (declare (list ll) (function fx))
-  "make an fset with every (fx o) for every o in ll. see fset->list."
-  (loop with res = (fset:empty-set)
-        for l in ll do (setf res (fset:with res (funcall fx l)))
-        finally (return res)))
-
-(defun fset->list (ss &optional (fx #'identity) &aux (res (list)))
-  (declare (fset:set ss) (function fx))
-  "inverse of list->fset."
-  (do-set (o ss) (push (funcall fx o) res)) res)
-
 (defun edge-set->ht (es &optional (ht (make-hash-table :test #'equal)))
   (declare (list es) (hash-table ht))
   "convert edge set to hash table."
@@ -78,7 +66,7 @@ second result is a boolean for whether it is a cycle."
                 (return-from edge-set->path (values left t)))
           ; not a cycle
           (let* ((right (-until-dead-end b a))
-                 (res (concatenate 'list left (reverse right))))
+                 (res `(,@left ,@(reverse right))))
             ; this isnt an exhaustive manifold test?
             ; and it should be configurable whether it fails?
             (unless (= (1- (length res)) (length es))

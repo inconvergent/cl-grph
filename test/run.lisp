@@ -51,7 +51,7 @@ inefficient. use for tests only."
              (2 :A 1) (3 :C 7) (3 :B 5) (3 :C 5) (3 :B 4) (3 :A 1)
              (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3) (5 :C 3) (5 :B 4)
              (5 :E 4) (7 :C 3) (99 :X 77))))
-  (grph:ingest-edges g f))
+  (grph:ingest-edges f g))
 
 (defun mk-grph-main ()
   (let ((g (grph:grph))
@@ -90,12 +90,12 @@ inefficient. use for tests only."
   (let ((g (grph:grph))
         (f `((0 :a 1) (0 :a 2) (1 :a 3)
              (3 :a 2) (3 :a 4) (3 :a 0))))
-  (grph:ingest-edges g f)))
+  (grph:ingest-edges f g)))
 
 (defun make-rules-edge-set-2 ()
   (let ((g (grph:grph))
         (f `((0 :b 1) (1 :b 3) (3 :b 0) (1 :e 4) (4 :e 6))))
-  (grph:ingest-edges g f)))
+  (grph:ingest-edges f g)))
 
 (defun make-rules-edge-set-3 ()
   (let ((g (grph:grph))
@@ -103,5 +103,5 @@ inefficient. use for tests only."
              (0 :b 1) (1 :b 3) (3 :b 0)
              (3 :c 5) (5 :c 2)
              (1 :e 4) (4 :e 6))))
-  (grph:ingest-edges g f)))
+  (grph:ingest-edges f g)))
 

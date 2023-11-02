@@ -15,6 +15,9 @@
                                        ,m))))
       (progn ,@body))))
 
+(defun eq-car? (a s)
+  (declare (optimize speed) (list a) (symbol s))
+  (eq (car a) s))
 (defun gk (p k &optional silent &aux (hit (cdr (assoc k p))))
   (declare #.*opt* (list p) (keyword k))
   (if (or silent hit) hit (warn "QRY: missing conf key: ~a~%conf: ~s" k p)))
@@ -33,18 +36,13 @@
   (declare (optimize speed))
   (typecase s (symbol (symbol-package s))))
 
-(defun has-symchar? (s c &optional (pos :first))
+(defun has-symchar? (s c &optional (pos :first) &aux (name (symbol-name s)))
   (declare (keyword pos))
-  (let ((name (symbol-name s)))
-    (declare (string name))
-    (eq (char name (case pos (:first 0)
-                             (otherwise (1- (length name)))))
-        c)))
+  (eq (char name (case pos (:first 0) (otherwise (1- (length name))))) c))
 
 (defun var? (s)
   (declare (optimize speed))
   (and (interned? s) (has-symchar? s #\?)))
-
 (defun ^var? (s)
   (declare (optimize speed) (symbol s))
   (and (> (symlen s) 1) (has-symchar? s #\^)))
@@ -57,24 +55,15 @@
 (defun any? (s)
   (declare (optimize speed))
   (and (interned? s) (= (symlen s) 1) (has-symchar? s #\_)))
-
-(defun eq-car? (a s)
-  (declare (optimize speed) (list a) (symbol s))
-  (eq (car a) s))
-
 (defun not? (p)
   (declare (optimize speed) (list p))
   (or (eq-car? p :not) (eq-car? p :not-join)))
-
 (defun fx? (p)
   (declare (optimize speed) (list p))
   (eq-car? p :%))
-
 (defun free? (s)
   (declare (optimize speed))
-  (cond ((or (var? s) (any? s)) t)
-        ((val? s) nil)
-        (t t)))
+  (cond ((or (var? s) (any? s)) t) ((val? s) nil) (t t)))
 
 (defun bindable? (s)
   (declare (optimize speed))
@@ -93,7 +82,6 @@
 (defun get-var (k l)
   (declare (optimize speed) (symbol k) (list l))
   (cdr (find k l :key #'car :test #'eq)))
-
 (defun rec/get-var (f l)
   (declare (symbol f))
   (cond ((var? l) `(get-var ',l ,f))
@@ -110,7 +98,6 @@
 (defun get-bindables (a)
   (declare (optimize speed) (list a))
   (reverse (tree-find-all a (lambda (c) (and (var? c) (bindable? c))))))
-
 (defun get-not-bindables (n &aux (s (car n)))
   (ecase s (:not-join (ensure-list (second n)))
            (:not (get-bindables n))
@@ -140,12 +127,10 @@
   (loop for o in l do (format s "~&██ ~a~&" o))
   (get-output-stream-string s))
 
-
-(defun qry/compile/check/messages (p err wrn)
+(veq:fvdef qry/compile/check/messages (p err wrn)
   (cond ((and wrn (not err)) ; only warnings
-         (warn "~&~a~&" (apply #'qry/compile/write-messages "COMPILE WARN"
-                          (concatenate 'list wrn (list (qry/show p :mode t))))))
-        (err ; errors (and possibly warnings)
-          (error "~&~a~&" (apply #'qry/compile/write-messages "COMPILE ERROR"
-                            (concatenate 'list err wrn (list (qry/show p :mode t))))))))
+         (warn "~&~a~&" (a@qry/compile/write-messages "COMPILE WARN"
+                          `(,@wrn ,(qry/show p :mode t)))))
+        (err (error "~&~a~&" (a@qry/compile/write-messages "COMPILE ERROR"
+                             `(,@err ,@wrn ,(qry/show p :mode t)))))))
 

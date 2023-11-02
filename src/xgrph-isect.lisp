@@ -51,10 +51,8 @@
                         do (-add (gethash (ic i a) crossing->vert)
                                  (gethash (ic i b) crossing->vert)
                                  :e ei)))))
-             ; edges ((v1 v2) (v8 v1) ...)
-      (let* ((edges (grph:to-vector (grph:@edges g)))
-             ; lines: (#(ax ay bx by) #(cx cy dx dy) ...)
-             (lines (grph:to-vector (edges-as-lines edges)))
+      (let* ((edges (grph:to-vector (grph:@edges g))) ; edges ((v1 v2) (v8 v1) ...)
+             (lines (grph:to-vector (edges-as-lines edges))) ; lines: (#(ax ay bx by) #(cx cy dx dy) ...)
              (veq::*eps* 0.00001)
              ; isects: #(((16 . 0.18584675) (5 . 0.35215548)) NIL NIL ...)
              (isects (sort-hits (veq:f2lsegx lines)))) ;  p/q is the lerp
@@ -76,8 +74,7 @@
     ((edges-as-lines (edges)
        (declare (simple-list edges))
        (loop for (a b) across edges
-             collect (veq:f2$line (m@fx (3@ pos a))
-                                  (m@fx (3@ pos b)))))
+             collect (veq:f2$line (f@fx (3@ pos a)) (f@fx (3@ pos b)))))
      (sort-hits (isects)
        (declare (simple-list isects))
        (loop for i of-type fixnum from 0 below (length isects)
@@ -101,8 +98,7 @@
                   (declare (list old-edge path-ind))
                   (when path-ind
                     (grph:path! g
-                      (cons (first old-edge)
-                            (concatenate 'list path-ind (last old-edge))))))))
+                      (cons (first old-edge) `(,@path-ind ,@(last old-edge))))))))
      (del-hit-edges (edges isects)
        (declare (simple-list edges isects))
        (loop for hits of-type list across isects
@@ -110,10 +106,8 @@
              if hits do (grph::ldel! g (aref edges i))
                         (loop for (c . p) in hits
                               do (grph::ldel! g (aref edges c))))))
-             ; edges ((v1 v2) (v8 v1) ...)
-    (let* ((edges (grph:to-vector (grph:@edges g)))
-           ; lines: (#(ax ay bx by) #(cx cy dx dy) ...)
-           (lines (grph:to-vector (edges-as-lines edges)))
+    (let* ((edges (grph:to-vector (grph:@edges g)))  ; edges ((v1 v2) (v8 v1) ...)
+           (lines (grph:to-vector (edges-as-lines edges))) ; lines: (#(ax ay bx by) #(cx cy dx dy) ...)
            (veq::*eps* 0.00001)
            ; isects: #(((16 . 0.18584675) (5 . 0.35215548)) NIL NIL ...)
            (isects (sort-hits (veq:f2lsegx lines)))) ;  p/q is the lerp

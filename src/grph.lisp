@@ -7,14 +7,12 @@
 
 (declaim (inline -del -add grph prop grph))
 
-
 (defun prt (o &optional s)
   (declare (notinline grph-num-edges))
   (format s "<@grph: (v: ~a/~a, e: ~a)>" (@vcnt o) (@vmax o) (@enum o)))
 
-; TODO: improve this
 ; this is silly, we should ensure that props accepts at least an fset:map
-(defun props-as-list (m &aux (res (list)))
+(defun props-as-list (m &aux (res (list))) ; TODO: improve this
   (unless m (return-from props-as-list nil))
   (do-map (k v m) (push (list k v) res))
   res)
@@ -46,75 +44,65 @@ the following terminology is used:
   (mid nilmap :type fset:map :read-only t)
   (num-edges 0 :type pn :read-only t))
 
-; GET / LOOKUP
+; (define-struct-load-form grph)
+#+SBCL(declaim (sb-ext:freeze-type grph))
+
+; GET / LOOKUP ----------------
 
 (defun @mem (g a b &aux (eset (@ (adj g) a)))
-  (declare (grph g) (pn a b))
-  "t if edge (a b) exists."
+  (declare (grph g) (pn a b)) "t if edge (a b) exists."
   (and eset (fset:@ eset b)))
 
-(defun @prop (g k &optional p)
-  (declare (grph g))
-  "get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a."
+(defun @prop (g k &optional p) ; NOTE: vert props are not supported properly
+  (declare (grph g)) "get val of prop, p, for key, k should be edge (a b); or vert."
   (if p (get-multi-rel (props g) k :prop p)
         (get-multi-rel (props g) k)))
-
 (defun @mid (g k &optional p)
-  (declare (grph g))
-  "get val of prop, p, for key, k. should be an edge k=(a b)."
+  (declare (grph g)) "get val of prop, p, for key, k. should be an edge k=(a b)."
   (if p (get-multi-rel (mid g) k :prop p)
         (get-multi-rel (mid g) k)))
 
+(defun adjcnt (adj &aux (n 0))
+  (declare (fset:map adj) (veq:pn n)) "count total number of edges in grph-adj."
+  (do-map (a edges adj) (do-map (b dir edges) (when dir (incf n))))
+  n)
+(defun ecnt (g)
+  (declare (grph g)) "count total number of edges in grph."
+  (adjcnt (grph-adj g)))
 (defun @enum (g)
-  (declare (grph g))
-  "total number of edges in graph."
+  (declare (grph g)) "total number of edges in graph."
   (grph-num-edges g))
 
 (defun @vcnt (g &aux (res 0))
-  (declare (grph g) (pn res))
-  "count all connected verts."
+  (declare (grph g) (pn res)) "count all connected verts."
   (itr-verts (g a) (incf res)) res)
 
-(defun @vmax (g &aux (res 0))
-  (declare (grph g) (pn res))
-  "get highest vertex index."
-  (itr-verts (g a) (setf res (max a res))) res)
-
 (defun @edges (g &aux (res (list)))
-  (declare (grph g) (list res))
-  "list of lists of all edges."
+  (declare (grph g) (list res)) "list of lists of all edges."
   (itr-edges (g e) (push e res)) res)
-
-(defun @verts (g &aux (res (list)))
-  (declare (grph g) (list res))
-  "list of all connected verts."
-  (itr-verts (g a) (push a res)) res)
-
 (defun @out (g a &aux (res (list)))
-  (declare (grph g) (pn a) (list res))
-  "list all outboud verts of a."
+  (declare (grph g) (pn a) (list res)) "list all outboud verts of a."
   (itr-adj (g a b ->) (push b res)) res)
 (defun @in (g a &aux (res (list)))
-  (declare (grph g) (pn a) (list res))
-  "list all outboud verts of a."
+  (declare (grph g) (pn a) (list res)) "list all outboud verts of a."
   (itr-adj (g a b <-) (push b res)) res)
 (defun @both (g a &aux (res (list)))
-  (declare (grph g) (pn a) (list res))
-  "list all verts of a that are bi-directional."
+  (declare (grph g) (pn a) (list res)) "list all verts of a that are bi-directional."
   (itr-adj (g a b <>) (push b res)) res)
 (defun @either (g a &aux (res (list)))
-  (declare (grph g) (pn a) (list res))
-  "list both inbound and outbond verts of a."
+  (declare (grph g) (pn a) (list res)) "list both inbound and outbond verts of a."
   (itr-adj (g a b ><) (push b res)) res)
 
-; MUTATE
+(defun @vmax (g &aux (res 0))
+  (declare (grph g) (pn res)) "get highest vertex index."
+  (itr-verts (g a) (setf res (max a res))) res)
+(defun @verts (g &aux (res (list)))
+  (declare (grph g) (list res)) "list of all connected verts."
+  (itr-verts (g a) (push a res)) res)
 
 ; TODO: clear edge props fx?
-
-; TODO: assert edge exists?
-(defun prop (g k props)
-  (declare #.*opt* (grph g) (list k props))
-  "set prop, p, of edge or vert, k."
+(defun prop (g k props) ; TODO: assert edge exists?
+  (declare #.*opt* (grph g) (list k props)) "set prop, p, of edge or vert, k."
   (labels ((with-prop (p val)
              (declare (keyword p))
              (if (not (eq p :_))
@@ -133,9 +121,7 @@ the following terminology is used:
   (grph (set-multi-rel (if (@mem g b a) (adj g)
                            (set-multi-rel (adj g) b a nil))
                        a b t)
-        (1+ (grph-num-edges g))
-        (props g) (mid g)))
-
+        (1+ (grph-num-edges g)) (props g) (mid g)))
 (defun add (g a b &optional props) ; option to force set prop?
   (declare #.*opt* (grph g) (pn a b) (list props))
   "new edge (a b). optionally set prop, p, (with val).
@@ -146,24 +132,20 @@ returns: (values g created?)"
 
 (defun -del-adj-both (adj ea eb a b)
   (declare #.*opt* (fset:map ea eb) (pn a b))
-  (let* ((ea (fset:less ea b))
-         (eb (fset:less eb a))
-         (nila (fset:empty? ea))
-         (nilb (fset:empty? eb)))
+  (let* ((ea (fset:less ea b)) (eb (fset:less eb a))
+         (nila (fset:empty? ea)) (nilb (fset:empty? eb)))
     (declare (fset:map ea eb) (boolean nila nilb))
     (cond ((and nila nilb) (fset:less (fset:less adj b) a))
           (nilb (fset:with (fset:less adj b) a ea))
           (nila (fset:with (fset:less adj a) b eb))
           (t (fset:map (fset:$ adj) (a ea) (b eb))))))
-
-; this EXPECTS a->b to exits. but handles the possibility that b<-a exists too
 (defun -del-adj (adj a b)
   (declare #.*opt* (fset:map adj) (pn a b))
+  ; this EXPECTS a->b to exits. but handles the possibility that b<-a exists too
   (let ((ea (@ adj a)) (eb (@ adj b)))
     (declare (fset:map ea eb))
     (if (@ eb a) (fset:with adj a (fset:with ea b nil)) ; a <> b. now set a->b to nil, keep ba
                  (-del-adj-both adj ea eb a b))))
-
 (defun -del (g a b)
   (declare #.*opt* (grph g) (pn a b))
   (labels ((prune-props (&aux (mid (mid g)) (ab `(,a ,b)))
@@ -182,9 +164,7 @@ returns: (values g created?)"
 returns: (values g deleted?)"
   (when (= a b) (warn "DEL: incorrect edge: (~a ~a)." a b))
   (-del g a b))
-
-; TODO: what happens with dangling mid/props values?
-(defun -del-prop (g ab prop)
+(defun -del-prop (g ab prop) ; TODO: what happens with dangling mid/props values?
   (declare #.*opt* (grph g) (list ab) (symbol prop))
   (if (@prop g ab prop)
       (values (grph (adj g) (grph-num-edges g)
@@ -192,7 +172,6 @@ returns: (values g deleted?)"
                     (del-multi-rel (mid g) prop ab))
               t)
       (values g nil)))
-
 (defun del-props (g ab props)
   (declare #.*opt* (grph g) (list ab props))
   (loop with deleted? = nil
@@ -203,22 +182,23 @@ returns: (values g deleted?)"
 
 ; VARIOUS ---
 
-(defun grp (val &optional (s :g))
+(defun grp (val &optional (s :g)) ; i'd like to find a better way to do this
   (declare (symbol val s))
   "for val = :black and s = :color, creates list of two props
 ((:color :black) :black). this is useful for making both :colour and :black
 filterable via @prop or in queries.
 
-eg: (add! g a b (grp :black :color))"
-  `((,s ,val) ,val))
+eg: (add! g a b (grp :black :color))" `((,s ,val) ,val))
 
-(defun ingest-edges (g f)
-  (declare (list f))
-  "ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9))."
-  (loop for (l p r) in f
-        do (cond ((not (@mem g l r))
-                    (add! g l r (if (not (eq (kv p) :_)) (list p))))
-                 ((not (@prop g (list l r) p))
-                    (add! g l r (list p)))))
+(defun ingest-edges (edges &optional (g (grph)))
+  (declare (list edges) (grph g))
+  "ingest a list of edges with props. eg: ((0 :a 3) ...). and return a grph."
+  (grph:modify! (g in) (loop for (l p r) in edges do (in-> l r `(,(kv p)))))
   g)
+(defun ingest-props-edges (pedges &optional (g (grph)))
+  (declare (list pedges) (grph g)) "ingest list of props and flattened edges. see props-edges."
+   (grph:modify! (g in)
+     (loop for (p edges) in pedges
+           do (loop for (a b) in (group edges 2) do (in-> a b `(,p)))))
+   g)
 

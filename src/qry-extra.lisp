@@ -1,6 +1,5 @@
 (in-package :grph)
 
-
 (defun normalise-fold (g)
   (declare (grph g))
   "remove all edges (a b) where a > b, and create edge (b a) if it does not exist.
@@ -17,10 +16,8 @@ also moves all properties from (a b) to (b a)."
 also moves all properties from (a b) to (b a)."
   `(setf ,g (normalise-fold ,g)))
 
-; TODO: example
-(defmacro collect-while ((&key (init '(list)) (test 'not) (lim 1000)
-                               (cres (gensym "CRES"))
-                               (citr (gensym "CITR")))
+(defmacro collect-while ((&key (init '(list)) (test 'not) (lim 1000) ; TODO: example
+                               (cres (gensym "CRES")) (citr (gensym "CITR")))
                           &body body)
   (declare (symbol cres))
   (awg (for-res lp)
@@ -36,16 +33,13 @@ also moves all properties from (a b) to (b a)."
 ; TODO: this is really confusing to use. change? make example?
 (defmacro qry-collect-while (g &rest rest)
   (declare (symbol g))
-  "
-  (let ((?a 2) (?b 1))
+  "(let ((?a 2) (?b 1))
   (grph:qry-collect-while g
      :init (list ?a ?b) :in ?b
-     :select ?n
-     :where (and (or (?b _ ?n) (?n _ ?b))
-                 (% (not (member ?n cres))))
+     :select ?n :where (and (or (?b _ ?n) (?n _ ?b))
+                            (% (not (member ?n cres))))
      :first (progn (setf ?b ?n) ?n)
-     :cres cres)) "
-
+     :cres cres))"
   `(collect-while (:init ,(get-kv rest :init '(list))
                    :lim ,(get-kv rest :lim 1000) ; RENAME clim?
                    :cres ,(get-kv rest :cres (gensym "CRES"))

@@ -158,7 +158,7 @@
         (ls '((3 2) (3 1) (0 2) (0 1))))))
 
 (subtest "qry nested or"
-  (let ((g (grph:ingest-edges (grph:grph)
+  (let ((g (grph:ingest-edges
              '((0 _ 1) (1 _ 0) (1 _ 4) (4 _ 1) (4 _ 7)
                (7 _ 4) (7 _ 6) (6 _ 7) (6 _ 3) (3 _ 6)
                (3 _ 0) (0 _ 3) (4 _ 5) (5 _ 4) (5 _ 2) (2 _ 5)))))

@@ -2,9 +2,7 @@
 
 
 (defun qry/check/and/bindable (hit c &aux (cb (get-bindables c)))
-  (unless (every (lambda (n &aux (nb (get-not-bindables n)))
-                   (subsetp nb cb))
-                 hit)
+  (unless (every (lambda (n) (subsetp (get-not-bindables n) cb)) hit)
           (format nil ":not/:% non-bindable ~a | ~a." hit c)))
 
 (defun qry/check/or/not (qc)
@@ -19,7 +17,6 @@
           unless (equal a (sort (copy-list b) #'string<))
           do (return-from qry/check/or
                (format nil "clauses in :or must have the same vars:~{~a ~}." qc)))))
-
 
 (defun qry/preproc/in/where (p &aux (in (gk p :in t)) (res (list)))
   "converts clause keywords to :keyword, mostly
@@ -64,11 +61,9 @@ because gensyms have no symbol-package. as a result :in vals are not free."
       ; NOTE: (rec ...) must be called before (reverse res)
       (let ((where (rec (kv-rec (gk p :where t)))))
         (qry/compile/check/messages p err wrn)
-        `((:where . ,where)
-          (:in . ,(reverse res)) ,@p)))))
+        `((:where . ,where) (:in . ,(reverse res)) ,@p)))))
 
-; TODO: what does :f do, and should it be renamed? see debug for example
-(defun qry/compile/where (p &aux (where (gk p :where)))
+(defun qry/compile/where (p &aux (where (gk p :where))) ; TODO: rename :f?
   "compile (the where part of a) datalog query."
   (with-messages (err wrn)
     (labels
@@ -89,8 +84,7 @@ because gensyms have no symbol-package. as a result :in vals are not free."
                if hit do (setf c* `(,@(subseq c* 0 i) ,n ,@(subseq c* i))))
          c*)
        (do-proc-bindable (qc &aux (qc (cdr qc)))
-         (loop for fx in (list #'not? #'fx?)
-               ; hit contains not/% clauses, c contains the rest
+         (loop for fx in (list #'not? #'fx?) ; hit contains not/% clauses, c contains the rest
                for (hit c) = (multiple-value-list (filter-by-predicate qc fx))
                do (msg-if wrn (qry/check/and/bindable hit c))
                   (setf qc (bind-shift hit c)))
@@ -115,9 +109,7 @@ because gensyms have no symbol-package. as a result :in vals are not free."
            qc))
        (res/inner (res inner)
          (if (= (length res) 1) (cadar res)
-             `(,(psel :let) (,@(lpos res 0 2))
-                (declare (list ,@(lpos res)))
-                ,inner)))
+             `(,(psel :let) (,@(lpos res 0 2)) (declare (list ,@(lpos res))) ,inner)))
        (next/map/or (qc &optional jarg &aux (res (next/map qc)))
          (res/inner res (loop with body = (caar res)
                               for s in (lpos (cdr res))
@@ -147,8 +139,7 @@ because gensyms have no symbol-package. as a result :in vals are not free."
 
 (defun qry/aggregate (s) (reverse (tree-find-all s #'aggr?)))
 (defun qry/not-aggregate (s)
-  (etypecase s (symbol s)
-               (cons (remove-if #'aggr? s))))
+  (etypecase s (symbol s) (cons (remove-if #'aggr? s))))
 
 (defun qry/compile/conf (p &aux (vars (gk p :vars t)) (in (gk p :in t))
                                 (using (gk p :using t)))
@@ -181,7 +172,6 @@ because gensyms have no symbol-package. as a result :in vals are not free."
     (qry/compile/check/messages p err wrn)
     p))
 
-
 (defun qry/compile/itr (p)
   (declare (list p))
   (awg (hit lp)
@@ -193,8 +183,7 @@ because gensyms have no symbol-package. as a result :in vals are not free."
          (let ((agg (car c))) ; c = (grp ?a ?b)
            (ecase (kv agg) (:grp `(agg/grp ?agg ,@(mapqt (cdr c)))) ; is max, min, usefull?
                            (:cnt `(agg/cnt ?agg))
-                           (:max `(agg/max ?agg ,@(mapqt (cdr c))))
-                           )))
+                           (:max `(agg/max ?agg ,@(mapqt (cdr c)))))))
        (replace-agg (s &aux (aggr (gk p :aggr t)))
          (if aggr (tree-replace-fx s (lambda (c) (member c aggr :test #'equal))
                                      (lambda (c) (select-agg-transform c)))
@@ -225,22 +214,17 @@ because gensyms have no symbol-package. as a result :in vals are not free."
        (re-bind-result ()
          `(setf ,@(awf (loop for g in (gk p :using t)
                              collect `(,(re-intern g) ,g))))))
-      (let* ((compiled-qry (if (gk p :aggr t)
-                               `(alists/collapse-keys '?agg
-                                 ',(gk p :xaggr t) ,(gk p :compiled))
-                               `(qry/project
-                                 ,(gk p :compiled) ',(gk p :vars))))
+      (let* ((compiled-qry
+               (if (gk p :aggr t)
+                   `(alists/collapse-keys '?agg ',(gk p :xaggr t) ,(gk p :compiled))
+                   `(qry/project ,(gk p :compiled) ',(gk p :vars))))
              (full
                `(macrolet
-                  ((cancel (&body body)
-                     "cancel, ignore changes."
+                  ((cancel (&body body) "cancel, ignore changes."
                      `(return-from ,',stop* (progn ,@body)))
-                   (stop (&body body)
-                     "stop, keep changes."
-                     `(progn ,',(re-bind-result)
-                             (return-from ,',stop* (progn ,@body))))
-                   (fact (&rest ,q)
-                     "return list of matches to q."
+                   (stop (&body body) "stop, keep changes."
+                     `(progn ,',(re-bind-result) (return-from ,',stop* (progn ,@body))))
+                   (fact (&rest ,q) "return list of matches to q."
                      `(gather-match ,',g ,@,q))
                    (q (&rest q)
                      "nest query. defaults to using parent grph instance.
@@ -248,11 +232,9 @@ because gensyms have no symbol-package. as a result :in vals are not free."
                      (etypecase (car q)
                        (keyword `(qry ,',g :pairs t :db ,',(gk p :db t) ,@q))
                        (symbol `(qry ,(car q) :pairs t :db ,',(gk p :db t) ,@(cdr q)))))
-                   (itr (&optional (i 0))
-                     "result itr counter."
+                   (itr (&optional (i 0)) "result itr counter."
                      `(+ ,i ,',(gk p :itr-sym)))
-                   (res ()
-                     "all query results (as pairs)."
+                   (res () "all query results (as pairs)."
                      ',(gk p :res-sym)))
                   ; NOTE: is it possible to move select vars into qry-compile-where?
                   (let ((,(gk p :res-sym) ,compiled-qry)
@@ -264,7 +246,6 @@ because gensyms have no symbol-package. as a result :in vals are not free."
 
 ; TODO: with
 ; TODO: add sort? maybe not?
-; TODO: finish multi aggs
 (defmacro qry (g &key db in using select where collect then first pairs)
   (declare (symbol g) (list where) (boolean pairs))
   "evaluate a trivial (datalog-like) query against g.
@@ -285,8 +266,7 @@ other modifiers:
  - :using [vars]; mutate the graph for every returned tuple, see examples
  - :db T; print some useful debug info about the compiled query.
 
-see examples for more usage."
-  ; TODO:  pre-check for in/aggr collisions
+see examples for more usage." ; TODO:  pre-check for in/aggr collisions
   (let ((p (veq:vchain (#'do/qry/compile/full #'qry/compile/where
                         #'qry/compile/itr #'qry/preproc/in/where
                         #'qry/compile/conf)
@@ -296,19 +276,16 @@ see examples for more usage."
                (:xaggr . ,(qry/not-aggregate (remove-nil select))) ; non-aggr vars
                (:vars . ,(undup (get-all-vars (remove-nil select)))) ; all select vars
                (:using . ,(remove-nil using)) ; all mutating vars
-               (:db . ,db) (:g . ,g) (:where . ,where)
-               (:pairs . ,pairs) (:first . ,first)
-               (:then . ,then) (:collect . ,collect)
+               (:db . ,db) (:g . ,g) (:where . ,where) (:pairs . ,pairs)
+               (:first . ,first) (:then . ,then) (:collect . ,collect)
                (:res-sym . ,(gensym "RES")) (:itr-sym . ,(gensym "ITR"))))))
     (when db (format t (qry/show p :mode db)) (finish-output))
     (gk p :compiled-full)))
 
 (defun lqry (g &key db select where then collect)
   (declare (grph g) (boolean db))
-  "compile and evaluate queries at runtime.
-ex:
-  (let ((g (grph))
-        (q '(or (?x ?p ?y) (?y ?p ?x))))
+  "compile and evaluate queries at runtime. ex:
+  (let ((g (grph)) (q '(or (?x ?p ?y) (?y ?p ?x))))
     (add! g 1 2)
     (print (lqry g :select '(?x ?p ?y) :where q)))"
   (awg (g*) (eval `(let ((,g* ,g))

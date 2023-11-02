@@ -137,7 +137,7 @@ valid spatial modes: (ABS REL)
  ;   Derived type: (FUNCTION (GRPH:GRPH T &OPTIONAL T)
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     get val of prop, p, for key, k. should be an edge k=(a b) or a vert, k=a.
+ ;     get val of prop, p, for key, k should be edge (a b); or vert.
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
@@ -467,21 +467,6 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
-#### GRPH:FSET->LIST
-
-```
- ; GRPH:FSET->LIST
- ;   [symbol]
- ; 
- ; FSET->LIST names a compiled function:
- ;   Lambda-list: (SS &OPTIONAL (FX (FUNCTION IDENTITY)) &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (FSET:SET &OPTIONAL FUNCTION)
- ;                  (VALUES LIST &OPTIONAL))
- ;   Documentation:
- ;     inverse of list->fset.
- ;   Source file: /data/x/grph/src/edge-set.lisp
-```
-
 #### GRPH:GATHER-MATCH
 
 ```
@@ -555,6 +540,7 @@ the transaction and discard all changes
  ;   Class precedence-list: GRPH, STRUCTURE-OBJECT, SB-PCL::SLOT-OBJECT, T
  ;   Direct superclasses: STRUCTURE-OBJECT
  ;   No subclasses.
+ ;   Sealed.
  ;   Slots:
  ;     ADJ
  ;       Type: FSET:MAP
@@ -591,10 +577,26 @@ the transaction and discard all changes
  ;   [symbol]
  ; 
  ; INGEST-EDGES names a compiled function:
- ;   Lambda-list: (G F)
- ;   Derived type: (FUNCTION (T LIST) (VALUES T &OPTIONAL))
+ ;   Lambda-list: (EDGES &OPTIONAL (G (GRPH)))
+ ;   Derived type: (FUNCTION (LIST &OPTIONAL GRPH:GRPH)
+ ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
- ;     ingest a list of edges with props. eg: ((0 :a 3) (8 :_ 9)).
+ ;     ingest a list of edges with props. eg: ((0 :a 3) ...). and return a grph.
+ ;   Source file: /data/x/grph/src/grph.lisp
+```
+
+#### GRPH:INGEST-PROPS-EDGES
+
+```
+ ; GRPH:INGEST-PROPS-EDGES
+ ;   [symbol]
+ ; 
+ ; INGEST-PROPS-EDGES names a compiled function:
+ ;   Lambda-list: (PEDGES &OPTIONAL (G (GRPH)))
+ ;   Derived type: (FUNCTION (LIST &OPTIONAL GRPH:GRPH)
+ ;                  (VALUES GRPH:GRPH &OPTIONAL))
+ ;   Documentation:
+ ;     ingest list of props and flattened edges. see props-edges.
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
@@ -664,21 +666,6 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:LIST->FSET
-
-```
- ; GRPH:LIST->FSET
- ;   [symbol]
- ; 
- ; LIST->FSET names a compiled function:
- ;   Lambda-list: (LL &OPTIONAL (FX (FUNCTION IDENTITY)))
- ;   Derived type: (FUNCTION (LIST &OPTIONAL FUNCTION)
- ;                  (VALUES T &OPTIONAL))
- ;   Documentation:
- ;     make an fset with every (fx o) for every o in ll. see fset->list.
- ;   Source file: /data/x/grph/src/edge-set.lisp
-```
-
 #### GRPH:LQRY
 
 ```
@@ -692,10 +679,8 @@ the transaction and discard all changes
  ;                             (:THEN T) (:COLLECT T))
  ;                  *)
  ;   Documentation:
- ;     compile and evaluate queries at runtime.
- ;     ex:
- ;       (let ((g (grph))
- ;             (q '(or (?x ?p ?y) (?y ?p ?x))))
+ ;     compile and evaluate queries at runtime. ex:
+ ;       (let ((g (grph)) (q '(or (?x ?p ?y) (?y ?p ?x))))
  ;         (add! g 1 2)
  ;         (print (lqry g :select '(?x ?p ?y) :where q)))
  ;   Source file: /data/x/grph/src/qry.lisp
@@ -716,6 +701,47 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
+#### GRPH:LST->MAP
+
+```
+ ; GRPH:LST->MAP
+ ;   [symbol]
+ ; 
+ ; LST->MAP names a macro:
+ ;   Lambda-list: (F)
+ ;   Documentation:
+ ;     convert fset:map to list.
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:LST->SET
+
+```
+ ; GRPH:LST->SET
+ ;   [symbol]
+ ; 
+ ; LST->SET names a macro:
+ ;   Lambda-list: (F)
+ ;   Documentation:
+ ;     convert list to fset:set.
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:LST->SET-FX
+
+```
+ ; GRPH:LST->SET-FX
+ ;   [symbol]
+ ; 
+ ; LST->SET-FX names a compiled function:
+ ;   Lambda-list: (LL &OPTIONAL (FX (FUNCTION IDENTITY)))
+ ;   Derived type: (FUNCTION (LIST &OPTIONAL FUNCTION)
+ ;                  (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     make an fset:set with (fx o) for every o in ll. see set->lst-fx.
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
 #### GRPH:MAKE
 
 ```
@@ -732,6 +758,19 @@ the transaction and discard all changes
  ;                   FSET:MAP)
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Source file: /data/x/grph/src/grph.lisp
+```
+
+#### GRPH:MAP->LST
+
+```
+ ; GRPH:MAP->LST
+ ;   [symbol]
+ ; 
+ ; MAP->LST names a macro:
+ ;   Lambda-list: (F)
+ ;   Documentation:
+ ;     convert fset:map to list.
+ ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
 #### GRPH:MATCH
@@ -883,6 +922,20 @@ the transaction and discard all changes
  ;   [symbol]
 ```
 
+#### GRPH:PROPS-EDGES
+
+```
+ ; GRPH:PROPS-EDGES
+ ;   [symbol]
+ ; 
+ ; PROPS-EDGES names a compiled function:
+ ;   Lambda-list: (G)
+ ;   Derived type: (FUNCTION (GRPH:GRPH) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     list of lists of prop with flattend list of edges
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
 #### GRPH:PRT
 
 ```
@@ -939,13 +992,11 @@ the transaction and discard all changes
  ; QRY-COLLECT-WHILE names a macro:
  ;   Lambda-list: (G &REST REST)
  ;   Documentation:
- ;     
- ;       (let ((?a 2) (?b 1))
+ ;     (let ((?a 2) (?b 1))
  ;       (grph:qry-collect-while g
  ;          :init (list ?a ?b) :in ?b
- ;          :select ?n
- ;          :where (and (or (?b _ ?n) (?n _ ?b))
- ;                      (% (not (member ?n cres))))
+ ;          :select ?n :where (and (or (?b _ ?n) (?n _ ?b))
+ ;                                 (% (not (member ?n cres))))
  ;          :first (progn (setf ?b ?n) ?n)
  ;          :cres cres))
  ;   Source file: /data/x/grph/src/qry-extra.lisp
@@ -1006,6 +1057,34 @@ the transaction and discard all changes
  ;     vertices that do not have exactly 2 adjacent vertices. ie. the set of dead
  ;     ends and multi isects. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
+#### GRPH:SET->LST
+
+```
+ ; GRPH:SET->LST
+ ;   [symbol]
+ ; 
+ ; SET->LST names a macro:
+ ;   Lambda-list: (F)
+ ;   Documentation:
+ ;     convert fset:set to list.
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
+#### GRPH:SET->LST-FX
+
+```
+ ; GRPH:SET->LST-FX
+ ;   [symbol]
+ ; 
+ ; SET->LST-FX names a compiled function:
+ ;   Lambda-list: (SS &OPTIONAL (FX (FUNCTION IDENTITY)) &AUX (RES (LIST)))
+ ;   Derived type: (FUNCTION (FSET:SET &OPTIONAL FUNCTION)
+ ;                  (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     inverse of lst->set-fx.
+ ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
 #### GRPH:SPLIT!
@@ -1127,7 +1206,8 @@ the transaction, but keep the changes
  ;   Lambda-list: (G ES &AUX (EDGES (EDGE-SET->HT ES)))
  ;   Derived type: (FUNCTION (GRPH:GRPH LIST) (VALUES LIST &OPTIONAL))
  ;   Documentation:
- ;     greedily walk the graph and return every edge exactly once. ignores edge dir.
+ ;     return a list of paths ((p1 closed?) (p2 closed?) ...) from edge set from g.
+ ;     every edge is included exactly once. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 

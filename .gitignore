@@ -12,3 +12,4 @@
 system-index.txt
 tmp.lisp
 2tmp.lisp
+*.grph

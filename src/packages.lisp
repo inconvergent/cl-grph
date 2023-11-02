@@ -20,15 +20,16 @@
     #:qry #:lqry #:rqry #:stop #:cancel #:using
     #:collect-while #:qry-collect-while
     #:connected-verts
-    #:gather-match #:ingest-edges
+    #:gather-match #:ingest-edges #:ingest-props-edges
     #:grp #:distinct #:first< #:first> #:lsort
     #:walk-grph #:walk-edge-set
-    #:dead-ends #:edge-set
+    #:dead-ends #:edge-set #:props-edges
     #:segment-isects #:multi-isects #:two-isects
     #:del-dead-ends #:del-dead-ends!
     #:path->edge-set #:edge-set->path #:edge-set->ht #:ht->edge-set
     #:normalise-fold #:normalise-fold!
-    #:list->fset #:fset->list))
+    #:lst->set #:lst->map #:set->lst #:map->lst
+    #:set->lst-fx #:lst->set-fx))
 
 (defpackage #:xgrph
   (:use #:common-lisp)
@@ -41,7 +42,7 @@
     #:vert! #:2vert! #:3vert! #:verts! #:2verts! #:3verts!
     #:move! #:2move! #:3move!
     #:@num #:2@num #:3@num
-    #:pos #:fxpos!
+    #:pos #:itr-vset!
     #:vset! #:2vset! #:3vset!
     #:path! #:2path! #:3path!
     #:split! #:2split! #:3split!
@@ -52,4 +53,12 @@
     #:2center-connected
     #:2cut-to-area #:2cut-to-area!
     #:triangulate-edge-set))
+
+(defpackage #:grph/io
+  (:use #:common-lisp)
+  (:import-from #:fset #:do-map #:do-set #:empty-map #:empty-set)
+  (:import-from #:veq #:dsb #:mvc #:mvb)
+  (:import-from #:grph #:grph)
+  (:export #:export-dat #:import-dat #:gexport #:gimport
+           #:gwrite #:gread #:gwrite-script))
 

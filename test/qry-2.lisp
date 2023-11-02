@@ -72,11 +72,11 @@
 
 ; (subtest "qry walk"
 ;   (let ((g (grph:grph)) (?a 3))
-;     (setf g (grph:ingest-edges g
+;     (setf g (grph:ingest-edges
 ;              `((0 :A 1) (0 :C 1) (1 :A 3) (1 :A 2) (1 :A 0) (1 :C 0)
 ;                (2 :A 1) (3 :C 7) (3 :B 5) (3 :C 5) (3 :B 4) (3 :A 1)
 ;                (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3) (5 :C 3) (5 :B 4)
-;                (5 :E 4) (7 :C 3) (99 :X 77))))
+;                (5 :E 4) (7 :C 3) (99 :X 77)) g))
 ;     ; this is contrived, but it tests specific behaviour of using combined
 ;     ; with qry-collect-while which might be useful.
 ;     (is (grph:qry-collect-while g :lim 10 :init (list ?a)
@@ -93,7 +93,7 @@
 
 
 (subtest "aggs"
- (let ((g (grph:ingest-edges (grph:make)
+ (let ((g (grph:ingest-edges
             '((0 :a 1) (0 :a 3) (1 :a 2) (1 :a 3)
               (3 :a 0) (3 :a 6) (4 :a 5) (6 :a 3)))))
 

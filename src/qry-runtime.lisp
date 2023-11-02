@@ -3,8 +3,7 @@
 ; RUNTIME QRY FXS AND REDUCERS (AND/NOT/FILTERS/SORT/...) ----------------
 
 (defun distinct (&rest rest &aux (n (length rest)))
-  (declare (optimize speed) (pn n))
-  "t if values in rest are distinct."
+  (declare (optimize speed) (pn n)) "t if values in rest are distinct."
   (= n (length (the list (undup rest nil))))) ; undup use is ok
 
 (defmacro fx-first (f a &rest rest)
@@ -18,8 +17,7 @@
   `(fx-first > ,@rest))
 
 (defun lsort (l &optional (fx #'<) &aux (l (copy-list l)))
-  (declare (optimize speed) (list l) (function fx))
-  "radix sort list of lists."
+  (declare (optimize speed) (list l) (function fx)) "radix sort list of lists."
   (loop for i of-type fixnum from (1- (length (the list (first l)))) downto 0
         do (labels ((p (a b)
                      (declare (list a b))
@@ -40,8 +38,7 @@
   (mapcar #'car (first a)))
 
 (defun alist-get-values (keys aa)
-  (declare (optimize speed (safety 0)) (list keys aa))
-  "get values of these keys"
+  (declare (optimize speed (safety 0)) (list keys aa)) "get values of these keys"
   (loop for k of-type symbol in keys collect (get-var k aa)))
 
 ; TODO: utilize/ensure keys maintains order. rename pairs/get-keys?
@@ -82,26 +79,15 @@
   (declare (optimize speed (safety 1)) (list aa bb))
   (loop with res = (list) for a in aa
         do (loop for b in bb
-                 do (push (psrt (concatenate 'list a b)) res))
+                 do (push (psrt `(,@a ,@b)) res))
         finally (return res)))
 
 (defun agg/grp (l &rest keys)
   (declare (optimize speed (safety 1)) (list l))
   (mapcar (lambda (row) (alist-get-values keys row)) l))
-
 (defun agg/cnt (l &rest keys)
   (declare (optimize speed (safety 1)) (list l) (ignore keys))
   (length l))
-
-; (defun agg/max (l key)
-;   (declare (optimize speed (safety 1)) (list l) (ignore keys))
-;   ; (length l)
-;   (let ((mx (car l)))
-;     (declare (pn mx))
-;     (map nil (lambda (row) (setf mx (max mx (get-var k row))))
-;              (cdr l))
-;     mx
-;     ))
 
 (defun qry-and (aa bb)
   (declare (optimize speed (safety 1)) (list aa bb))
@@ -127,7 +113,7 @@
                (loop for root being the hash-keys of lft using (hash-value ll)
                      for rr = (gethash root rht)
                      if rr do (loop for x in (outer-join-pairs ll rr)
-                                    do (push (psrt (concatenate 'list root x)) res)))
+                                    do (push (psrt `(,@root ,@x)) res)))
                res)))
 
     (let* ((ka (pkeys aa)) (kb (pkeys bb))
@@ -144,8 +130,7 @@
       (isect-merge-2 common aa bb))))
 
 (defun qry-or (aa bb &optional select)
-  (declare (optimize speed (safety 1)) (list aa bb))
-  "logical sets, or"
+  (declare (optimize speed (safety 1)) (list aa bb)) "logical sets, or"
   (when (not aa) (return-from qry-or bb))
   (when (not bb) (return-from qry-or aa))
   (labels ((do-merge (ht common a)
@@ -170,8 +155,7 @@
       res)))
 
 (defun qry-not (orig not* &optional select)
-  (declare (optimize speed (safety 1)) (list orig not*))
-  "logical sets not"
+  (declare (optimize speed (safety 1)) (list orig not*)) "logical sets not"
   ; early exit when nothing to subtract or nothing to return
   ; orig will either be nil, or whatever was passed in (when not is nil)
   (when (or (not orig) (not not*)) (return-from qry-not orig))
@@ -197,8 +181,7 @@
   ; TODO: drop _ pairs!!!
   (mvb (pairs filters)
        (filter-by-predicate pairs (lambda (p) (or (var? p) (any? p))) :key #'cdr)
-    (labels ((filter-match-all (v)
-              (declare (list v))
+    (labels ((filter-match-all (v) (declare (list v))
               (every (lambda (f) (find f v :test #'equal)) filters))
              (repl (f) (mapcar (lambda (p &aux (lft (car p)) (rht (cdr p)))
                                  (declare (symbol lft rht))
@@ -210,8 +193,7 @@
 (defun rules/post-proc (l &rest args)
   (declare (optimize speed (safety 1)) (list l args))
   "strip first nil if present, select args from every row."
-  (mapcar (lambda (f)
-            (declare (list f))
+  (mapcar (lambda (f) (declare (list f))
             (mapcar (lambda (a) (declare (symbol a)) (get-var a f)) args))
           l))
 

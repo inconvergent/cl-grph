@@ -1,11 +1,9 @@
 (asdf:defsystem #:grph
   :description "immutable graph data structure with Datalog query language"
-  :version "0.23.0"
+  :version "0.40.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
-  :licence "MIT"
   :in-order-to ((asdf:test-op (asdf:test-op #:grph/tests)))
-  :pathname "src/"
-  :serial nil
+  :licence "MIT" :pathname "src/" :serial nil
   :depends-on (#:veq #:fset #+:grph-parallel #:lparallel)
   :components ((:file "packages")
                (:file "utils" :depends-on ("packages"))
@@ -37,17 +35,16 @@
                (:file "grph-walk" :depends-on ("qry"))
 
                (:file "xgrph" :depends-on ("qry"))
-               (:file "xgrph-isect" :depends-on ("xgrph"))))
+               (:file "xgrph-isect" :depends-on ("xgrph"))
+               (:file "io" :depends-on ("grph-walk" "xgrph"))))
 
 (asdf:defsystem #:grph/tests
   :depends-on (#:veq #:grph #:prove #+:grph-parallel #:lparallel #:uiop #:asdf)
-  :version "0.23.0"
-  :perform (asdf:test-op (o s)
-             (uiop:symbol-call ':grph-tests
-               #+:grph-parallel '#:p/run-tests
-               #-:grph-parallel '#:run-tests))
-  :pathname "test/"
-  :serial t
+  :version "0.40.0"
+  :perform (asdf:test-op (o s) (uiop:symbol-call ':grph-tests
+                                 #+:grph-parallel '#:p/run-tests
+                                 #-:grph-parallel '#:run-tests))
+  :pathname "test/" :serial t
   :components ((:file "run")))
 
 ; TODO: there is an if-feature feature in ASDF, how does it work??
