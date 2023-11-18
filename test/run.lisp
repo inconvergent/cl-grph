@@ -1,8 +1,6 @@
 
-(defpackage #:grph-tests (:use #:cl #:prove) (:export #:run-tests))
-
 (setf prove:*enable-colors* nil)
-
+(defpackage #:grph-tests (:use #:cl #:prove) (:export #:run-tests))
 (in-package #:grph-tests)
 
 (defun -run-tests (files)
@@ -18,16 +16,12 @@
           finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
-  (-run-tests '(#P"test/qry-runtime.lisp"
-                #P"test/grph.lisp" #P"test/qry.lisp"
-                #P"test/qry-2.lisp" #P"test/qry-3.lisp"
-                #P"test/xgrph.lisp"
+  (-run-tests '(#P"test/qry-runtime.lisp" #P"test/grph.lisp" #P"test/qry.lisp"
+                #P"test/qry-2.lisp" #P"test/qry-3.lisp" #P"test/xgrph.lisp"
                 #P"test/grph-walk.lisp")))
 (defun p/run-tests ()
-  (-run-tests '(#P"test/qry-runtime.lisp"
-                #P"test/grph.lisp" #P"test/qry.lisp"
-                #P"test/qry-2.lisp" #P"test/qry-3.lisp"
-                #P"test/xgrph.lisp")))
+  (-run-tests '(#P"test/qry-runtime.lisp" #P"test/grph.lisp" #P"test/qry.lisp"
+                #P"test/qry-2.lisp" #P"test/qry-3.lisp" #P"test/xgrph.lisp")))
 
 (defun lsort* (l &aux (l (copy-list l)))
   (declare (optimize speed) (list l))
@@ -35,9 +29,11 @@
 inefficient. use for tests only."
   (loop for i of-type fixnum from (1- (length (the list (first l)))) downto 0
         do (labels ((srt (a b)
-                      (funcall (the function (etypecase a (symbol #'string<)
-                                                          (number #'<)))
-                               a b))
+                      (funcall
+                        (etypecase a (symbol #'string<) (number #'<)
+                                     (cons (lambda (a* b*) ; hacky ...
+                                             (string< (veq::mkstr a*) (veq::mkstr b*)))))
+                        a b))
                     (p (a b) (srt (nth i a) (nth i b))))
                    (setf l (stable-sort (the list l) #'p))))
   l)
@@ -45,13 +41,11 @@ inefficient. use for tests only."
 (defun mapls (&rest rest) (mapcar #'lsort* rest))
 (defun rs (l) (sort l #'<))
 
-(defun make-edge-set
-  (&aux (g (grph:grph))
-        (f `((0 :A 1) (0 :C 1) (1 :A 3) (1 :A 2) (1 :A 0) (1 :C 0)
-             (2 :A 1) (3 :C 7) (3 :B 5) (3 :C 5) (3 :B 4) (3 :A 1)
-             (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3) (5 :C 3) (5 :B 4)
-             (5 :E 4) (7 :C 3) (99 :X 77))))
-  (grph:ingest-edges f g))
+(defun make-edge-set ()
+  (grph:ingest-edges
+    `((0 :A 1) (0 :C 1) (1 :A 3) (1 :A 2) (1 :A 0) (1 :C 0) (2 :A 1) (3 :C 7)
+      (3 :B 5) (3 :C 5) (3 :B 4) (3 :A 1) (4 :B 3) (4 :B 5) (4 :E 5) (5 :B 3)
+      (5 :C 3) (5 :B 4) (5 :E 4) (7 :C 3) (99 :X 77))))
 
 (defun mk-grph-main ()
   (let ((g (grph:grph))
@@ -68,7 +62,6 @@ inefficient. use for tests only."
     (grph:add! g 7 8 '(:b))
     (grph:add! g 0 3)
     g))
-
 (defun mk-grph-match ()
   (let ((g (grph:grph)))
     (grph:add! g 0 1 '(:a))
@@ -87,21 +80,10 @@ inefficient. use for tests only."
     g))
 
 (defun make-rules-edge-set-1 ()
-  (let ((g (grph:grph))
-        (f `((0 :a 1) (0 :a 2) (1 :a 3)
-             (3 :a 2) (3 :a 4) (3 :a 0))))
-  (grph:ingest-edges f g)))
-
+  (grph:ingest-edges '((0 :a 1) (0 :a 2) (1 :a 3) (3 :a 2) (3 :a 4) (3 :a 0))))
 (defun make-rules-edge-set-2 ()
-  (let ((g (grph:grph))
-        (f `((0 :b 1) (1 :b 3) (3 :b 0) (1 :e 4) (4 :e 6))))
-  (grph:ingest-edges f g)))
-
+  (grph:ingest-edges '((0 :b 1) (1 :b 3) (3 :b 0) (1 :e 4) (4 :e 6))))
 (defun make-rules-edge-set-3 ()
-  (let ((g (grph:grph))
-        (f `((0 :a 3) (3 :a 2) (2 :a 0)
-             (0 :b 1) (1 :b 3) (3 :b 0)
-             (3 :c 5) (5 :c 2)
-             (1 :e 4) (4 :e 6))))
-  (grph:ingest-edges f g)))
+  (grph:ingest-edges `((0 :a 3) (3 :a 2) (2 :a 0) (0 :b 1) (1 :b 3)
+                       (3 :b 0) (3 :c 5) (5 :c 2) (1 :e 4) (4 :e 6))))
 

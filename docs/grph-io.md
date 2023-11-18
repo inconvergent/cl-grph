@@ -10,7 +10,7 @@
  ;                  (VALUES NULL &OPTIONAL))
  ;   Documentation:
  ;     write o to fn.
- ;   Source file: /data/x/grph/src/io.lisp
+ ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
 #### GRPH/IO:GEXPORT
@@ -27,7 +27,7 @@
  ;                  (VALUES CONS &OPTIONAL))
  ;   Documentation:
  ;     serialize g.
- ;   Source file: /data/x/grph/src/io.lisp
+ ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
 #### GRPH/IO:GIMPORT
@@ -41,7 +41,7 @@
  ;   Derived type: (FUNCTION (LIST) (VALUES T T T &OPTIONAL))
  ;   Documentation:
  ;     deserialize g.
- ;   Source file: /data/x/grph/src/io.lisp
+ ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
 #### GRPH/IO:GREAD
@@ -55,7 +55,7 @@
  ;   Derived type: (FUNCTION (STRING) *)
  ;   Documentation:
  ;     read grph from fn.
- ;   Source file: /data/x/grph/src/io.lisp
+ ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
 #### GRPH/IO:GWRITE
@@ -72,7 +72,7 @@
  ;                  *)
  ;   Documentation:
  ;     write grph to fn.
- ;   Source file: /data/x/grph/src/io.lisp
+ ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
 #### GRPH/IO:GWRITE-SCRIPT
@@ -85,7 +85,7 @@
  ;   Lambda-list: ((FN G &KEY (POS (POS 0.0)) (DIM 2) META) &BODY BODY)
  ;   Documentation:
  ;     write grph and body (:script) to fn.
- ;   Source file: /data/x/grph/src/io.lisp
+ ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
 #### GRPH/IO:IMPORT-DAT
@@ -100,6 +100,6 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     read data from fn.
- ;   Source file: /data/x/grph/src/io.lisp
+ ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 

@@ -10,7 +10,7 @@
     (labels ((ypos (v) (declare (pn v)) (veq:fsel (:y) (f@fx v)))
              (ind-rotate (path ymost)
                (declare (vector path) (pn ymost))
-               (grph::vector-rearrange path (ymost nil) (0 ymost)))
+               (veq:vector-rearrange path (ymost nil) (0 ymost)))
              (y-most (path &aux (ypos (ypos (aref path 0))) (cv 0) )
                (loop for v across (subseq path 1)
                      for i from 1
@@ -49,11 +49,11 @@
                (when (= i -1) (error "bad split (-1) at: ~a" path))
                (when (< (length path) 3) (error "diag: too few elements in ~a" path))
                (when (>= i (length path)) (error "diag bad ind: ~a ~a" path i))
-               (do-step (grph::vector-rearrange path (i) (0 i)))
-               (do-step (grph::vector-rearrange path (0) (i nil))))
+               (do-step (veq:vector-rearrange path (i) (0 i)))
+               (do-step (veq:vector-rearrange path (0) (i nil))))
              (split-tri (path)
                "split path into a triangle and a new path."
-               (do-step (grph::vector-rearrange path ((1- (length path))) (0 2)))
+               (do-step (veq:vector-rearrange path ((1- (length path))) (0 2)))
                (do-step (subseq path 1)))
              (do-step (path &aux (n (length path)))
                "recursively subdived the path into triangles and/or new loops."

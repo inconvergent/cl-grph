@@ -32,5 +32,8 @@
 
 (defmacro gwrite-script ((fn g &key (pos (xgrph:pos 0f0)) (dim 2) meta) &body body)
   (declare (symbol g pos)) "write grph and body (:script) to fn."
-  `(progn ,@body (gwrite ,fn ,g :pos ,pos :dim ,dim :meta '((:script . ,body) ,@meta))))
+  (veq::awg (fn*)
+     `(let ((,fn* ,fn)) ,@(veq::tree-replace body :fn fn*)
+                        (gwrite ,fn* ,g :pos ,pos :dim ,dim
+                                :meta '((:script . ,body) ,@meta)))))
 

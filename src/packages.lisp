@@ -1,28 +1,26 @@
 (defpackage #:grph
   (:use #:common-lisp)
   (:nicknames #:cl-grph)
-  (:import-from #:veq #:dsb #:mvc #:mvb #:awg #:awf #:pn)
+  (:import-from #:veq #:dsb #:mvc #:mvb #:awg #:awf #:pn #:group #:ungroup)
   (:import-from #:fset #:@ #:contains? #:do-map #:do-set #:empty-map
                 #:empty-set #:less #:member?)
   (:export
-    #:*dir-modes* #:*pos-modes* #:*clauses* *aggregates*
+    #:*dir-modes* #:*pos-modes* #:*clauses* *aggregates* #:v? #:ext-symbols?
     #:to-vector #:ensure-list #:last* #:vector-last #:vector-first
-    #:ext-symbols?
     #:@edges #:@enum #:@in #:@out #:@either #:@both #:num-either
     #:@verts #:@vcnt #:@vmax #:@prop #:@mem
+    #:grph #:make #:prt
     #:add #:del #:del-props
     #:add! #:add*! #:del! #:ldel! #:pdel!
     #:path! #:modify! #:split!
-    #:memo #:relneigh
     #:itr-edges #:itr-adj #:itr-verts
-    #:grph #:make #:prt
     #:compile-query #:match
     #:qry #:lqry #:rqry #:stop #:cancel #:using
     #:collect-while #:qry-collect-while
-    #:connected-verts
+    #:connected-verts #:memo #:relneigh
     #:gather-match #:ingest-edges #:ingest-props-edges
     #:grp #:distinct #:first< #:first> #:lsort
-    #:walk-grph #:walk-edge-set
+    #:walk-grph #:walk-edge-set #:walk-grph-segments #:walk-edge-set-segments
     #:dead-ends #:edge-set #:props-edges
     #:segment-isects #:multi-isects #:two-isects
     #:del-dead-ends #:del-dead-ends!

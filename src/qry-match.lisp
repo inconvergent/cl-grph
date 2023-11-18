@@ -1,14 +1,9 @@
 (in-package :grph)
 
-
-; ; TODO: possibly improve?
-(defun -dedupe-matches (l)
-  (declare (optimize speed (safety 1)) (list l))
-  "remove duplicates in l."
-  (labels ((srt-varset (a)
-             (declare (list a))
-             (sort (copy-list a) #'string< :key #'car)))
-    (remove-duplicates (mapcar #'srt-varset l) :test #'equal)))
+(declaim (inline sorted-fact))
+(defun sorted-fact (&rest rest)
+  (declare #.*opt*)
+  (sort rest #'string< :key #'car))
 
 (defmacro match ((g f lft mid rht) &body body)
   (declare (symbol g f))
@@ -22,9 +17,9 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
        (mem (l r body) `(when (@mem ,g ,l ,r) ,body)) ; non-free lft/rht (edge)
        (prop (l p r body) `(when (@prop ,g (list ,l ,r) ,p) ,body)) ; non-free mid
        (fact (l p r)
-         `(let ((,f (list ,@(when (bindable? lft) `((cons ',lft ,l)))
-                          ,@(when (bindable? mid) `((cons ',mid ,p)))
-                          ,@(when (bindable? rht) `((cons ',rht ,r))))))
+         `(let ((,f (sorted-fact ,@(when (bindable? lft) `((cons ',lft ,l)))
+                                 ,@(when (bindable? mid) `((cons ',mid ,p)))
+                                 ,@(when (bindable? rht) `((cons ',rht ,r))))))
             (declare (list ,f))
             ,@body))
        (itr-rht (r body) ; rht is free
@@ -39,8 +34,7 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
                           ,(mem l rht body)))))
 
        (itr-props (l p r body) ; mid is free
-         ; if mid is :_ we don't need to iterate all props
-         (if (not (bindable? mid)) body
+         (if (not (bindable? mid)) body ; if mid is :_ we don't need to iterate all props
              `(do-map (,p ,has (or (@ (props ,g) (list ,l ,r))
                                    (fset:map (:_ t))))
                 (declare (ignorable ,p ,has))
@@ -59,19 +53,17 @@ that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a))."
                 (do-map (,r ,has ,eset)
                   (declare (ignorable ,r ,has))
                   (when ,has ,(itr-props l p r (fact l p r))))))
-          ; NOTE: if props has verts, we need a fixnum/pn test here?
-          ((hit pat t nil t)
+          ((hit pat t nil t) ; NOTE: if props has verts, we need a fixnum/pn test here?
              `(do-set (,s (or (@ (mid ,g) ,mid) (fset:empty-set)))
                 (etypecase ,s (list (dsb (,l ,r) ,s
                                      (declare (ignorable ,l ,r))
                                      ,(fact l mid r))))))
           (t (error "MATCH: unexpected clause: (~s ~s ~s)." lft mid rht)))))))
 
-(defmacro gather-match (g l p r)
-  (declare (symbol g))
-  (awg (gather-res f)
-    `(let ((,gather-res (list)))
-       (declare (list ,gather-res))
-       (match (,g ,f ,l ,p ,r) (push ,f ,gather-res))
-       (-dedupe-matches ,gather-res))))
-
+(defmacro gather-match (g l p r) ; return ht when possible?
+  (declare (symbol g)) "return list of matches for (l p r)."
+  (awg (res f)
+    `(let ((,res (make-hash-table :test #'equal)))
+       (declare (hash-table ,res))
+       (match (,g ,f ,l ,p ,r) (setf (gethash ,f ,res) t))
+       (loop for k being the hash-keys of ,res collect k))))

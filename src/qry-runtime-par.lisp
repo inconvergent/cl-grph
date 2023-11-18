@@ -4,6 +4,6 @@
 ; TODO: there are probably ways to parallelize some of the current serial reducers?
 
 (defun p/qry-filter (a b fx)
-  (declare (optimize speed (safety 0)) (list a) (ignore b) (function fx))
+  (declare #.*opt* (list a) (ignore b) (function fx))
   (lparallel:premove-if-not fx a))
 

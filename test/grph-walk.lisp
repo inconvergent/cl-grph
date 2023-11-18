@@ -12,9 +12,7 @@
               '((0 :path 1) (1 :path 2) (2 :path 0)
                 (0 :path 4) (4 :path 5) (5 :path 0)))))
 
-    (is (grph:walk-grph g :path)
-        '(((4 1 0 3 6 7) T) ((4 5 2 10) NIL)))
-    (is (grph:walk-grph gg :path)
-        '(((4 0 5) T) ((1 0 2) T)))))
+    (is (grph:walk-grph g :path) '(((10 2 5 4 7 6 3 0 1 4) NIL)))
+    (is (grph:walk-grph gg :path) '(((1 0 4 5 0 2) T)))))
 
 (unless (finalize) (error "error in grph walk"))

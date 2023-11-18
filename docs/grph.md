@@ -105,7 +105,8 @@ valid spatial modes: (ABS REL)
  ; @MEM names a compiled function:
  ;   Lambda-list: (G A B &AUX (ESET (@ (ADJ G) A)))
  ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) (UNSIGNED-BYTE 32)) *)
+ ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) (UNSIGNED-BYTE 32))
+ ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     t if edge (a b) exists.
  ;   Source file: /data/x/grph/src/grph.lisp
@@ -282,7 +283,7 @@ the transaction and discard all changes
  ; DEAD-ENDS names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
- ;     vertices that have exactly one adjacent vertices: [g-] ?y-?x ignores edge dir.
+ ;     verts that have exactly one adjacent verts: [g-] ?y-?x ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -324,7 +325,8 @@ the transaction and discard all changes
  ; 
  ; DEL-DEAD-ENDS names a compiled function:
  ;   Lambda-list: (G &OPTIONAL (P _))
- ;   Derived type: (FUNCTION (T &OPTIONAL T) (VALUES GRPH:GRPH &OPTIONAL))
+ ;   Derived type: (FUNCTION (GRPH:GRPH &OPTIONAL SYMBOL)
+ ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
  ;     delete dead-ends until there are no more dead ends left. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
@@ -416,14 +418,14 @@ the transaction and discard all changes
 #### GRPH:ENSURE-LIST
 
 ```
-:missing:todo:
-
  ; GRPH:ENSURE-LIST
  ;   [symbol]
  ; 
  ; ENSURE-LIST names a compiled function:
  ;   Lambda-list: (L)
  ;   Derived type: (FUNCTION (T) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     return l if l is a nil/list. otherwise return (list l).
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
@@ -470,13 +472,13 @@ the transaction and discard all changes
 #### GRPH:GATHER-MATCH
 
 ```
-:missing:todo:
-
  ; GRPH:GATHER-MATCH
  ;   [symbol]
  ; 
  ; GATHER-MATCH names a macro:
  ;   Lambda-list: (G L P R)
+ ;   Documentation:
+ ;     return list of matches for (l p r).
  ;   Source file: /data/x/grph/src/qry-match.lisp
 ```
 
@@ -642,14 +644,14 @@ the transaction and discard all changes
 #### GRPH:LAST\*
 
 ```
-:missing:todo:
-
  ; GRPH:LAST*
  ;   [symbol]
  ; 
  ; LAST* names a compiled function:
  ;   Lambda-list: (L)
  ;   Derived type: (FUNCTION (LIST) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     last item in list.
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
@@ -834,7 +836,7 @@ the transaction and discard all changes
  ; MULTI-ISECTS names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
- ;     vertices that have 3 or more adjacent vertices. ignores edge dir.
+ ;     verts that have 3 or more adjacent verts. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -879,7 +881,7 @@ the transaction and discard all changes
  ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) &OPTIONAL SYMBOL)
  ;                  (VALUES (MOD 4611686018427387901) &OPTIONAL))
  ;   Documentation:
- ;     number of adjacent vertices to ?x. ignores edge dir.
+ ;     number of adjacent verts to ?x. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -1041,7 +1043,7 @@ the transaction and discard all changes
  ;      - trivial rules contain only queries that can be passed directly to qry
  ;      - simple rules reference earlier rules, but not themselves
  ;      - linear rules have (only) one self-reference (references to earlier
- ;       rules are allowed.)
+ ;        rules are allowed.)
  ;   Source file: /data/x/grph/src/qry-rules.lisp
 ```
 
@@ -1054,7 +1056,7 @@ the transaction and discard all changes
  ; SEGMENT-ISECTS names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
- ;     vertices that do not have exactly 2 adjacent vertices. ie. the set of dead
+ ;     verts that do not have exactly 2 adjacent verts. ie. the set of dead
  ;     ends and multi isects. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
@@ -1117,14 +1119,14 @@ the transaction, but keep the changes
 #### GRPH:TO-VECTOR
 
 ```
-:missing:todo:
-
  ; GRPH:TO-VECTOR
  ;   [symbol]
  ; 
  ; TO-VECTOR names a compiled function:
  ;   Lambda-list: (INIT)
  ;   Derived type: (FUNCTION (LIST) (VALUES SIMPLE-VECTOR &OPTIONAL))
+ ;   Documentation:
+ ;     make non-adjustable array with init contents.
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
@@ -1137,7 +1139,7 @@ the transaction, but keep the changes
  ; TWO-ISECTS names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
- ;     vertices that have exactly 2 adjacent vertex: [g-] ?y1-?x-?y2 [-g] ignores edge dir.
+ ;     verts that have exactly 2 adjacent verts [g-] ?y1-?x-?y2 [-g] ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
@@ -1168,31 +1170,48 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
+#### GRPH:V?
+
+```
+ ; GRPH:V?
+ ;   [symbol]
+ ; 
+ ; V? names a compiled function:
+ ;   Lambda-list: (&OPTIONAL (SILENT T) &AUX
+ ;                 (V
+ ;                  (SLOT-VALUE (FIND-SYSTEM (QUOTE GRPH))
+ ;                              (QUOTE VERSION))))
+ ;   Derived type: (FUNCTION (&OPTIONAL T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     return/print grph version.
+ ;   Source file: /data/x/grph/src/utils.lisp
+```
+
 #### GRPH:VECTOR-FIRST
 
 ```
-:missing:todo:
-
  ; GRPH:VECTOR-FIRST
  ;   [symbol]
  ; 
  ; VECTOR-FIRST names a compiled function:
  ;   Lambda-list: (A)
  ;   Derived type: (FUNCTION (VECTOR) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     first element of vector.
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
 #### GRPH:VECTOR-LAST
 
 ```
-:missing:todo:
-
  ; GRPH:VECTOR-LAST
  ;   [symbol]
  ; 
  ; VECTOR-LAST names a compiled function:
  ;   Lambda-list: (A)
  ;   Derived type: (FUNCTION (VECTOR) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     last element of vector.
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
@@ -1211,6 +1230,20 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
+#### GRPH:WALK-EDGE-SET-SEGMENTS
+
+```
+ ; GRPH:WALK-EDGE-SET-SEGMENTS
+ ;   [symbol]
+ ; 
+ ; WALK-EDGE-SET-SEGMENTS names a compiled function:
+ ;   Lambda-list: (G ES &AUX (EDGES (EDGE-SET->HT ES)))
+ ;   Derived type: (FUNCTION (GRPH:GRPH LIST) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     walk edge set and split into segments.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
 #### GRPH:WALK-GRPH
 
 ```
@@ -1222,6 +1255,20 @@ the transaction, but keep the changes
  ;   Derived type: (FUNCTION (GRPH:GRPH &OPTIONAL SYMBOL) *)
  ;   Documentation:
  ;     walk graph via walk-edge-set.
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
+```
+
+#### GRPH:WALK-GRPH-SEGMENTS
+
+```
+ ; GRPH:WALK-GRPH-SEGMENTS
+ ;   [symbol]
+ ; 
+ ; WALK-GRPH-SEGMENTS names a compiled function:
+ ;   Lambda-list: (G &OPTIONAL (P _))
+ ;   Derived type: (FUNCTION (GRPH:GRPH &OPTIONAL SYMBOL) *)
+ ;   Documentation:
+ ;     walk graph via walk-edge-set-segments.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 

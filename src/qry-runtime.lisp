@@ -3,7 +3,7 @@
 ; RUNTIME QRY FXS AND REDUCERS (AND/NOT/FILTERS/SORT/...) ----------------
 
 (defun distinct (&rest rest &aux (n (length rest)))
-  (declare (optimize speed) (pn n)) "t if values in rest are distinct."
+  (declare #.*opt* (pn n)) "t if values in rest are distinct."
   (= n (length (the list (undup rest nil))))) ; undup use is ok
 
 (defmacro fx-first (f a &rest rest)
@@ -17,7 +17,7 @@
   `(fx-first > ,@rest))
 
 (defun lsort (l &optional (fx #'<) &aux (l (copy-list l)))
-  (declare (optimize speed) (list l) (function fx)) "radix sort list of lists."
+  (declare #.*opt* (list l) (function fx)) "radix sort list of lists."
   (loop for i of-type fixnum from (1- (length (the list (first l)))) downto 0
         do (labels ((p (a b)
                      (declare (list a b))
@@ -29,28 +29,28 @@
 ; TODO: it is bad to copy this stuff all the time. how can we avoid it?
 (declaim (inline psrt pkeys split-by-keys get-keys))
 (defun psrt (l &optional (fx #'car))
-  (declare (optimize speed (safety 1)) (list l) (function fx))
+  (declare #.*opt* (list l) (function fx))
   "sort pairs by first element."
   (sort (copy-list l) #'string< :key fx))
 
 (defun pkeys (a)
-  (declare (optimize speed (safety 1)) (list a))
+  (declare #.*opt* (list a))
   (mapcar #'car (first a)))
 
 (defun alist-get-values (keys aa)
-  (declare (optimize speed (safety 0)) (list keys aa)) "get values of these keys"
+  (declare #.*opt* (list keys aa)) "get values of these keys"
   (loop for k of-type symbol in keys collect (get-var k aa)))
 
 ; TODO: utilize/ensure keys maintains order. rename pairs/get-keys?
 (defun get-keys (keys aa)
-  (declare (optimize speed (safety 1)) (list keys aa))
+  (declare #.*opt* (list keys aa))
   "get only keys pairs. discard the rest. see split-by-keys"
   (loop for k of-type symbol in keys
         for x = (find k aa :test #'eq :key #'car)
         if x collect x))
 
 (defun split-by-keys (keys aa)
-  (declare (optimize speed (safety 1)) (list keys aa))
+  (declare #.*opt* (list keys aa))
   "split keys pairs to the left. see get-keys"
   (loop for x of-type list in aa
         if (find (car x) keys :test #'eq) collect x into yes
@@ -58,7 +58,7 @@
         finally (return (values (psrt yes) (psrt no)))))
 
 (defun alists/collapse-keys/ht (keys aa)
-  (declare (optimize speed (safety 1)) (list keys aa))
+  (declare #.*opt* (list keys aa))
   (loop with ht = (ht) for a in aa
         do (veq:mvb (in out) (split-by-keys keys a)
              (if (gethash in ht)
@@ -67,7 +67,7 @@
         finally (return ht)))
 
 (defun alists/collapse-keys (agg keys aa)
-  (declare (optimize speed (safety 1)) (list aa keys) (symbol agg))
+  (declare #.*opt* (list aa keys) (symbol agg))
   "collapse by keys and attach the remainder as agg"
   (when (not aa) (return-from alists/collapse-keys nil))
   (loop with ht = (alists/collapse-keys/ht keys aa)
@@ -76,17 +76,17 @@
         collect `((,agg . ,v) ,@k)))
 
 (defun outer-join-pairs (aa bb)
-  (declare (optimize speed (safety 1)) (list aa bb))
+  (declare #.*opt* (list aa bb))
   (loop with res = (list) for a in aa
         do (loop for b in bb
                  do (push (psrt `(,@a ,@b)) res))
         finally (return res)))
 
 (defun agg/grp (l &rest keys)
-  (declare (optimize speed (safety 1)) (list l))
+  (declare #.*opt* (list l))
   (mapcar (lambda (row) (alist-get-values keys row)) l))
 (defun agg/cnt (l &rest keys)
-  (declare (optimize speed (safety 1)) (list l) (ignore keys))
+  (declare #.*opt* (list l) (ignore keys))
   (length l))
 
 (defun qry-and (aa bb)
@@ -130,7 +130,7 @@
       (isect-merge-2 common aa bb))))
 
 (defun qry-or (aa bb &optional select)
-  (declare (optimize speed (safety 1)) (list aa bb)) "logical sets, or"
+  (declare #.*opt* (list aa bb)) "logical sets, or"
   (when (not aa) (return-from qry-or bb))
   (when (not bb) (return-from qry-or aa))
   (labels ((do-merge (ht common a)
@@ -143,7 +143,7 @@
       res)))
 
 (defun qry/project (aa select)
-  (declare (optimize speed (safety 1)) (list aa select))
+  (declare #.*opt* (list aa select))
   "select these vars from aa, and deduplicate rows"
   (when (not aa) (return-from qry/project nil))
   (labels ((do-merge (ht select a)
@@ -155,7 +155,7 @@
       res)))
 
 (defun qry-not (orig not* &optional select)
-  (declare (optimize speed (safety 1)) (list orig not*)) "logical sets not"
+  (declare #.*opt* (list orig not*)) "logical sets not"
   ; early exit when nothing to subtract or nothing to return
   ; orig will either be nil, or whatever was passed in (when not is nil)
   (when (or (not orig) (not not*)) (return-from qry-not orig))
@@ -171,16 +171,16 @@
       res)))
 
 (defun qry-filter (a b fx)
-  (declare (optimize speed (safety 1)) (list a) (ignore b) (function fx))
+  (declare #.*opt* (list a) (ignore b) (function fx))
   "used for % filter clauses."
   (remove-if-not fx a))
 
 (defun rules/prev-matches (var &rest pairs)
-  (declare (optimize speed (safety 1)) (list var))
+  (declare #.*opt* (list var))
   "get the hits from the last iteration for linear rules."
   ; TODO: drop _ pairs!!!
   (mvb (pairs filters)
-       (filter-by-predicate pairs (lambda (p) (or (var? p) (any? p))) :key #'cdr)
+       (veq::filter-by-predicate pairs (lambda (p) (or (var? p) (any? p))) :key #'cdr)
     (labels ((filter-match-all (v) (declare (list v))
               (every (lambda (f) (find f v :test #'equal)) filters))
              (repl (f) (mapcar (lambda (p &aux (lft (car p)) (rht (cdr p)))
@@ -191,7 +191,7 @@
       (mapcar #'repl var))))
 
 (defun rules/post-proc (l &rest args)
-  (declare (optimize speed (safety 1)) (list l args))
+  (declare #.*opt* (list l args))
   "strip first nil if present, select args from every row."
   (mapcar (lambda (f) (declare (list f))
             (mapcar (lambda (a) (declare (symbol a)) (get-var a f)) args))

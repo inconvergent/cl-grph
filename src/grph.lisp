@@ -51,7 +51,7 @@ the following terminology is used:
 
 (defun @mem (g a b &aux (eset (@ (adj g) a)))
   (declare (grph g) (pn a b)) "t if edge (a b) exists."
-  (and eset (fset:@ eset b)))
+  (and eset (values (fset:@ eset b))))
 
 (defun @prop (g k &optional p) ; NOTE: vert props are not supported properly
   (declare (grph g)) "get val of prop, p, for key, k should be edge (a b); or vert."

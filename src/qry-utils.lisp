@@ -5,7 +5,6 @@
 
 (defmacro msg-if (msg a &aux (a* (gensym "A")))
   `(let ((,a* ,a)) (when ,a* (,msg ,a*))))
-
 (defmacro with-messages (msgs &body body)
   `(let (,@(loop for m in msgs collect `(,m (list))))
      (labels (,@(loop for m in msgs
@@ -93,11 +92,11 @@
 
 (defun get-all-vars (a)
   (declare (optimize speed) (list a))
-  (reverse (tree-find-all a #'var?)))
+  (reverse (veq::tree-find-all a #'var?)))
 
 (defun get-bindables (a)
   (declare (optimize speed) (list a))
-  (reverse (tree-find-all a (lambda (c) (and (var? c) (bindable? c))))))
+  (reverse (veq::tree-find-all a (lambda (c) (and (var? c) (bindable? c))))))
 (defun get-not-bindables (n &aux (s (car n)))
   (ecase s (:not-join (ensure-list (second n)))
            (:not (get-bindables n))

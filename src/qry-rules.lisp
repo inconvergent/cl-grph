@@ -5,9 +5,9 @@
     ((lstp (r) (and (listp r) (not (null r))))
      (ok/length (r) (= (length r) 3))
      (ok/args (r &aux (a (second r))) (and (lstp a) (every #'var? a)))
-     (ok/args/subset (r) (subsetp (second r) (tree-find-all (third r) #'var?)))
+     (ok/args/subset (r) (subsetp (second r) (veq::tree-find-all (third r) #'var?)))
      (ok/args/consistent (rules)
-       (reduce #'consistent (lpos rules 0 2) :initial-value (list)))
+       (reduce #'consistent (veq:lpos rules 0 2) :initial-value (list)))
      (consistent (prv nxt &aux (hit (find (car nxt) prv :key #'car)))
        (if (and hit (not (equalp hit nxt)))
            (error "RULE: inconsistent args for:~%~s" rules)
@@ -24,12 +24,12 @@
 
 ; TODO: non-lin test is not sufficient
 (defun rules/split/trivial (rules)
-  (filter-by-predicate rules
-    (lambda (r) (not (tree-find-all (third r) #'rule-name?)))))
+  (veq::filter-by-predicate rules
+    (lambda (r) (not (veq::tree-find-all (third r) #'rule-name?)))))
 
 (defun rules/classify/non-trivial (n a r)
-  (let* ((rule-names (tree-find-all r #'rule-name?))
-         (self-refs (length (tree-find-all rule-names
+  (let* ((rule-names (veq::tree-find-all r #'rule-name?))
+         (self-refs (length (veq::tree-find-all rule-names
                               (lambda (s) (eq s n))))))
     (cond ((< 1 self-refs) (error "RULE: non-linear rule:~%~s ~s ~s" n a r))
           ((= 1 self-refs) :linear)
@@ -62,7 +62,7 @@ note the difference between rule types:
  - trivial rules contain only queries that can be passed directly to qry
  - simple rules reference earlier rules, but not themselves
  - linear rules have (only) one self-reference (references to earlier
-  rules are allowed.)"
+   rules are allowed.)"
   (mvb (trivial non-trivial) (rules/split/trivial (rules/valid/format rules))
     (let ((all-names (undup (mapcar #'car rules))))
       (labels

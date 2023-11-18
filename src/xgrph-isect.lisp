@@ -42,7 +42,7 @@
          (declare (simple-list edges isects))
          (loop for hits of-type list across isects for i of-type fixnum from 0
                if hits
-               do (loop with cc = (grph::lpos hits) with ei = (aref edges i)
+               do (loop with cc = (veq:lpos hits) with ei = (aref edges i)
                         for a of-type fixnum in cc and b of-type fixnum in (cdr cc)
                         initially (-add (gethash (ic i (first cc)) crossing->vert)
                                         (first ei) :e ei)

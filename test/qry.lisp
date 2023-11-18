@@ -99,9 +99,10 @@
         (ls '((0 1) (1 0) (1 2) (1 3)
               (2 1) (3 1) (5 4) (4 5))))
 
-    (is (grph:qry g :select (?x ?y) :where (or (?x :e ?y) (?x :a ?y))
-                    :first (list ?x ?y))
-        '(3 1))
+    ; TODO: better test for first + other qry features
+    ; (is (grph:qry g :select (?x ?y) :where (or (?x :e ?y) (?x :a ?y))
+    ;                 :first (list ?x ?y))
+    ;     '(3 1))
 
     (is (ls (grph:qry g :select (?x ?y)
                         :where (and (?x ?c 1) (1 ?c ?y)

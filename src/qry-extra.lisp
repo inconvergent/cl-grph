@@ -1,7 +1,7 @@
 (in-package :grph)
 
 (defun normalise-fold (g)
-  (declare (grph g))
+  (declare #.*opt* (grph g))
   "remove all edges (a b) where a > b, and create edge (b a) if it does not exist.
 also moves all properties from (a b) to (b a)."
   (qry g :select (?x ?y) :where (and (?x _ ?y) (% (< ?y ?x)))
@@ -22,13 +22,13 @@ also moves all properties from (a b) to (b a)."
   (declare (symbol cres))
   (awg (for-res lp)
     `(macrolet ((cstop (&body body) `(return-from ,',lp (progn ,@body))))
-      (loop named ,lp
-            with ,cres of-type list = ,init
-            for ,for-res = (progn ,@body)
-            for ,citr of-type pn from 0 below (the pn ,lim)
-            until (,test ,for-res)
-            if ,for-res do (push ,for-res ,cres)
-            finally (return-from ,lp (reverse ,cres))))))
+       (loop named ,lp
+             with ,cres of-type list = ,init
+             for ,for-res = (progn ,@body)
+             for ,citr of-type pn from 0 below (the pn ,lim)
+             until (,test ,for-res)
+             if ,for-res do (push ,for-res ,cres)
+             finally (return-from ,lp (reverse ,cres))))))
 
 ; TODO: this is really confusing to use. change? make example?
 (defmacro qry-collect-while (g &rest rest)
@@ -40,9 +40,9 @@ also moves all properties from (a b) to (b a)."
                             (% (not (member ?n cres))))
      :first (progn (setf ?b ?n) ?n)
      :cres cres))"
-  `(collect-while (:init ,(get-kv rest :init '(list))
-                   :lim ,(get-kv rest :lim 1000) ; RENAME clim?
-                   :cres ,(get-kv rest :cres (gensym "CRES"))
-                   :citr ,(get-kv rest :citr (gensym "CITR")))
-    (qry ,g ,@(strip-kvs rest '(:init :lim :cres :citr)))))
+  `(collect-while (:init ,(veq:get-arg-key rest :init '(list))
+                   :lim  ,(veq:get-arg-key rest :lim  1000) ; RENAME clim?
+                   :cres ,(veq:get-arg-key rest :cres (gensym "CRES"))
+                   :citr ,(veq:get-arg-key rest :citr (gensym "CITR")))
+    (qry ,g ,@(veq:strip-arg-keys rest '(:init :lim :cres :citr)))))
 

@@ -1,12 +1,13 @@
 (asdf:defsystem #:grph
   :description "immutable graph data structure with Datalog query language"
-  :version "0.40.0"
+  :version "1.0.0"
   :author "anders hoff / @inconvergent / inconvergent@gmail.com"
   :in-order-to ((asdf:test-op (asdf:test-op #:grph/tests)))
   :licence "MIT" :pathname "src/" :serial nil
   :depends-on (#:veq #:fset #+:grph-parallel #:lparallel)
   :components ((:file "packages")
-               (:file "utils" :depends-on ("packages"))
+               (:file "init" :depends-on ("packages"))
+               (:file "utils" :depends-on ("init"))
 
                (:file "docs" :depends-on ("utils"))
                (:file "config" :depends-on ("utils"))
@@ -19,13 +20,11 @@
                (:file "qry-runtime" :depends-on ("qry-match"))
                (:file "qry-runtime-2" :depends-on ("qry-match"))
 
-               ; parallel:
-               #+:grph-parallel
+               #+:grph-parallel ; parallel
                (:file "qry-runtime-par" :depends-on ("qry-runtime"))
                #+:grph-parallel
                (:file "qry" :depends-on ("qry-runtime-par"))
-               ; serial:
-               #-:grph-parallel
+               #-:grph-parallel ; serial
                (:file "qry" :depends-on ("qry-runtime"))
 
                (:file "qry-extra" :depends-on ("qry"))
@@ -36,11 +35,11 @@
 
                (:file "xgrph" :depends-on ("qry"))
                (:file "xgrph-isect" :depends-on ("xgrph"))
-               (:file "io" :depends-on ("grph-walk" "xgrph"))))
+               (:file "xgrph-io" :depends-on ("grph-walk" "xgrph"))))
 
 (asdf:defsystem #:grph/tests
   :depends-on (#:veq #:grph #:prove #+:grph-parallel #:lparallel #:uiop #:asdf)
-  :version "0.40.0"
+  :version "1.0.0"
   :perform (asdf:test-op (o s) (uiop:symbol-call ':grph-tests
                                  #+:grph-parallel '#:p/run-tests
                                  #-:grph-parallel '#:run-tests))
