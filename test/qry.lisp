@@ -1,6 +1,6 @@
 (in-package #:grph-tests)
 
-(plan 5)
+(plan 6)
 
 (subtest "qry preproc"
   (is (cdr (assoc :where
@@ -49,8 +49,8 @@
                                     (% (< ?x ?y)))))
         (ls '((0 1) (1 2) (1 3) (4 5))))
 
-    (is (let ((?x 5))
-          (rs (grph:qry g :select ?y :in ?x :where (or (?x :e ?y) (?x :a ?y)))))
+    (is (rs (grph:qry g :select ?y :in ((?x 5))
+                        :where (or (?x :e ?y) (?x :a ?y))))
         (rs `(4)))
 
       (is (rs (grph:qry g :select ?x
@@ -111,6 +111,21 @@
                                          ((?x . 2) (?y . 3))
                                          ((?x 888) (?y . 77)))))))
         (ls `((0 0) (0 2) (2 3))))))
+
+(subtest "qry vert props"
+  (let ((g (grph:make)))
+    (grph:prop! g 0 '(:a)) (grph:prop! g 1 '(:a)) (grph:prop! g 2 :a)
+    (grph:prop! g 2 '(:b)) (grph:prop! g 3 '(:b)) (grph:prop! g 4 :b)
+    (grph:prop! g 4 '(:c)) (grph:prop! g 5 '(:c)) (grph:prop! g 0 :c)
+    (grph:prop! g -4 '(:a)) (grph:prop! g -5 '(:b)) (grph:prop! g -0 '(:c))
+
+    (grph:add! g 0 1 '(:x)) (grph:add! g 1 2 :x)
+    (grph:add! g 2 3 '(:y)) (grph:add! g 3 4 :y)
+
+    (is (grph:qry g :select (?x ?y) :where (:a ?x ?y)) '((:Y 3) (:X 2) (:X 1)))
+    (is (grph:qry g :select (?x ?y) :where (:b ?x ?y)) '((:Y 4) (:Y 3)))
+    (is (grph:qry g :select (?x ?y) :where (?x ?y :a)) '((1 :X) (0 :X)))
+    (is (grph:qry g :select (?x ?y) :where (?x ?y :b)) '((3 :Y) (2 :Y) (1 :X)))))
 
 (subtest "joins"
   (let ((g (make-edge-set)))
@@ -179,6 +194,17 @@
                                      (or (?x _ 2) (2 _ ?x))
                                      (% /= ?y 4))))
         (ls '((5 2))))))
+
+(subtest "qry neg"
+  (let ((g (grph:make)))
+    (grph:add! g -3 -2)
+    (grph:add! g -3 -4 '(:a))
+    (grph:add! g -4 -3 '(:b))
+    (grph:add! g -3 -2 '(:a))
+    (grph:add! g 1 -2)
+    (is (grph:qry g :select (?a ?b) :where (?a :a ?b)) '((-3 -2) (-3 -4)))
+    (is (grph:qry g :select (?a ?b) :where (and (?a _ ?b) (not (?a :a ?b)))) '((-4 -3) (1 -2)))
+    ))
 
 (unless (finalize) (error "error in QRY BASIC."))
 

@@ -16,12 +16,14 @@
           finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
-  (-run-tests '(#P"test/qry-runtime.lisp" #P"test/grph.lisp" #P"test/qry.lisp"
-                #P"test/qry-2.lisp" #P"test/qry-3.lisp" #P"test/xgrph.lisp"
-                #P"test/grph-walk.lisp")))
-(defun p/run-tests ()
-  (-run-tests '(#P"test/qry-runtime.lisp" #P"test/grph.lisp" #P"test/qry.lisp"
-                #P"test/qry-2.lisp" #P"test/qry-3.lisp" #P"test/xgrph.lisp")))
+  (if grph:*parallel*
+    (progn (print "parallel tests")
+      (-run-tests '( #P"test/qry-runtime.lisp" #P"test/grph.lisp" #P"test/qry.lisp"
+                     #P"test/qry-2.lisp" #P"test/qry-3.lisp" #P"test/xgrph.lisp")))
+    (progn (print "serial tests")
+      (-run-tests '(#P"test/qry-runtime.lisp" #P"test/grph.lisp" #P"test/qry.lisp"
+                   #P"test/qry-2.lisp" #P"test/qry-3.lisp" #P"test/xgrph.lisp"
+                   #P"test/grph-walk.lisp")))))
 
 (defun lsort* (l &aux (l (copy-list l)))
   (declare (optimize speed) (list l))
@@ -49,34 +51,38 @@ inefficient. use for tests only."
 
 (defun mk-grph-main ()
   (let ((g (grph:grph))
-        (bprop  '((:b "90"))))
+        (bprop  '(:b)))
     (grph:add! g 0 1)
     (grph:add! g 2 3)
     (grph:add! g 3 4 '(:a))
-    (grph:add! g 4 3 '((:a "43")))
+    (grph:add! g 4 3 '(:a))
     (grph:add! g 5 6)
-    (grph:add! g 6 0 '((:a "60")))
+    (grph:add! g 6 0 '(:a))
     (grph:add! g 7 8 '(:c))
     (grph:add! g 8 9 '(:b))
     (grph:add! g 9 0 bprop)
     (grph:add! g 7 8 '(:b))
     (grph:add! g 0 3)
+    (grph:prop! g 2 '(:a))
+    (grph:prop! g -2 '(:a))
     g))
 (defun mk-grph-match ()
   (let ((g (grph:grph)))
     (grph:add! g 0 1 '(:a))
     (grph:add! g 0 3 '(:a))
-    (grph:add! g 2 3 '((:a "bbbbb")))
-    (grph:add! g 2 3 '((:b "ccccc")))
+    (grph:add! g 2 3 '(:a))
+    (grph:add! g 2 3 '(:b))
     (grph:add! g 3 4 '(:a))
     (grph:add! g 4 3 '(:a))
-    (grph:add! g 7 8 '((:a "7778888")))
+    (grph:add! g 7 8 '(:a))
     (grph:add! g 5 6)
     (grph:add! g 6 0 '(:b))
     (grph:add! g 33 0 '(:b))
     (grph:add! g 8 9 '(:b))
     (grph:add! g 9 0 '(:a))
-    (grph:add! g 0 1 '((:a "aaa")))
+    (grph:add! g 0 1 '(:a))
+    (grph:prop! g 2 '(:a))
+    (grph:prop! g -2 '(:a))
     g))
 
 (defun make-rules-edge-set-1 ()

@@ -1,6 +1,6 @@
 (in-package #:grph-tests)
 
-(plan 4)
+(plan 3)
 
 (subtest  "qry nested"
   (let* ((gg (make-edge-set)) (xg gg))

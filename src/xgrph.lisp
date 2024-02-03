@@ -143,7 +143,7 @@
   (declare (symbol g s) (pn dim)) "delete edge (a b) and add edges (a x) (x b)."
   (awg (a* b* v* props*)
   `(let* ((,a* ,a) (,b* ,b) (,v* (vert! ,dim ,s ,x))
-          (,props* (grph::props-as-list (grph:@prop ,g (list ,a* ,b*)))))
+          (,props* (grph:@prop ,g (list ,a* ,b*))))
     (del! ,g ,a* ,b*)
     (add! ,g ,a* ,v* ,props*)
     (add! ,g ,v* ,b* ,props*)

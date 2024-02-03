@@ -8,7 +8,7 @@ also moves all properties from (a b) to (b a)."
          :using ^g
          :then (let ((p (@prop g (list ?x ?y))))
                  (del! ^g ?x ?y)
-                 (add! ^g ?y ?x (props-as-list p))))
+                 (add! ^g ?y ?x p)))
   g)
 (defmacro normalise-fold! (g)
   (declare (symbol g))

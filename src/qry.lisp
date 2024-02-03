@@ -1,8 +1,8 @@
 (in-package :grph)
 
 
-(defun qry/check/and/bindable (hit c &aux (cb (get-bindables c)))
-  (unless (every (lambda (n) (subsetp (get-not-bindables n) cb)) hit)
+(defun qry/check/and/bindable (hit c &aux (cb (get-vars c)))
+  (unless (every (lambda (n) (subsetp (get-vars-in-not-clause n) cb)) hit)
           (format nil ":not/:% non-bindable ~a | ~a." hit c)))
 
 (defun qry/check/or/not (qc)
@@ -18,19 +18,20 @@
           do (return-from qry/check/or
                (format nil "clauses in :or must have the same vars:~{~a ~}." qc)))))
 
+; TODO: this is a very large function that doesn't actually do all that much.
+; can we simplify without losing qry validation?
 (defun qry/preproc/in/where (p &aux (in (gk p :in t)) (res (list)))
   "converts clause keywords to :keyword, mostly
 
 safeguards :in vars:
   for :in ?a and :w (AND (?A _ ?B) (?D _ ?C))
-  returns (values ((?A32 ?A)) (AND (?A32 _ ?B) (?D _ ?C)))
-  where ?A32 is a gensym.
+  returns (values ((!?A ?A)) (AND (!?A _ ?B) (?D _ ?C)))
   if :in is empty, nothing happens.
 
-NOTE: resulting (:in) gensyms in :where will be counted as val?, not var?,
-because gensyms have no symbol-package. as a result :in vals are not free."
+NOTE: items in :in will be counted as val. ie they are bound as a value. see fx: val?.
+      because they will get the ! prefix."
   (with-messages (err wrn)
-    (labels ; kv-rec --->
+    (labels                        ;;;;      kv-rec --->
       ((rec/map (qc) (mapcar #'kv-rec qc))
        (fact? (qc) (and (= (length qc) 3)
                         (every (lambda (c) (or (any? c) (val? c) (var? c))) qc)))
@@ -48,14 +49,16 @@ because gensyms have no symbol-package. as a result :in vals are not free."
                      (member (kv (car qc)) *clauses*))
                   `(,(kv (car qc)) ,@(rec/map (cdr qc))))
                (t (unless (fact? qc) (err "bad qry clause: ~a." qc))
-                  `(:fact ,@qc)))) ; <--- kv-rec
-       (push-new (s &aux (gs (gensym (string-upcase (mkstr s)))))
-         (push (list gs s) res)
+                  `(:fact ,@qc)))) ;;;; <--- kv-rec
+       (push-new (s &aux (gs (symb (string-upcase (mkstr "!" s)))))
+         (push (list gs s (cadr (assoc s in :test #'eq))) res)
          gs)
        (convert (s &aux (m (car (member s res :key #'second :test #'eq))))
          (if m (car m) (push-new s)))
        (rec (where)
-         (cond ((and (var? where) (member where in :test #'eq)) (convert where))
+         (cond ((and (var? where)
+                     (member where in :test #'eq :key #'car))
+                (convert where))
                ((consp where) (cons (rec (car where)) (rec (cdr where))))
                (t where))))
       ; NOTE: (rec ...) must be called before (reverse res)
@@ -135,34 +138,32 @@ because gensyms have no symbol-package. as a result :in vals are not free."
 
       (let ((body (next where)))
         (qry/compile/check/messages p err wrn)
-        `((:compiled . (let (,@(gk p :in t)) ,body)) ,@p)))))
+        `((:compiled . ,body) ,@p)))))
 
 (defun qry/aggregate (s) (reverse (veq::tree-find-all s #'aggr?)))
 (defun qry/not-aggregate (s)
   (etypecase s (symbol s) (cons (remove-if #'aggr? s))))
 
-(defun qry/compile/conf (p &aux (vars (gk p :vars t)) (in (gk p :in t))
-                                (using (gk p :using t)))
+(defun qry/compile/conf (p &aux (vars (gk p :vars t)) (using (gk p :using t)))
   (with-messages (err wrn)
     (unless (gk p :where t) (wrn "where is empty."))
     (unless (gk p :select t) (wrn "select is empty."))
 
-    (when (gk& p t :pairs :using)
-          (err ":pairs can not be combined with :using."))
+    (when (gk& p t :pairs :using) (err ":pairs can not be combined with :using."))
     (unless (apply #'at-most 1 (gkk p :pairs :then :collect :first))
             (err "use either :pairs :then, :first, :collect; or neither."))
     (unless (and (every #'^var? using) (no-dupes? using))
             (err "got bad value for :using ~s. vars need ^ prefix." using))
+    (unless (and (every #'var? vars) (no-dupes? vars))
+            (err "got bad value for :select ~s" vars))
 
-    (unless (and (every #'var? (gk p :vars)) (no-dupes? (gk p :vars)))
-            (err "got bad value for :select ~s" (gk p :vars)))
+    (loop for o in (gk p :in t) collect (etypecase o (symbol o) (list (car o))) into in
+      finally (unless (and (every #'var? in) (no-dupes? in))
+                      (err "duplicate/bad value for :in."))
+              (unless (not #1=(intersection vars in))
+                      (err ":select and :in can not overlap: ~a" #1#)))
 
-    (unless (and (every #'var? in) (no-dupes? in))
-            (err "duplicate/bad value for :in."))
-    (unless (not (apply #'intersection (gkk p :vars :in)))
-            (err ":select and :in can not overlap."))
-
-    (unless (subsetp (gk p :vars t) (get-all-vars (gk p :where t)))
+    (unless (subsetp vars (get-all-vars (gk p :where t)))
             (wrn "selecting var(s) not in :where: ~a." vars))
 
     ; (unless (subsetp (qry/aggregate (gkk p :then :collect :first))
@@ -237,12 +238,23 @@ because gensyms have no symbol-package. as a result :in vals are not free."
                    (res () "all query results (as pairs)."
                      ',(gk p :res-sym)))
                   ; NOTE: is it possible to move select vars into qry-compile-where?
-                  (let ((,(gk p :res-sym) ,compiled-qry)
-                        ,@(bind-partial) ,qry-final-res)
+                  (let* (,@(mapcar (lambda (v) `(,(first v) ,(third v))) (gk p :in t))
+                         (,(gk p :res-sym) ,compiled-qry)
+                         ,@(bind-partial) ,qry-final-res)
                     (block ,stop* (setf ,qry-final-res ,(gk p :itr))
                                   ,(re-bind-result)
                                   ,qry-final-res)))))
         `((:compiled-full . ,full) ,@p)))))
+
+(defun qry/preproc/in (p &aux (in (gk p :in t)))
+  (with-messages (err wrn)
+    (labels ((err* () (err "unexpected value for in: ~a." in)))
+     `((:in . ,(loop for v in in
+                collect (typecase v (cons   (unless (var? (car v)) (err*)) v)
+                                    (symbol (unless (var? v)       (err*)) (list v v))
+                                    (otherwise                     (err*)))
+          finally (qry/compile/check/messages p err wrn)))
+      ,@p))))
 
 ; TODO: with
 ; TODO: add sort? maybe not?
@@ -269,7 +281,7 @@ other modifiers:
 see examples for more usage." ; TODO:  pre-check for in/aggr collisions
   (let ((p (veq:vchain (#'do/qry/compile/full #'qry/compile/where
                         #'qry/compile/itr #'qry/preproc/in/where
-                        #'qry/compile/conf)
+                        #'qry/preproc/in #'qry/compile/conf)
              `((:in . ,(remove-nil in)) ; pre-bound vars
                (:select . ,select) ; select expression, with aggrs
                (:aggr . ,(qry/aggregate (remove-nil select))) ; aggrs in select

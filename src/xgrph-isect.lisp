@@ -11,7 +11,7 @@
       ((ic (i c) (declare (fixnum i c)) (if (< i c) (list i c) (list c i)))
        (-add (a b &key e)
          (declare (pn a b) (list e))
-         (add! g a b (grph::props-as-list (grph:@prop g e))))
+         (add! g a b (grph:@prop g e)))
        (edges-as-lines (edges)
          (declare (simple-list edges))
          (loop for edge of-type list across edges collect (2@verts pos edge)))
@@ -35,9 +35,9 @@
        (del-hit-edges (edges isects)
          (declare (simple-list edges isects))
          (loop for hits of-type list across isects for i of-type fixnum from 0
-               if hits do (grph::ldel! g (aref edges i))
+               if hits do (grph:ldel! g (aref edges i))
                           (loop for (c . p) in hits
-                                do (grph::ldel! g (aref edges c)))))
+                                do (grph:ldel! g (aref edges c)))))
        (add-new-edges (edges isects)
          (declare (simple-list edges isects))
          (loop for hits of-type list across isects for i of-type fixnum from 0
@@ -103,9 +103,9 @@
        (declare (simple-list edges isects))
        (loop for hits of-type list across isects
              for i of-type fixnum from 0
-             if hits do (grph::ldel! g (aref edges i))
+             if hits do (grph:ldel! g (aref edges i))
                         (loop for (c . p) in hits
-                              do (grph::ldel! g (aref edges c))))))
+                              do (grph:ldel! g (aref edges c))))))
     (let* ((edges (grph:to-vector (grph:@edges g)))  ; edges ((v1 v2) (v8 v1) ...)
            (lines (grph:to-vector (edges-as-lines edges))) ; lines: (#(ax ay bx by) #(cx cy dx dy) ...)
            (veq::*eps* 0.00001)
@@ -127,12 +127,12 @@ all edges intersecting the envelope will be deleted, a new vert will be
 inserted on the intersection; connected to the inside vert."
   (labels
     ((inside (i)
-      (declare (grph::pn i))
+      (declare (pn i))
       (veq:xlet ((f2!p (2@ pos i)))
         (and (> (:vr p 0) lft) (> (:vr p 1) top)
              (< (:vr p 0) rht) (< (:vr p 1) bot))))
      (split-line (ai bi &aux (rev nil))
-       (declare (grph::pn ai bi) (boolean rev))
+       (declare (pn ai bi) (boolean rev))
        (unless (inside ai) (rotatef ai bi) (setf rev t))
        (veq:xlet ((f2!a (2@ pos ai))
                   (f2!b (2@ pos bi))
@@ -154,7 +154,7 @@ inserted on the intersection; connected to the inside vert."
               (ecase state
                 (:keep nil)
                 (:outside (grph:del! ^g ?x ?y))
-                (:split (let ((props (grph::props-as-list (grph:@prop g (list ?x ?y)))))
+                (:split (let ((props (grph:@prop g (list ?x ?y))))
                           (grph:del! ^g ?x ?y)
                           (2append! ^g ^pos (if rev ?y ?x) (veq:f2 px) abs props)))))))
   (values g pos))
@@ -198,10 +198,9 @@ optionally delete edges on the side of ab where (sidefx (cross ab va) 0f0)"
           ((strip-cut-verts (ea eb)
              (remove-if (lambda (i) (eq :cut (gethash i cuts-ht))) (list ea eb)))
            (del-side? (ee)
-              (some (lambda (i)
-                      (funcall (the function sidefx)
-                               (veq:f2cross ab (f2!@- (xgrph:2@ pos i) a)) 0f0))
-                    ee))
+             (some (lambda (i) (funcall (the function sidefx)
+                                        (veq:f2cross ab (f2!@- (xgrph:2@ pos i) a)) 0f0))
+                   ee))
            (sym (i)
              (veq:xlet ((f2!pp (xgrph:2@ pos i)) (f2!ap (f2!@- pp a))
                         (f2!nn (f2!@- ap (f2!@/. (f2!@*. ab (veq:f2dot ap ab))
@@ -211,8 +210,7 @@ optionally delete edges on the side of ab where (sidefx (cross ab va) 0f0)"
            (vert (i &aux (k (gethash i cuts-ht)))
              (cond ((eq :cut k) i) ((numberp k) k) (t (sym i))))
            (do-edge (ea eb)
-            (grph:add! ^g (vert ea) (vert eb)
-              (grph::props-as-list (grph:@prop g `(,ea ,eb)))))
+             (grph:add! ^g (vert ea) (vert eb) (grph:@prop g `(,ea ,eb))))
            (do-edge-del (ea eb)
              (if (del-side? (strip-cut-verts ea eb))
                  (grph:del! ^g ea eb) ; add del side as :del in ht?

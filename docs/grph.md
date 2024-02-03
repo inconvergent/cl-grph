@@ -16,6 +16,12 @@ valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
 valid edge direction modes: (-> <- <> ><)
 ```
 
+#### GRPH:\*PARALLEL\*
+
+```
+set to nil at compile time to disable parallism. default: T
+```
+
 #### GRPH:\*POS-MODES\*
 
 ```
@@ -30,7 +36,7 @@ valid spatial modes: (ABS REL)
  ; 
  ; @BOTH names a compiled function:
  ;   Lambda-list: (G A &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 32))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (SIGNED-BYTE 32))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list all verts of a that are bi-directional.
@@ -59,7 +65,7 @@ valid spatial modes: (ABS REL)
  ; 
  ; @EITHER names a compiled function:
  ;   Lambda-list: (G A &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 32))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (SIGNED-BYTE 32))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list both inbound and outbond verts of a.
@@ -89,7 +95,7 @@ valid spatial modes: (ABS REL)
  ; 
  ; @IN names a compiled function:
  ;   Lambda-list: (G A &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 32))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (SIGNED-BYTE 32))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list all outboud verts of a.
@@ -104,11 +110,25 @@ valid spatial modes: (ABS REL)
  ; 
  ; @MEM names a compiled function:
  ;   Lambda-list: (G A B &AUX (ESET (@ (ADJ G) A)))
- ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) (UNSIGNED-BYTE 32))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (SIGNED-BYTE 32) (SIGNED-BYTE 32))
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     t if edge (a b) exists.
+ ;   Source file: /data/x/grph/src/grph.lisp
+```
+
+#### GRPH:@MID
+
+```
+ ; GRPH:@MID
+ ;   [symbol]
+ ; 
+ ; @MID names a compiled function:
+ ;   Lambda-list: (G K &OPTIONAL P)
+ ;   Derived type: (FUNCTION (GRPH:GRPH T &OPTIONAL T)
+ ;                  (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     get val of prop, p, for key, k. should be a prop (keyword).
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
@@ -120,10 +140,24 @@ valid spatial modes: (ABS REL)
  ; 
  ; @OUT names a compiled function:
  ;   Lambda-list: (G A &AUX (RES (LIST)))
- ;   Derived type: (FUNCTION (GRPH:GRPH (UNSIGNED-BYTE 32))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (SIGNED-BYTE 32))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list all outboud verts of a.
+ ;   Source file: /data/x/grph/src/grph.lisp
+```
+
+#### GRPH:@PNUM
+
+```
+ ; GRPH:@PNUM
+ ;   [symbol]
+ ; 
+ ; @PNUM names a compiled function:
+ ;   Lambda-list: (G)
+ ;   Derived type: (FUNCTION (GRPH:GRPH) *)
+ ;   Documentation:
+ ;     total number of props in graph.
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
@@ -135,7 +169,8 @@ valid spatial modes: (ABS REL)
  ; 
  ; @PROP names a compiled function:
  ;   Lambda-list: (G K &OPTIONAL P)
- ;   Derived type: (FUNCTION (GRPH:GRPH T &OPTIONAL T)
+ ;   Derived type: (FUNCTION
+ ;                  (GRPH:GRPH (OR LIST (SIGNED-BYTE 32)) &OPTIONAL T)
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     get val of prop, p, for key, k should be edge (a b); or vert.
@@ -195,11 +230,11 @@ valid spatial modes: (ABS REL)
  ; ADD names a compiled function:
  ;   Lambda-list: (G A B &OPTIONAL PROPS)
  ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) (UNSIGNED-BYTE 32)
- ;                             &OPTIONAL LIST)
+ ;                  (GRPH:GRPH (SIGNED-BYTE 32) (SIGNED-BYTE 32) &OPTIONAL
+ ;                             (OR LIST KEYWORD FSET:SET))
  ;                  (VALUES GRPH:GRPH BOOLEAN &OPTIONAL))
  ;   Documentation:
- ;     new edge (a b). optionally set prop, p, (with val).
+ ;     new edge (a b). optionally set prop, p.
  ;     returns: (values g created?)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
@@ -295,8 +330,7 @@ the transaction and discard all changes
  ; 
  ; DEL names a compiled function:
  ;   Lambda-list: (G A B)
- ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) (UNSIGNED-BYTE 32))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (SIGNED-BYTE 32) (SIGNED-BYTE 32))
  ;                  (VALUES GRPH:GRPH BOOLEAN &OPTIONAL))
  ;   Documentation:
  ;     delete edge (a b). deletes associated props.
@@ -351,7 +385,7 @@ the transaction and discard all changes
  ; 
  ; DEL-PROPS names a compiled function:
  ;   Lambda-list: (G AB PROPS)
- ;   Derived type: (FUNCTION (GRPH:GRPH LIST LIST)
+ ;   Derived type: (FUNCTION (GRPH:GRPH LIST (OR LIST FSET:SET))
  ;                  (VALUES GRPH:GRPH T &OPTIONAL))
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
@@ -482,25 +516,6 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-match.lisp
 ```
 
-#### GRPH:GRP
-
-```
- ; GRPH:GRP
- ;   [symbol]
- ; 
- ; GRP names a compiled function:
- ;   Lambda-list: (VAL &OPTIONAL (S G))
- ;   Derived type: (FUNCTION (SYMBOL &OPTIONAL SYMBOL)
- ;                  (VALUES CONS &OPTIONAL))
- ;   Documentation:
- ;     for val = :black and s = :color, creates list of two props
- ;     ((:color :black) :black). this is useful for making both :colour and :black
- ;     filterable via @prop or in queries.
- ;     
- ;     eg: (add! g a b (grp :black :color))
- ;   Source file: /data/x/grph/src/grph.lisp
-```
-
 #### GRPH:GRPH
 
 ```
@@ -584,7 +599,7 @@ the transaction and discard all changes
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
  ;     ingest a list of edges with props. eg: ((0 :a 3) ...). and return a grph.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:INGEST-PROPS-EDGES
@@ -599,7 +614,7 @@ the transaction and discard all changes
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
  ;     ingest list of props and flattened edges. see props-edges.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
 #### GRPH:ITR-ADJ
@@ -784,7 +799,7 @@ the transaction and discard all changes
  ; MATCH names a macro:
  ;   Lambda-list: ((G F LFT MID RHT) &BODY BODY)
  ;   Documentation:
- ;     execute body with alist f as every bindable var for every fact in the graph
+ ;     execute body with alist f with vars for every fact in the graph
  ;     that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
  ;   Source file: /data/x/grph/src/qry-match.lisp
 ```
@@ -799,7 +814,7 @@ the transaction and discard all changes
  ;   Lambda-list: (FX &AUX (HT (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
  ;   Derived type: (FUNCTION (FUNCTION) (VALUES FUNCTION &OPTIONAL))
  ;   Documentation:
- ;     return a functiont that memoizes calls to fx.
+ ;     return function that memoizes calls to fx.
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
@@ -877,9 +892,8 @@ the transaction and discard all changes
  ; 
  ; NUM-EITHER names a compiled function:
  ;   Lambda-list: (G ?X &OPTIONAL (?P _))
- ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (UNSIGNED-BYTE 32) &OPTIONAL SYMBOL)
- ;                  (VALUES (MOD 4611686018427387901) &OPTIONAL))
+ ;   Derived type: (FUNCTION (GRPH:GRPH (SIGNED-BYTE 32) &OPTIONAL SYMBOL)
+ ;                  (VALUES (UNSIGNED-BYTE 44) &OPTIONAL))
  ;   Documentation:
  ;     number of adjacent verts to ?x. ignores edge dir.
  ;   Source file: /data/x/grph/src/grph-walk.lisp
@@ -924,6 +938,37 @@ the transaction and discard all changes
  ;   [symbol]
 ```
 
+#### GRPH:PROP
+
+```
+ ; GRPH:PROP
+ ;   [symbol]
+ ; 
+ ; PROP names a compiled function:
+ ;   Lambda-list: (G K PROPS)
+ ;   Derived type: (FUNCTION
+ ;                  (GRPH:GRPH (OR LIST (SIGNED-BYTE 32))
+ ;                             (OR LIST KEYWORD FSET:SET))
+ ;                  (VALUES GRPH:GRPH &OPTIONAL))
+ ;   Documentation:
+ ;     set prop, p, of edge or vert, k.
+ ;   Inline proclamation: INLINE (inline expansion available)
+ ;   Source file: /data/x/grph/src/grph.lisp
+```
+
+#### GRPH:PROP!
+
+```
+ ; GRPH:PROP!
+ ;   [symbol]
+ ; 
+ ; PROP! names a macro:
+ ;   Lambda-list: (G K PROPS)
+ ;   Documentation:
+ ;     add edge/vert prop for key, k.
+ ;   Source file: /data/x/grph/src/macros.lisp
+```
+
 #### GRPH:PROPS-EDGES
 
 ```
@@ -934,7 +979,7 @@ the transaction and discard all changes
  ;   Lambda-list: (G)
  ;   Derived type: (FUNCTION (GRPH:GRPH) (VALUES LIST &OPTIONAL))
  ;   Documentation:
- ;     list of lists of prop with flattend list of edges
+ ;     list of lists of prop with flattend list of edges. see ingest-props-edges
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 

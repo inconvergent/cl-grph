@@ -42,14 +42,12 @@
   (declare (optimize speed))
   (remove-duplicates (if flatten (awf e) e)))
 
-(defun at-most (n &rest rest)
-  (declare (pn n))
+(defun at-most (n &rest rest) (declare (pn n))
   (<= (length (remove-if-not #'identity rest)) n))
 
-(defun -gensyms (name n)
-  (declare (symbol name) (pn n))
+(defun -gensyms (name n) (declare (symbol name) (pn n))
   (loop with name = (string-upcase (string name))
-        for x across "XYZWUVPQR" repeat n
+        for x across "XYZWUVPQRIJKABC" repeat n
         collect (gensym (format nil "~a-~a-" name x))))
 
 (defun split-string (x s &key prune)
@@ -67,9 +65,8 @@
   (declare (optimize speed (safety 1)) (list l))
   "cartesian product of a list of lists (sets)."
   (if (null l) (list nil)
-               (loop for x in (car l)
-                     nconc (loop for y in (n-cartesian-product (cdr l))
-                                 collect (cons x y)))))
+               (loop for x in (car l) nconc
+                 (loop for y in (n-cartesian-product (cdr l)) collect (cons x y)))))
 
 (defun ensure-list (l)
   "return l if l is a nil/list. otherwise return (list l)."
@@ -77,10 +74,8 @@
 (defun to-list (a) (declare (sequence a)) "coerce sequence to list." (coerce a 'list))
 (defun vector-last (a) (declare (vector a)) "last element of vector." (aref a (1- (length a))))
 (defun vector-first (a) (declare (vector a)) "first element of vector." (aref a 0))
-(defun to-vector (init)
-  (declare (list init)) "make non-adjustable array with init contents."
-  (make-array (length init)
-    :initial-contents init :adjustable nil :element-type 'list))
+(defun to-vector (init) (declare (list init)) "make non-adjustable array with init contents."
+  (make-array (length init) :initial-contents init :adjustable nil :element-type 'list))
 
 (defun select-mode (c valid &aux (c* (ensure-list c)))
   (declare (list valid c*))
@@ -94,8 +89,7 @@
             (error "MODE: invalid mode for ~a in ~a. use: ~a." name l* valid))
     res))
 
-(defun remove-nil (l)
-  "coerce to list, and remove any nils"
+(defun remove-nil (l) "coerce to list, and remove any nils"
   (remove-if-not #'identity (ensure-list l)))
 
 (defmacro fsize (v) `(the pn (fset:size ,v)))
@@ -103,12 +97,12 @@
 
 (defun memo (fx &aux (ht (make-hash-table :test #'equal)))
   (declare (function fx) (hash-table ht))
-  "return a functiont that memoizes calls to fx."
+  "return function that memoizes calls to fx."
   (labels ((memo-wrap (&rest rest &aux (v (gethash rest ht)))
              (if v v (let ((res (apply fx rest)))
                        (setf (gethash rest ht) res)
                        res))))
-          #'memo-wrap))
+    #'memo-wrap))
 
 (veq:fvdef relneigh (inds dstfx &aux (res (list)))
   (declare (list inds res) (function dstfx))
@@ -119,8 +113,8 @@
                                         (f@dstfx i j))
                                   do (return-from relneigh? nil))
                             t))
-    (loop for i in inds
-          do (loop for j in inds if (and (< i j) (relneigh? i j))
-                                 do (push (list i j) res)))
+    (loop for i in inds do
+      (loop for j in inds
+        if (and (< i j) (relneigh? i j)) do (push (list i j) res)))
     res))
 

@@ -29,14 +29,13 @@
       (add! g 9 6)
       (add! g 9 7)
       ; add edges with property
-      (add! g 3 4 '(:a)) ; '(:a) corresponds to '((:a t))
-      (add! g 4 3 '((:a "43") (:xx 888))) ; add edge with two prop with values
-      (add! g 6 0 '((:a "60") :b)) ; one prop with value and one with no val (t)
-      (add! g 8 9 '(:b))
+      (add! g 3 4 :a) ; edge with property: (3 :a 4)
+      (add! g 4 3 '(:a :xx)) ; edge with two properties
+      (add! g 6 0 '(:a :b))
+      (add! g 8 9 :b)
       (add! g 7 8 '(:b :some-value)) ; returns '(7 8)
       ; this wil be ignored since (7 8) is created above
-      (add! g 7 8 '(:nothing-happens :hh)) ; returns nil
-    ))
+      (add! g 7 8 '(:nothing-happens :hh)))) ; returns nil
   g)
 
 
@@ -61,10 +60,10 @@
 
     (veq:vpr (@prop g '(4 3)))
     (veq:vpr (@prop g '(7 8)))
-    (veq:vpr (@prop g '(4 3) :a)) ; get value of prop :a on edge '(4 3)
+    (veq:vpr (@prop g '(4 3) :a)) ; t if (4 :a 3) exists
     (veq:vpr (@verts g))
     (print g)
-    (print h) ; h still has the initial graph from (get-sample-graph)
+    (print h) ; grph is immutable, so h still has the initial graph
 
     ; iteration macros
     (itr-edges (g e) (format t "~&edge: ~a: ~a~%" e (@prop g e)))

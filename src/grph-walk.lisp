@@ -1,24 +1,43 @@
 (in-package :grph)
 
-(defmacro connected-verts (g &optional (p :_))
-  (declare (symbol p)) "get all connected verts."
-  (veq:with-symbs `(g ,g)
-  (if (any? p) `(qry g :select ?x :where (or (?x _ _) (_ _ ?x)))
-               `(let ((?p ,p)) (qry g :select ?x :in ?p :where (or (?x ?p _) (_ ?p ?x)))))))
-
 (defun props-edges (g)
-  (declare #.*opt* (grph g)) "list of lists of prop with flattend list of edges"
+  (declare #.*opt* (grph g))
+  "list of lists of prop with flattend list of edges. see ingest-props-edges"
   (labels ((flat (edges) (loop for e of-type list in edges nconc e)))
     (grph:qry g :select (?p (grp ?x ?y)) :where (?x ?p ?y)
                 :collect (list ?p (flat (grp ?x ?y))))))
 
+(defun ingest-edges (edges &optional (g (grph)))
+  (declare (list edges) (grph g))
+  "ingest a list of edges with props. eg: ((0 :a 3) ...). and return a grph."
+  (grph:modify! (g in)
+    (loop for (l p r) in edges if (any? p) do (in-> l r)
+                               else do (in-> l r `(,(kv p)))))
+  g)
+
+(defun ingest-props-edges (pedges &optional (g (grph)))
+  (declare (list pedges) (grph g)) "ingest list of props and flattened edges. see props-edges."
+   (grph:modify! (g in)
+     (loop for (p edges) in pedges for edges* = (group edges 2)
+           if (any? p) do (loop for (a b) in edges* do (in-> a b))
+           else do (loop for (a b) in edges* do (in-> a b `(,p)))))
+   g)
+
+(defmacro connected-verts (g &optional (p :_))
+  (declare (symbol p)) "get all connected verts."
+  (veq:with-symbs `(g ,g)
+  (if (any? p) `(qry g :select ?x :where (or (?x _ _) (_ _ ?x)))
+               `(let ((?p ,p)) (qry g :select ?x :in ?p
+                                      :where (or (?x ?p _) (_ ?p ?x)))))))
+
 ; this is a fx because that makes it easier to use in queries
-(defun num-either (g ?x &optional (?p :_)) ; TODO: make two different fxs for ?p / not ?p?
-  (declare #.*opt* (grph g) (pn ?x) (symbol ?p))
+(defun num-either (g ?x &optional (?p :_))
+  (declare #.*opt* (grph g) (in ?x) (symbol ?p))
   "number of adjacent verts to ?x. ignores edge dir."
   (length (undup (if (any? ?p)
-                     (qry g :in ?x :select ?y :where (or (?x _ ?y) (?y _ ?x)))
-                     (qry g :in (?x ?p) :select ?y :where (or (?x ?p ?y) (?y ?p ?x)))))))
+                     (qry g :select ?y :in ?x :where (or (?x _ ?y) (?y _ ?x)))
+                     (qry g :select ?y :in (?x ?p)
+                            :where (or (?x ?p ?y) (?y ?p ?x)))))))
 
 
 (defmacro edge-set (g &optional (p :_))
@@ -27,7 +46,8 @@
   (if (any? p)
       `(qry g :select (?x ?y) :where (and (% (< ?x ?y)) (or (?x _ ?y) (?y _ ?x))))
       `(let ((?p ,p))
-         (qry g :select (?x ?y) :in ?p :where (and (% (< ?x ?y)) (or (?x ?p ?y) (?y ?p ?x))))))))
+         (qry g :select (?x ?y) :in ?p
+                :where (and (% (< ?x ?y)) (or (?x ?p ?y) (?y ?p ?x))))))))
 
 (defmacro dead-ends (g &optional (p :_) y)
   (declare (symbol p) (boolean y))
@@ -135,7 +155,7 @@ every edge is included exactly once. ignores edge dir."
            (2cnt (v) (= 2 (loop for w in (@either g v)
                                 if (gethash (srt w v) edges) summing 1)))
            (with-2cnt (p) (loop for v in p collect (list v (2cnt v))))
-           (split-paths (p c) (rec (print (with-2cnt (if c (close-path p) p)))))
+           (split-paths (p c) (rec (with-2cnt (if c (close-path p) p))))
            (closed? (p) (if (= (first p) (last* p))
                             (list (butlast p) t) (list p nil))))
    (loop with res = (list)

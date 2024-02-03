@@ -1,5 +1,7 @@
 (in-package :grph)
 
+; (defvar *parallel* t)
+
 (defmacro init-config (dev-vals vals)
   (if (> (length (string-downcase (veq::vgetenv "DEV" ""))) 0)
     `(progn (defvar *dev* t) (defvar *opt* ',dev-vals)

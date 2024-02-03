@@ -2,6 +2,12 @@
 
 (defvar *pfx* ".grph")
 
+(defun serialize-vprops (g &aux (res (list)))
+  (fset:do-map (p o (grph::mid g))
+    (let ((lst (remove-if-not (lambda (v) (typecase v (veq:in v))) (grph:set->lst o))))
+      (when lst (push `(,p . ,lst) res))))
+  res)
+
 (defun export-dat (fn o &optional (pfx ".dat"))
   (declare (string fn pfx)) "write o to fn."
   (with-open-file (f (grph::mkstr fn pfx) :direction :output :if-exists :supersede)
@@ -11,19 +17,23 @@
   (with-open-file (f (grph::mkstr fn pfx) :direction :input) (read f)))
 
 (defun gexport (g &key (pos (xgrph:pos 0f0)) (dim 2) meta)
-  (declare (grph:grph g) (xgrph:pos pos) (veq:pn dim) (list meta)) "serialize g."
-  `((:file . ((:ver . :v0) (:pkg . :grph/io) (:type . :single)))
+  (declare (grph:grph g) (xgrph:pos pos) (pn dim) (list meta)) "serialize g."
+  `((:file . ((:ver . :v1) (:pkg . :grph/io) (:type . :single)))
     (:dim . ,dim) (:meta . (,@meta))
-    (:edges . ,(grph:props-edges g)) (:pos . ,(fset:convert 'list pos))))
+    (:edges . ,(grph:props-edges g))
+    (:verts . ,(serialize-vprops g))
+    (:pos . ,(fset:convert 'list pos))))
 (defun gimport (o)
   (declare (list o)) "deserialize g."
   (labels ((gk (k) (cdr (assoc k o :test #'eq))))
-    (values (grph:ingest-props-edges (gk :edges))
-            (fset:with-default (fset:convert 'fset:seq (gk :pos)) 0f0)
-            (gk :meta))))
+    (let ((g (grph:ingest-props-edges (gk :edges))))
+      (loop for (p . vv) in (gk :verts)
+            do (loop for v in vv do (grph:prop! g v (list p))))
+      (values g (fset:with-default (fset:convert 'fset:seq (gk :pos)) 0f0)
+                (gk :meta)))))
 
 (defun gwrite (fn g &key (pos (xgrph:pos 0f0)) (dim 2) meta)
-  (declare (string fn) (grph:grph g) (xgrph:pos pos) (veq:pn dim) (list meta))
+  (declare (string fn) (grph:grph g) (xgrph:pos pos) (pn dim) (list meta))
   "write grph to fn."
   (export-dat fn (gexport g :pos pos :dim dim :meta meta) *pfx*))
 (defun gread (fn)
@@ -32,8 +42,7 @@
 
 (defmacro gwrite-script ((fn g &key (pos (xgrph:pos 0f0)) (dim 2) meta) &body body)
   (declare (symbol g pos)) "write grph and body (:script) to fn."
-  (veq::awg (fn*)
-     `(let ((,fn* ,fn)) ,@(veq::tree-replace body :fn fn*)
-                        (gwrite ,fn* ,g :pos ,pos :dim ,dim
+  (awg (fn*) `(let ((,fn* ,fn)) ,@(veq::tree-replace body :fn fn*)
+                (gwrite ,fn* ,g :pos ,pos :dim ,dim
                                 :meta '((:script . ,body) ,@meta)))))
 

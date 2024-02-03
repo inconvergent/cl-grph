@@ -1,17 +1,17 @@
 (defpackage #:grph
   (:use #:common-lisp)
   (:nicknames #:cl-grph)
-  (:import-from #:veq #:dsb #:mvc #:mvb #:awg #:awf #:pn #:group #:ungroup)
+  (:import-from #:veq #:dsb #:mvc #:mvb #:awg #:awf #:pn #:in #:group #:ungroup)
   (:import-from #:fset #:@ #:contains? #:do-map #:do-set #:empty-map
                 #:empty-set #:less #:member?)
   (:export
-    #:*dir-modes* #:*pos-modes* #:*clauses* *aggregates* #:v? #:ext-symbols?
+    #:*dir-modes* #:*pos-modes* #:*clauses* *aggregates* #:v? #:ext-symbols? #:*parallel*
     #:to-vector #:ensure-list #:last* #:vector-last #:vector-first
-    #:@edges #:@enum #:@in #:@out #:@either #:@both #:num-either
-    #:@verts #:@vcnt #:@vmax #:@prop #:@mem
+    #:@edges #:@enum #:@pnum #:@in #:@out #:@either #:@both #:num-either
+    #:@verts #:@vcnt #:@vmax #:@prop #:@mem #:@mid
     #:grph #:make #:prt
-    #:add #:del #:del-props
-    #:add! #:add*! #:del! #:ldel! #:pdel!
+    #:add #:del #:del-props #:prop
+    #:add! #:add*! #:del! #:ldel! #:pdel! #:prop!
     #:path! #:modify! #:split!
     #:itr-edges #:itr-adj #:itr-verts
     #:compile-query #:match
@@ -19,7 +19,7 @@
     #:collect-while #:qry-collect-while
     #:connected-verts #:memo #:relneigh
     #:gather-match #:ingest-edges #:ingest-props-edges
-    #:grp #:distinct #:first< #:first> #:lsort
+    #:distinct #:first< #:first> #:lsort
     #:walk-grph #:walk-edge-set #:walk-grph-segments #:walk-edge-set-segments
     #:dead-ends #:edge-set #:props-edges
     #:segment-isects #:multi-isects #:two-isects
@@ -32,7 +32,7 @@
 (defpackage #:xgrph
   (:use #:common-lisp)
   (:import-from #:fset #:empty-seq #:seq)
-  (:import-from #:veq #:dsb #:mvc #:mvb #:awg #:pn)
+  (:import-from #:veq #:dsb #:mvc #:mvb #:awg #:pn #:in)
   (:import-from #:grph #:*dir-modes* #:*pos-modes* #:add! #:del!)
   (:export
     #:@vert #:2@vert #:3@vert #:@verts #:2@verts #:3@verts
@@ -55,7 +55,7 @@
 (defpackage #:grph/io
   (:use #:common-lisp)
   (:import-from #:fset #:do-map #:do-set #:empty-map #:empty-set)
-  (:import-from #:veq #:dsb #:mvc #:mvb)
+  (:import-from #:veq #:dsb #:mvc #:mvb #:awg #:pn #:in)
   (:import-from #:grph #:grph)
   (:export #:export-dat #:import-dat #:gexport #:gimport
            #:gwrite #:gread #:gwrite-script))

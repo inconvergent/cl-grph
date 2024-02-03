@@ -20,7 +20,9 @@ interesting being that it makes it trivial to to create transactions.
 
 I have written about this library at
 
+ - https://inconvergent.net/2023/datalog-to-svg/
  - https://inconvergent.net/2022/graph-data-structure-with-datalog-ql/
+ - https://inconvergent.net/2023/lets-write-a-dsl/
  - (more to come)
 
 
@@ -29,11 +31,12 @@ I have written about this library at
 
 ## Components
 
-The `grph` system has two packages:
+The `grph` system has three packages:
 
 1. `grph` contains the graph structure, as well as the query interface (Datalog
    compiler).
-2. `xgrph` expands `grph` with some spatial awareness.
+2. `xgrph` expands `grph` with spatial information.
+3. `grph/io` for exporting and importing graph data.
 
 See the [docs folder](docs) for auomatically generated docs (incomplete).
 
@@ -92,10 +95,8 @@ folder](examples).
     the Github repo (not quicklisp).
   - [fset](https://fset.common-lisp.dev/). Automatically installed via
     quicklisp.
-  - [lparallel](https://lparallel.org/). Not required by default, but some
-    queries can be significantly faster when `grph` is loaded with
-    `:grph-parallel` in `*feautures*`; in which case `lparallel` will be
-    automatically installed via quicklisp.
+  - [lparallel](https://lparallel.org/). Installed via quicklisp Disable
+    parallel queries at compile time by setting `grph:*parallel*` to `nil`.
   - [auxin](https://github.com/inconvergent/auxin). Some of the examples depend
     on `auxin`. But the `grph` system does not require `auxin` directly.
 
@@ -104,10 +105,4 @@ folder](examples).
 
 Tests can be executed with `(asdf:test-system :grph)`. Or by executing
 `./run-tests.sh`.
-
-## Note
-
-This code is likely to change with little or no warning. You should not use
-this for anything remotely important. Make sure to fork the repository if you
-need it to remain stable.
 

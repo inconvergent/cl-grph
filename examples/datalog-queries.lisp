@@ -2,11 +2,8 @@
 
 (load "~/quicklisp/setup.lisp")
 
-; load with parallel reducers:
-(let ((*features* `(:grph-parallel
-                    :veq-reader-macros
-                    ,@*features*)))
-  (ql:quickload :grph))
+(ql:quickload :grph)
+
 (setf lparallel:*kernel* (lparallel:make-kernel 8))
 
 ; or grph load with serial query reducers
@@ -94,12 +91,11 @@
     ; get every vert ?y where
     ;   5 -:b-> ?y; or
     ;   5 -:a-> ?y
-    (let ((?x 5))
-      (veq:vpr (qry g :in ?x ; bind ?x to the "outside" value: 5
-                      :select ?y
-                      :where (or (?x :b ?y)
-                                 (?x :a ?y)))))
-    ; '(3 4)
+    (veq:vpr (qry g :in ((?x 5)) ; bind ?x to the "outside" value: 5
+                    :select ?y
+                    :where (or (?x :b ?y)
+                               (?x :a ?y))))
+    ; '(4 3)
 
     ; collect (list ...) for every edge (?x ?y)
     ; with prop :a or :b, ignore edges with prop :c
