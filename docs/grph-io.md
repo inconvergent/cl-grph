@@ -9,7 +9,7 @@
  ;   Derived type: (FUNCTION (STRING T &OPTIONAL STRING)
  ;                  (VALUES NULL &OPTIONAL))
  ;   Documentation:
- ;     write o to fn.
+ ;     write o to fn. see import-dat.
  ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
@@ -26,7 +26,7 @@
  ;                             (:DIM (UNSIGNED-BYTE 32)) (:META LIST))
  ;                  (VALUES CONS &OPTIONAL))
  ;   Documentation:
- ;     serialize g.
+ ;     serialize g. see gimport.
  ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
@@ -40,7 +40,7 @@
  ;   Lambda-list: (O)
  ;   Derived type: (FUNCTION (LIST) (VALUES T T T &OPTIONAL))
  ;   Documentation:
- ;     deserialize g.
+ ;     deserialize g. see gexport.
  ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
@@ -54,7 +54,7 @@
  ;   Lambda-list: (FN)
  ;   Derived type: (FUNCTION (STRING) *)
  ;   Documentation:
- ;     read grph from fn.
+ ;     read grph from fn. see gwrite.
  ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
@@ -71,7 +71,7 @@
  ;                          (:DIM (UNSIGNED-BYTE 32)) (:META LIST))
  ;                  *)
  ;   Documentation:
- ;     write grph to fn.
+ ;     write grph to fn. see gread.
  ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
@@ -99,7 +99,7 @@
  ;   Derived type: (FUNCTION (STRING &OPTIONAL STRING)
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     read data from fn.
+ ;     read data from fn. see export-dat.
  ;   Source file: /data/x/grph/src/xgrph-io.lisp
 ```
 
