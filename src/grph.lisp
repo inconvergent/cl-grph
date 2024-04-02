@@ -8,8 +8,8 @@
 (declaim (inline -del -add grph prop grph))
 
 (defun prt (o &optional s)
-  (declare (notinline grph-num-edges))
-  (format s "<@grph: (v: ~a/~a, e: ~a, p: ~a)>" (@vcnt o) (@vmax o) (@enum o) (@pnum o)))
+  (format s "<@grph: (v: ~a/~a, e: ~a, p: ~a)>"
+            (@vcnt o) (@vmax o) (@enum o) (@pnum o)))
 
 (defstruct (grph
   (:constructor grph (&optional (adj nilmap) (num-edges 0) (props nilmap) (mid nilmap)))
@@ -161,6 +161,4 @@ returns: (values g deleted?)"
         do (mvb (g* del?) (-del-prop g ab p)
              (setf g g* deleted? (or del? deleted?)))
         finally (return-from del-props (values g deleted?))))
-
-; INGEST ---
 

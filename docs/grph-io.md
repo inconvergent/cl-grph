@@ -82,7 +82,8 @@
  ;   [symbol]
  ; 
  ; GWRITE-SCRIPT names a macro:
- ;   Lambda-list: ((FN G &KEY (POS (POS 0.0)) (DIM 2) META) &BODY BODY)
+ ;   Lambda-list: ((FN G &KEY (POS (POS 0.0)) (DIM 2) META (OUT T)) &BODY
+ ;                 BODY)
  ;   Documentation:
  ;     write grph and body (:script) to fn.
  ;   Source file: /data/x/grph/src/xgrph-io.lisp

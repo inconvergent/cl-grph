@@ -12,7 +12,7 @@
        (-add (a b &key e)
          (declare (pn a b) (list e))
          (add! g a b (grph:@prop g e)))
-       (edges-as-lines (edges)
+       (edges-as-lines (edges) ; TODO: build vector directly
          (declare (simple-list edges))
          (loop for edge of-type list across edges collect (2@verts pos edge)))
        (sort-hits (isects)

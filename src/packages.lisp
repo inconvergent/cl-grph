@@ -11,7 +11,7 @@
     #:@verts #:@vcnt #:@vmax #:@prop #:@mem #:@mid
     #:grph #:make #:prt
     #:add #:del #:del-props #:prop
-    #:add! #:add*! #:del! #:ldel! #:pdel! #:prop!
+    #:add! #:add*! #:ladd*! #:del! #:ldel! #:pdel! #:prop!
     #:path! #:modify! #:split!
     #:itr-edges #:itr-adj #:itr-verts
     #:compile-query #:match

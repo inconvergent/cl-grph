@@ -40,9 +40,10 @@
   (declare (string fn)) "read grph from fn. see gwrite."
   (gimport (import-dat fn *pfx*)))
 
-(defmacro gwrite-script ((fn g &key (pos (xgrph:pos 0f0)) (dim 2) meta) &body body)
+(defmacro gwrite-script ((fn g &key (pos (xgrph:pos 0f0)) (dim 2) meta (out t))
+                               &body body)
   (declare (symbol g pos)) "write grph and body (:script) to fn."
   (awg (fn*) `(let ((,fn* ,fn)) ,@(veq::tree-replace body :fn fn*)
-                (gwrite ,fn* ,g :pos ,pos :dim ,dim
-                                :meta '((:script . ,body) ,@meta)))))
+                ,(if out `(gwrite ,fn* ,g :pos ,pos :dim ,dim
+                                  :meta '((:script . ,body) ,@meta))))))
 

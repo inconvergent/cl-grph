@@ -58,11 +58,14 @@
       (labels ((,seen (,b) (if (gethash ,b ,seen) t
                                (progn (setf (gethash ,b ,seen) t)
                                       nil))))
-        (itr-edges (,g ,a ,b)
+        (itr-edges (,g ,a ,b) ; this seems inefficient
           (when (not (,seen ,a)) (let ((,a ,a)) (declare (ignorable ,a)) ,@body))
           (when (not (,seen ,b)) (let ((,a ,b)) (declare (ignorable ,a)) ,@body)))))))
 
-(defmacro add! (g a b &optional props) ; TODO: deprecate this in favor of add*!?
+; TODO: mode for setting the same props to vertices in eg. path, add*! etc
+; TODO: rename add! to %add!, then rename add*! to add!. similar for del
+; OR find a better name for add!/add*!
+(defmacro add! (g a b &optional props)
   (declare (symbol g))
   "add edge edge and re-bind. returns: (a b) or nil."
   (awg (a* b* g* created?)
@@ -70,7 +73,6 @@
        (mvb (,g* ,created?) (add ,g ,a* ,b* ,props)
          (setf ,g ,g*)
          (if ,created? (list ,a* ,b*) nil)))))
-; TODO: ladd*!, clear! (props) ; ldel!, lclear! ?
 (defmacro add*! (g a b &optional (modes :->) props)
   (declare (symbol g))
   "add edge edge and re-bind. returns: (a b) or nil. modes: (-> <- <>)"
@@ -82,13 +84,14 @@
           (declare (in ,a* ,b*))
          ,(ecase (select-mode modes *dir-modes*)
               (:-> ->) (:<- <-) (:<> `(progn ,<- ,->)))))))
+(defmacro ladd*! (g e &optional (modes :->) props)
+  (awg (a b) `(dsb (,a ,b) ,e (add*! ,g ,a ,b ,modes ,props))))
 
 (defmacro prop! (g k props)
   (declare (symbol g))
   "add edge/vert prop for key, k."
-  (awg (k*)
-    `(let ((,k* ,k))
-       (setf ,g (prop ,g ,k* ,props)))))
+  (awg (k*) `(let ((,k* ,k))
+               (setf ,g (prop ,g ,k* ,props)))))
 
 (defmacro path! (g path &optional (modes '(:open :->)) props)
   (declare (symbol g))
@@ -223,11 +226,12 @@ ex: (modify! (g mygrp)
                                   `(del ,g ,a* ,b*))
         (setf ,g ,g*)
         ,deleted?))))
-(defmacro ldel! (g ab &rest rest)
+(defmacro ldel! (g e &optional p)
   "del edge ab=(a b) and re-bind. returns: deleted?"
-  `(dsb (a b) ,ab (del! ,g a b ,@rest)))
+  (awg (a b) `(dsb (,a ,b) ,e (del! ,g ,a ,b ,p))))
 
-; (defmacro pdel! (g path &optional p) ; TODO:
+; (defmacro pdel! (g path &optional p) ; TODO: clear/pdel
+; or set-override option/mode in add*?
 ;   (declare (symbol g))
 ;   "del edge and re-bind. returns: deleted?"
 ;   (awg (a* b* g* deleted?)

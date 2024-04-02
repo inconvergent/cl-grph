@@ -656,6 +656,19 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
+#### GRPH:LADD\*!
+
+```
+:missing:todo:
+
+ ; GRPH:LADD*!
+ ;   [symbol]
+ ; 
+ ; LADD*! names a macro:
+ ;   Lambda-list: (G E &OPTIONAL (MODES ->) PROPS)
+ ;   Source file: /data/x/grph/src/macros.lisp
+```
+
 #### GRPH:LAST\*
 
 ```
@@ -677,7 +690,7 @@ the transaction and discard all changes
  ;   [symbol]
  ; 
  ; LDEL! names a macro:
- ;   Lambda-list: (G AB &REST REST)
+ ;   Lambda-list: (G E &OPTIONAL P)
  ;   Documentation:
  ;     del edge ab=(a b) and re-bind. returns: deleted?
  ;   Source file: /data/x/grph/src/macros.lisp
