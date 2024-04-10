@@ -1181,8 +1181,9 @@ the transaction, but keep the changes
  ;   [symbol]
  ; 
  ; TO-VECTOR names a compiled function:
- ;   Lambda-list: (INIT)
- ;   Derived type: (FUNCTION (LIST) (VALUES SIMPLE-VECTOR &OPTIONAL))
+ ;   Lambda-list: (INIT &OPTIONAL (TYPE (QUOTE LIST)))
+ ;   Derived type: (FUNCTION (LIST &OPTIONAL T)
+ ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
  ;   Documentation:
  ;     make non-adjustable array with init contents.
  ;   Source file: /data/x/grph/src/utils.lisp

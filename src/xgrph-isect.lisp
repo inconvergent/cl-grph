@@ -2,8 +2,8 @@
 
 (deftype simple-list () `(simple-array list))
 
-(veq:fvdef 2intersect-all (g pos)
-  (declare (grph:grph g) (pos pos))
+(veq:fvdef 2intersect-all (g pos &optional (edges (grph:to-vector (grph:@edges g))))
+  (declare (grph:grph g) (pos pos) (simple-list edges))
   "creates intersections for all edges in g such that it becomes a planar graph."
   (let ((crossing->vert (make-hash-table :test #'equal)))
     (declare (hash-table crossing->vert))
@@ -51,12 +51,21 @@
                         do (-add (gethash (ic i a) crossing->vert)
                                  (gethash (ic i b) crossing->vert)
                                  :e ei)))))
-      (let* ((edges (grph:to-vector (grph:@edges g))) ; edges ((v1 v2) (v8 v1) ...)
+      (let* (;(edges (grph:to-vector (grph:@edges g))) ; edges ((v1 v2) (v8 v1) ...)
              (lines (grph:to-vector (edges-as-lines edges))) ; lines: (#(ax ay bx by) #(cx cy dx dy) ...)
              (veq::*eps* 0.00001)
              ; isects: #(((16 . 0.18584675) (5 . 0.35215548)) NIL NIL ...)
              (isects (sort-hits (veq:f2lsegx lines)))) ;  p/q is the lerp
-        (declare (simple-list isects edges) (simple-array lines))
+        (declare (simple-list isects) (simple-array lines))
+
+        ; filter out edges that share vertices from intersection hits because sometimes
+        ; contiguous lines yield intersection.
+        (labels ((filter-hits (e hits)
+                   (loop for (k . s) in hits
+                         if (not (intersection e (aref edges k))) collect `(,k . ,s))))
+          (loop for i from 0 below (length edges) for hits = (aref isects i)
+              if hits do (setf (aref isects i) (filter-hits (aref edges i) hits))))
+
         (add-new-verts edges isects)
         (add-new-edges edges isects)
         (del-hit-edges edges isects)

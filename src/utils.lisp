@@ -74,8 +74,9 @@
 (defun to-list (a) (declare (sequence a)) "coerce sequence to list." (coerce a 'list))
 (defun vector-last (a) (declare (vector a)) "last element of vector." (aref a (1- (length a))))
 (defun vector-first (a) (declare (vector a)) "first element of vector." (aref a 0))
-(defun to-vector (init) (declare (list init)) "make non-adjustable array with init contents."
-  (make-array (length init) :initial-contents init :adjustable nil :element-type 'list))
+(defun to-vector (init &optional (type 'list))
+  (declare (list init)) "make non-adjustable array with init contents."
+  (make-array (length init) :initial-contents init :adjustable nil :element-type type))
 
 (defun select-mode (c valid &aux (c* (ensure-list c)))
   (declare (list valid c*))

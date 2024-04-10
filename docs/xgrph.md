@@ -148,8 +148,9 @@
  ;   [symbol]
  ; 
  ; 2INTERSECT-ALL names a compiled function:
- ;   Lambda-list: (G POS)
- ;   Derived type: (FUNCTION (GRPH:GRPH FSET:SEQ)
+ ;   Lambda-list: (G POS &OPTIONAL (EDGES (TO-VECTOR (@EDGES G))))
+ ;   Derived type: (FUNCTION
+ ;                  (GRPH:GRPH FSET:SEQ &OPTIONAL (SIMPLE-ARRAY LIST))
  ;                  (VALUES GRPH:GRPH FSET:SEQ &OPTIONAL))
  ;   Documentation:
  ;     creates intersections for all edges in g such that it becomes a planar graph.
