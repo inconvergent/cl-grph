@@ -59,7 +59,9 @@ the following terminology is used:
 
 (defun adjcnt (adj &aux (n 0))
   (declare (fset:map adj) (veq:pn n)) "count total number of edges in grph-adj."
-  (do-map (a edges adj) (do-map (b dir edges) (when dir (incf n))))
+  (do-map (a edges adj) (declare (ignorable a))
+    (do-map (b dir edges) (declare (ignorable b))
+      (when dir (incf n))))
   n)
 (defun ecnt (g) (declare (grph g)) "count total number of edges in grph." (adjcnt (grph-adj g)))
 (defun @enum (g) (declare (grph g)) "total number of edges in graph." (grph-num-edges g))

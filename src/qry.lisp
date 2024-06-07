@@ -66,7 +66,7 @@ NOTE: items in :in will be counted as val. ie they are bound as a value. see fx:
         (qry/compile/check/messages p err wrn)
         `((:where . ,where) (:in . ,(reverse res)) ,@p)))))
 
-(defun qry/compile/where (p &aux (where (gk p :where))) ; TODO: rename :f?
+(defun qry/compile/where (p &aux (where (gk p :where)) (par (gk p :par t))) ; TODO: rename :f?
   "compile (the where part of a) datalog query."
   (with-messages (err wrn)
     (labels
@@ -112,16 +112,16 @@ NOTE: items in :in will be counted as val. ie they are bound as a value. see fx:
            qc))
        (res/inner (res inner)
          (if (= (length res) 1) (cadar res)
-             `(,(psel :let) (,@(veq:lpos res 0 2)) (declare (list ,@(veq:lpos res))) ,inner)))
+             `(,(psel par :let) (,@(veq:lpos res 0 2)) (declare (list ,@(veq:lpos res))) ,inner)))
        (next/map/or (qc &optional jarg &aux (res (next/map qc)))
          (res/inner res (loop with body = (caar res)
                               for s in (veq:lpos (cdr res))
-                              do (setf body `(,(psel :or) ,s ,body ',jarg))
+                              do (setf body `(,(psel par :or) ,s ,body ',jarg))
                               finally (return body))))
        (next/map/and (qc &aux (res (next/map qc)))
          (res/inner res (loop with body = (caar res)
                               for (s nil clause join-vars) in (cdr res)
-                              do (setf body `(,(psel clause) ,body ,s ,@join-vars))
+                              do (setf body `(,(psel par clause) ,body ,s ,@join-vars))
                               finally (return body))))
        (next (qc &aux (c (car qc)))
          (unless qc (wrn "empty clause in :where: ~a." where))
@@ -258,8 +258,8 @@ NOTE: items in :in will be counted as val. ie they are bound as a value. see fx:
 
 ; TODO: with
 ; TODO: add sort? maybe not?
-(defmacro qry (g &key db in using select where collect then first pairs)
-  (declare (symbol g) (list where) (boolean pairs))
+(defmacro qry (g &key db in using select where collect then first pairs (par *parallel*))
+  (declare (symbol g) (list where) (boolean pairs par))
   "evaluate a trivial (datalog-like) query against g.
 ex: (qry g :select (?x ?y)
            :where (and (?x :c ?y)
@@ -288,7 +288,7 @@ see examples for more usage." ; TODO:  pre-check for in/aggr collisions
                (:xaggr . ,(qry/not-aggregate (remove-nil select))) ; non-aggr vars
                (:vars . ,(undup (get-all-vars (remove-nil select)))) ; all select vars
                (:using . ,(remove-nil using)) ; all mutating vars
-               (:db . ,db) (:g . ,g) (:where . ,where) (:pairs . ,pairs)
+               (:db . ,db) (:g . ,g) (:where . ,where) (:pairs . ,pairs) (:par . ,par)
                (:first . ,first) (:then . ,then) (:collect . ,collect)
                (:res-sym . ,(gensym "RES")) (:itr-sym . ,(gensym "ITR"))))))
     (when db (format t "~a~&" (qry/show p :mode db)) (finish-output))

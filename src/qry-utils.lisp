@@ -14,6 +14,12 @@
                                        ,m))))
       (progn ,@body))))
 
+(defun psel (par k) (declare (boolean par) (keyword k))
+  (if par (ecase k ((:and :fact :f :q) 'qry-and) (:or 'qry-or)
+                    (:not 'qry-not) (:% 'p/qry-filter) (:let 'lparallel:plet))
+          (ecase k ((:and :fact :f :q) 'qry-and) (:or 'qry-or)
+                    (:not 'qry-not) (:% 'qry-filter)  (:let 'let))))
+
 (defun eq-car? (a s) (declare #.*opt* (list a) (symbol s))
   (eq (car a) s))
 (defun gk (p k &optional silent &aux (hit (cdr (assoc k p)))) (declare #.*opt* (list p) (keyword k))
@@ -69,22 +75,23 @@
 ; DEBUG / SHOW ----------------
 
 (defun qry/show (p &key (s (make-string-output-stream)) (mode :default))
-  (labels ((full (p) (gk p :compiled-full t))
-           (main (p) (third (gk p :compiled-full t)))
-           (default (p) (gk p :compiled t)))
-    (apply #'format s "
-██ COMPILED ██████████████████████████
+  (let ((*print-gensym* nil) (*print-case* :downcase))
+    (labels ((full (p) (gk p :compiled-full t))
+             (main (p) (third (gk p :compiled-full t)))
+             (default (p) (gk p :compiled t)))
+      (apply #'format s "
+██ COMPILED QRY (~a) ██████████████████████████
 ██ select:  ~a
 ██ where:   ~a
-██ PROPS    ██████████████████████████~%" (gkk p :select :where))
-    (loop with ignores = '(:select :where :res-sym :itr-sym
-                           :compiled-full :compiled)
-          for (k . v) in p for k* = (string-downcase (mkstr k ":"))
-          if (and v (not (member k ignores)))
-          do (format s "~&██ ~8,,,' @<~d~> ~a~%" k* v))
-    (format s "~&██ OUTPUT   >>>>>~%██ ~a~%███████████ <<<<<~%"
-              (funcall (ecase mode (:full #'full) (t #'default) (:main #'main)) p))
-    (get-output-stream-string s)))
+██ PROPS~%" (v?) (gkk p :select :where))
+      (loop with ignores = '(:select :where :res-sym :itr-sym
+                             :compiled-full :compiled)
+            for (k . v) in p for k* = (string-downcase (mkstr k ":"))
+            if (and v (not (member k ignores)))
+            do (format s "~&██ ~8,,,' @<~d~> ~a~%" k* v))
+      (format s "~&██~%~a~%███████████~%"
+                (funcall (ecase mode (:full #'full) (t #'default) (:main #'main)) p))
+      (get-output-stream-string s))))
 
 (defun qry/compile/write-messages (&rest l &aux (s (make-string-output-stream)))
   (loop for o in l do (format s "~&██ ~a~&" o))

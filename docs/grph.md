@@ -1,35 +1,36 @@
-#### GRPH:\*AGGREGATES\*
-
+## `grph:*aggregates*`
 ```
 valid aggregate clauses in qry: (CNT GRP)
 ```
 
-#### GRPH:\*CLAUSES\*
-
+## `grph:*clauses*`
 ```
 valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
 ```
 
-#### GRPH:\*DIR-MODES\*
-
+## `grph:*dir-modes*`
 ```
 valid edge direction modes: (-> <- <> ><)
 ```
 
-#### GRPH:\*PARALLEL\*
-
+## `grph:*parallel*`
 ```
-set to nil at compile time to disable parallism. default: T
+:missing:
+
+ ; GRPH:*PARALLEL*
+ ;   [symbol]
+ ; 
+ ; *PARALLEL* names a special variable:
+ ;   Declared type: BOOLEAN
+ ;   Value: NIL
 ```
 
-#### GRPH:\*POS-MODES\*
-
+## `grph:*pos-modes*`
 ```
 valid spatial modes: (ABS REL)
 ```
 
-#### GRPH:@BOTH
-
+## `grph:@both`
 ```
  ; GRPH:@BOTH
  ;   [symbol]
@@ -43,8 +44,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@EDGES
-
+## `grph:@edges`
 ```
  ; GRPH:@EDGES
  ;   [symbol]
@@ -57,8 +57,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@EITHER
-
+## `grph:@either`
 ```
  ; GRPH:@EITHER
  ;   [symbol]
@@ -72,8 +71,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@ENUM
-
+## `grph:@enum`
 ```
  ; GRPH:@ENUM
  ;   [symbol]
@@ -87,8 +85,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@IN
-
+## `grph:@in`
 ```
  ; GRPH:@IN
  ;   [symbol]
@@ -102,8 +99,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@MEM
-
+## `grph:@mem`
 ```
  ; GRPH:@MEM
  ;   [symbol]
@@ -117,8 +113,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@MID
-
+## `grph:@mid`
 ```
  ; GRPH:@MID
  ;   [symbol]
@@ -132,8 +127,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@OUT
-
+## `grph:@out`
 ```
  ; GRPH:@OUT
  ;   [symbol]
@@ -147,8 +141,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@PNUM
-
+## `grph:@pnum`
 ```
  ; GRPH:@PNUM
  ;   [symbol]
@@ -161,8 +154,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@PROP
-
+## `grph:@prop`
 ```
  ; GRPH:@PROP
  ;   [symbol]
@@ -177,8 +169,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@VCNT
-
+## `grph:@vcnt`
 ```
  ; GRPH:@VCNT
  ;   [symbol]
@@ -192,8 +183,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@VERTS
-
+## `grph:@verts`
 ```
  ; GRPH:@VERTS
  ;   [symbol]
@@ -206,8 +196,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:@VMAX
-
+## `grph:@vmax`
 ```
  ; GRPH:@VMAX
  ;   [symbol]
@@ -221,8 +210,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:ADD
-
+## `grph:add`
 ```
  ; GRPH:ADD
  ;   [symbol]
@@ -239,8 +227,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:ADD!
-
+## `grph:add!`
 ```
  ; GRPH:ADD!
  ;   [symbol]
@@ -252,8 +239,7 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:ADD\*!
-
+## `grph:add*!`
 ```
  ; GRPH:ADD*!
  ;   [symbol]
@@ -265,17 +251,15 @@ valid spatial modes: (ABS REL)
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:CANCEL
-
+## `grph:cancel`
 ```
 (cancel) can be used in some contexts (using, qry) to cancel
 the transaction and discard all changes
 ```
 
-#### GRPH:COLLECT-WHILE
-
+## `grph:collect-while`
 ```
-:missing:todo:
+:missing:
 
  ; GRPH:COLLECT-WHILE
  ;   [symbol]
@@ -287,17 +271,15 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-extra.lisp
 ```
 
-#### GRPH:COMPILE-QUERY
-
+## `grph:compile-query`
 ```
-:missing:todo:
+:missing:
 
  ; GRPH:COMPILE-QUERY
  ;   [symbol]
 ```
 
-#### GRPH:CONNECTED-VERTS
-
+## `grph:connected-verts`
 ```
  ; GRPH:CONNECTED-VERTS
  ;   [symbol]
@@ -309,8 +291,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:DEAD-ENDS
-
+## `grph:dead-ends`
 ```
  ; GRPH:DEAD-ENDS
  ;   [symbol]
@@ -322,8 +303,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:DEL
-
+## `grph:del`
 ```
  ; GRPH:DEL
  ;   [symbol]
@@ -338,8 +318,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:DEL!
-
+## `grph:del!`
 ```
  ; GRPH:DEL!
  ;   [symbol]
@@ -351,8 +330,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:DEL-DEAD-ENDS
-
+## `grph:del-dead-ends`
 ```
  ; GRPH:DEL-DEAD-ENDS
  ;   [symbol]
@@ -366,19 +344,17 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:DEL-DEAD-ENDS!
-
+## `grph:del-dead-ends!`
 ```
-:missing:todo:
+:missing:
 
  ; GRPH:DEL-DEAD-ENDS!
  ;   [symbol]
 ```
 
-#### GRPH:DEL-PROPS
-
+## `grph:del-props`
 ```
-:missing:todo:
+:missing:
 
  ; GRPH:DEL-PROPS
  ;   [symbol]
@@ -390,8 +366,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:DISTINCT
-
+## `grph:distinct`
 ```
  ; GRPH:DISTINCT
  ;   [symbol]
@@ -404,8 +379,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
-#### GRPH:EDGE-SET
-
+## `grph:edge-set`
 ```
  ; GRPH:EDGE-SET
  ;   [symbol]
@@ -417,8 +391,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:EDGE-SET->HT
-
+## `grph:edge-set->ht`
 ```
  ; GRPH:EDGE-SET->HT
  ;   [symbol]
@@ -433,8 +406,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
-#### GRPH:EDGE-SET->PATH
-
+## `grph:edge-set->path`
 ```
  ; GRPH:EDGE-SET->PATH
  ;   [symbol]
@@ -449,8 +421,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
-#### GRPH:ENSURE-LIST
-
+## `grph:ensure-list`
 ```
  ; GRPH:ENSURE-LIST
  ;   [symbol]
@@ -463,8 +434,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:EXT-SYMBOLS?
-
+## `grph:ext-symbols?`
 ```
  ; GRPH:EXT-SYMBOLS?
  ;   [symbol]
@@ -477,8 +447,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/docs.lisp
 ```
 
-#### GRPH:FIRST<
-
+## `grph:first<`
 ```
  ; GRPH:FIRST<
  ;   [symbol]
@@ -490,8 +459,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
-#### GRPH:FIRST>
-
+## `grph:first>`
 ```
  ; GRPH:FIRST>
  ;   [symbol]
@@ -503,8 +471,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
-#### GRPH:GATHER-MATCH
-
+## `grph:gather-match`
 ```
  ; GRPH:GATHER-MATCH
  ;   [symbol]
@@ -516,10 +483,9 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-match.lisp
 ```
 
-#### GRPH:GRPH
-
+## `grph:grph`
 ```
-:missing:todo:
+:missing:
 
  ; GRPH:GRPH
  ;   [symbol]
@@ -573,8 +539,7 @@ the transaction and discard all changes
  ;       Initform: 0
 ```
 
-#### GRPH:HT->EDGE-SET
-
+## `grph:ht->edge-set`
 ```
  ; GRPH:HT->EDGE-SET
  ;   [symbol]
@@ -587,8 +552,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
-#### GRPH:INGEST-EDGES
-
+## `grph:ingest-edges`
 ```
  ; GRPH:INGEST-EDGES
  ;   [symbol]
@@ -602,8 +566,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:INGEST-PROPS-EDGES
-
+## `grph:ingest-props-edges`
 ```
  ; GRPH:INGEST-PROPS-EDGES
  ;   [symbol]
@@ -617,8 +580,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:ITR-ADJ
-
+## `grph:itr-adj`
 ```
  ; GRPH:ITR-ADJ
  ;   [symbol]
@@ -630,8 +592,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:ITR-EDGES
-
+## `grph:itr-edges`
 ```
  ; GRPH:ITR-EDGES
  ;   [symbol]
@@ -643,8 +604,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:ITR-VERTS
-
+## `grph:itr-verts`
 ```
  ; GRPH:ITR-VERTS
  ;   [symbol]
@@ -656,10 +616,9 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:LADD\*!
-
+## `grph:ladd*!`
 ```
-:missing:todo:
+:missing:
 
  ; GRPH:LADD*!
  ;   [symbol]
@@ -669,8 +628,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:LAST\*
-
+## `grph:last*`
 ```
  ; GRPH:LAST*
  ;   [symbol]
@@ -683,8 +641,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:LDEL!
-
+## `grph:ldel!`
 ```
  ; GRPH:LDEL!
  ;   [symbol]
@@ -696,8 +653,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:LQRY
-
+## `grph:lqry`
 ```
  ; GRPH:LQRY
  ;   [symbol]
@@ -716,8 +672,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry.lisp
 ```
 
-#### GRPH:LSORT
-
+## `grph:lsort`
 ```
  ; GRPH:LSORT
  ;   [symbol]
@@ -731,8 +686,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-runtime.lisp
 ```
 
-#### GRPH:LST->MAP
-
+## `grph:lst->map`
 ```
  ; GRPH:LST->MAP
  ;   [symbol]
@@ -744,8 +698,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:LST->SET
-
+## `grph:lst->set`
 ```
  ; GRPH:LST->SET
  ;   [symbol]
@@ -757,8 +710,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:LST->SET-FX
-
+## `grph:lst->set-fx`
 ```
  ; GRPH:LST->SET-FX
  ;   [symbol]
@@ -772,10 +724,9 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:MAKE
-
+## `grph:make`
 ```
-:missing:todo:
+:missing:
 
  ; GRPH:MAKE
  ;   [symbol]
@@ -790,8 +741,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:MAP->LST
-
+## `grph:map->lst`
 ```
  ; GRPH:MAP->LST
  ;   [symbol]
@@ -803,8 +753,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:MATCH
-
+## `grph:match`
 ```
  ; GRPH:MATCH
  ;   [symbol]
@@ -817,8 +766,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-match.lisp
 ```
 
-#### GRPH:MEMO
-
+## `grph:memo`
 ```
  ; GRPH:MEMO
  ;   [symbol]
@@ -831,8 +779,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:MODIFY!
-
+## `grph:modify!`
 ```
  ; GRPH:MODIFY!
  ;   [symbol]
@@ -855,8 +802,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:MULTI-ISECTS
-
+## `grph:multi-isects`
 ```
  ; GRPH:MULTI-ISECTS
  ;   [symbol]
@@ -868,8 +814,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:NORMALISE-FOLD
-
+## `grph:normalise-fold`
 ```
  ; GRPH:NORMALISE-FOLD
  ;   [symbol]
@@ -883,8 +828,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-extra.lisp
 ```
 
-#### GRPH:NORMALISE-FOLD!
-
+## `grph:normalise-fold!`
 ```
  ; GRPH:NORMALISE-FOLD!
  ;   [symbol]
@@ -897,8 +841,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-extra.lisp
 ```
 
-#### GRPH:NUM-EITHER
-
+## `grph:num-either`
 ```
  ; GRPH:NUM-EITHER
  ;   [symbol]
@@ -912,8 +855,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:PATH!
-
+## `grph:path!`
 ```
  ; GRPH:PATH!
  ;   [symbol]
@@ -925,8 +867,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:PATH->EDGE-SET
-
+## `grph:path->edge-set`
 ```
  ; GRPH:PATH->EDGE-SET
  ;   [symbol]
@@ -942,17 +883,15 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/edge-set.lisp
 ```
 
-#### GRPH:PDEL!
-
+## `grph:pdel!`
 ```
-:missing:todo:
+:missing:
 
  ; GRPH:PDEL!
  ;   [symbol]
 ```
 
-#### GRPH:PROP
-
+## `grph:prop`
 ```
  ; GRPH:PROP
  ;   [symbol]
@@ -969,8 +908,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:PROP!
-
+## `grph:prop!`
 ```
  ; GRPH:PROP!
  ;   [symbol]
@@ -982,8 +920,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:PROPS-EDGES
-
+## `grph:props-edges`
 ```
  ; GRPH:PROPS-EDGES
  ;   [symbol]
@@ -996,10 +933,9 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:PRT
-
+## `grph:prt`
 ```
-:missing:todo:
+:missing:
 
  ; GRPH:PRT
  ;   [symbol]
@@ -1011,15 +947,14 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph.lisp
 ```
 
-#### GRPH:QRY
-
+## `grph:qry`
 ```
  ; GRPH:QRY
  ;   [symbol]
  ; 
  ; QRY names a macro:
  ;   Lambda-list: (G &KEY DB IN USING SELECT WHERE COLLECT THEN FIRST
- ;                 PAIRS)
+ ;                 PAIRS (PAR *PARALLEL*))
  ;   Documentation:
  ;     evaluate a trivial (datalog-like) query against g.
  ;     ex: (qry g :select (?x ?y)
@@ -1043,8 +978,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry.lisp
 ```
 
-#### GRPH:QRY-COLLECT-WHILE
-
+## `grph:qry-collect-while`
 ```
  ; GRPH:QRY-COLLECT-WHILE
  ;   [symbol]
@@ -1062,8 +996,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-extra.lisp
 ```
 
-#### GRPH:RELNEIGH
-
+## `grph:relneigh`
 ```
  ; GRPH:RELNEIGH
  ;   [symbol]
@@ -1077,14 +1010,13 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:RQRY
-
+## `grph:rqry`
 ```
  ; GRPH:RQRY
  ;   [symbol]
  ; 
  ; RQRY names a macro:
- ;   Lambda-list: (G &KEY (LIM 1000) RULES THEN)
+ ;   Lambda-list: (G &KEY (LIM 1000) RULES THEN (PAR *PARALLEL*))
  ;   Documentation:
  ;     evaluate simple datalog programs top-down. all rule names (with * prefix)
  ;     are bound as variables that can be used in :then.
@@ -1105,8 +1037,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/qry-rules.lisp
 ```
 
-#### GRPH:SEGMENT-ISECTS
-
+## `grph:segment-isects`
 ```
  ; GRPH:SEGMENT-ISECTS
  ;   [symbol]
@@ -1119,8 +1050,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:SET->LST
-
+## `grph:set->lst`
 ```
  ; GRPH:SET->LST
  ;   [symbol]
@@ -1132,8 +1062,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:SET->LST-FX
-
+## `grph:set->lst-fx`
 ```
  ; GRPH:SET->LST-FX
  ;   [symbol]
@@ -1147,8 +1076,7 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:SPLIT!
-
+## `grph:split!`
 ```
  ; GRPH:SPLIT!
  ;   [symbol]
@@ -1167,15 +1095,13 @@ the transaction and discard all changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:STOP
-
+## `grph:stop`
 ```
 (stop) can be used in some contexts (using, qry) to stop
 the transaction, but keep the changes
 ```
 
-#### GRPH:TO-VECTOR
-
+## `grph:to-vector`
 ```
  ; GRPH:TO-VECTOR
  ;   [symbol]
@@ -1189,8 +1115,7 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:TWO-ISECTS
-
+## `grph:two-isects`
 ```
  ; GRPH:TWO-ISECTS
  ;   [symbol]
@@ -1202,8 +1127,7 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:USING
-
+## `grph:using`
 ```
  ; GRPH:USING
  ;   [symbol]
@@ -1229,8 +1153,7 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/macros.lisp
 ```
 
-#### GRPH:V?
-
+## `grph:v?`
 ```
  ; GRPH:V?
  ;   [symbol]
@@ -1246,8 +1169,7 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:VECTOR-FIRST
-
+## `grph:vector-first`
 ```
  ; GRPH:VECTOR-FIRST
  ;   [symbol]
@@ -1260,8 +1182,7 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:VECTOR-LAST
-
+## `grph:vector-last`
 ```
  ; GRPH:VECTOR-LAST
  ;   [symbol]
@@ -1274,8 +1195,7 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/utils.lisp
 ```
 
-#### GRPH:WALK-EDGE-SET
-
+## `grph:walk-edge-set`
 ```
  ; GRPH:WALK-EDGE-SET
  ;   [symbol]
@@ -1289,8 +1209,7 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:WALK-EDGE-SET-SEGMENTS
-
+## `grph:walk-edge-set-segments`
 ```
  ; GRPH:WALK-EDGE-SET-SEGMENTS
  ;   [symbol]
@@ -1303,8 +1222,7 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:WALK-GRPH
-
+## `grph:walk-grph`
 ```
  ; GRPH:WALK-GRPH
  ;   [symbol]
@@ -1317,8 +1235,7 @@ the transaction, but keep the changes
  ;   Source file: /data/x/grph/src/grph-walk.lisp
 ```
 
-#### GRPH:WALK-GRPH-SEGMENTS
-
+## `grph:walk-grph-segments`
 ```
  ; GRPH:WALK-GRPH-SEGMENTS
  ;   [symbol]

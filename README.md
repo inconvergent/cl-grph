@@ -95,8 +95,7 @@ folder](examples).
     the Github repo (not quicklisp).
   - [fset](https://fset.common-lisp.dev/). Automatically installed via
     quicklisp.
-  - [lparallel](https://lparallel.org/). Installed via quicklisp Disable
-    parallel queries at compile time by setting `grph:*parallel*` to `nil`.
+  - [lparallel](https://lparallel.org/). Installed via quicklisp.
   - [auxin](https://github.com/inconvergent/auxin). Some of the examples depend
     on `auxin`. But the `grph` system does not require `auxin` directly.
 

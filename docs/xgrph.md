@@ -1,5 +1,4 @@
-#### XGRPH:2@
-
+## `xgrph:2@`
 ```
  ; XGRPH:2@
  ;   [symbol]
@@ -11,8 +10,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2@NUM
-
+## `xgrph:2@num`
 ```
  ; XGRPH:2@NUM
  ;   [symbol]
@@ -24,8 +22,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2@VERT
-
+## `xgrph:2@vert`
 ```
  ; XGRPH:2@VERT
  ;   [symbol]
@@ -37,8 +34,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2@VERTS
-
+## `xgrph:2@verts`
 ```
  ; XGRPH:2@VERTS
  ;   [symbol]
@@ -50,8 +46,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2APPEND!
-
+## `xgrph:2append!`
 ```
  ; XGRPH:2APPEND!
  ;   [symbol]
@@ -63,8 +58,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2CENTER-CONNECTED
-
+## `xgrph:2center-connected`
 ```
  ; XGRPH:2CENTER-CONNECTED
  ;   [symbol]
@@ -79,8 +73,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2CUT
-
+## `xgrph:2cut`
 ```
  ; XGRPH:2CUT
  ;   [symbol]
@@ -96,8 +89,7 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:2CUT!
-
+## `xgrph:2cut!`
 ```
  ; XGRPH:2CUT!
  ;   [symbol]
@@ -110,8 +102,7 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:2CUT-TO-AREA
-
+## `xgrph:2cut-to-area`
 ```
  ; XGRPH:2CUT-TO-AREA
  ;   [symbol]
@@ -128,10 +119,9 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:2CUT-TO-AREA!
-
+## `xgrph:2cut-to-area!`
 ```
-:missing:todo:
+:missing:
 
  ; XGRPH:2CUT-TO-AREA!
  ;   [symbol]
@@ -141,8 +131,7 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:2INTERSECT-ALL
-
+## `xgrph:2intersect-all`
 ```
  ; XGRPH:2INTERSECT-ALL
  ;   [symbol]
@@ -157,10 +146,9 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:2INTERSECT-ALL!
-
+## `xgrph:2intersect-all!`
 ```
-:missing:todo:
+:missing:
 
  ; XGRPH:2INTERSECT-ALL!
  ;   [symbol]
@@ -170,8 +158,7 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:2L@
-
+## `xgrph:2l@`
 ```
  ; XGRPH:2L@
  ;   [symbol]
@@ -183,8 +170,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2MIRROR
-
+## `xgrph:2mirror`
 ```
  ; XGRPH:2MIRROR
  ;   [symbol]
@@ -200,10 +186,9 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:2MIRROR!
-
+## `xgrph:2mirror!`
 ```
-:missing:todo:
+:missing:
 
  ; XGRPH:2MIRROR!
  ;   [symbol]
@@ -213,8 +198,7 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:2MOVE!
-
+## `xgrph:2move!`
 ```
  ; XGRPH:2MOVE!
  ;   [symbol]
@@ -226,8 +210,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2PATH!
-
+## `xgrph:2path!`
 ```
  ; XGRPH:2PATH!
  ;   [symbol]
@@ -239,8 +222,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2SPLIT!
-
+## `xgrph:2split!`
 ```
  ; XGRPH:2SPLIT!
  ;   [symbol]
@@ -252,8 +234,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2VERT!
-
+## `xgrph:2vert!`
 ```
  ; XGRPH:2VERT!
  ;   [symbol]
@@ -265,8 +246,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2VERTS!
-
+## `xgrph:2verts!`
 ```
  ; XGRPH:2VERTS!
  ;   [symbol]
@@ -278,8 +258,19 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:2VSET!
+## `xgrph:2vfx`
+```
+:missing:
 
+ ; XGRPH:2VFX
+ ;   [symbol]
+ ; 
+ ; 2VFX names a macro:
+ ;   Lambda-list: (V)
+ ;   Source file: /data/x/grph/src/xgrph-cycle.lisp
+```
+
+## `xgrph:2vset!`
 ```
  ; XGRPH:2VSET!
  ;   [symbol]
@@ -291,8 +282,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3@
-
+## `xgrph:3@`
 ```
  ; XGRPH:3@
  ;   [symbol]
@@ -304,8 +294,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3@NUM
-
+## `xgrph:3@num`
 ```
  ; XGRPH:3@NUM
  ;   [symbol]
@@ -317,8 +306,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3@VERT
-
+## `xgrph:3@vert`
 ```
  ; XGRPH:3@VERT
  ;   [symbol]
@@ -330,8 +318,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3@VERTS
-
+## `xgrph:3@verts`
 ```
  ; XGRPH:3@VERTS
  ;   [symbol]
@@ -343,8 +330,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3APPEND!
-
+## `xgrph:3append!`
 ```
  ; XGRPH:3APPEND!
  ;   [symbol]
@@ -356,8 +342,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3CUT-ALL
-
+## `xgrph:3cut-all`
 ```
  ; XGRPH:3CUT-ALL
  ;   [symbol]
@@ -371,10 +356,9 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:3CUT-ALL!
-
+## `xgrph:3cut-all!`
 ```
-:missing:todo:
+:missing:
 
  ; XGRPH:3CUT-ALL!
  ;   [symbol]
@@ -384,8 +368,7 @@
  ;   Source file: /data/x/grph/src/xgrph-isect.lisp
 ```
 
-#### XGRPH:3L@
-
+## `xgrph:3l@`
 ```
  ; XGRPH:3L@
  ;   [symbol]
@@ -397,8 +380,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3MOVE!
-
+## `xgrph:3move!`
 ```
  ; XGRPH:3MOVE!
  ;   [symbol]
@@ -410,8 +392,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3PATH!
-
+## `xgrph:3path!`
 ```
  ; XGRPH:3PATH!
  ;   [symbol]
@@ -423,8 +404,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3SPLIT!
-
+## `xgrph:3split!`
 ```
  ; XGRPH:3SPLIT!
  ;   [symbol]
@@ -436,8 +416,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3VERT!
-
+## `xgrph:3vert!`
 ```
  ; XGRPH:3VERT!
  ;   [symbol]
@@ -449,8 +428,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3VERTS!
-
+## `xgrph:3verts!`
 ```
  ; XGRPH:3VERTS!
  ;   [symbol]
@@ -462,8 +440,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:3VSET!
-
+## `xgrph:3vset!`
 ```
  ; XGRPH:3VSET!
  ;   [symbol]
@@ -475,8 +452,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:@
-
+## `xgrph:@`
 ```
  ; XGRPH:@
  ;   [symbol]
@@ -488,8 +464,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:@NUM
-
+## `xgrph:@num`
 ```
  ; XGRPH:@NUM
  ;   [symbol]
@@ -501,8 +476,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:@VERT
-
+## `xgrph:@vert`
 ```
  ; XGRPH:@VERT
  ;   [symbol]
@@ -514,8 +488,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:@VERTS
-
+## `xgrph:@verts`
 ```
  ; XGRPH:@VERTS
  ;   [symbol]
@@ -527,8 +500,61 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:APPEND!
+## `xgrph:adj->left-most-vert`
+```
+:missing:
 
+ ; XGRPH:ADJ->LEFT-MOST-VERT
+ ;   [symbol]
+ ; 
+ ; ADJ->LEFT-MOST-VERT names a compiled function:
+ ;   Lambda-list: (VFX VV &AUX (C (CAR VV)))
+ ;   Derived type: (FUNCTION (FUNCTION LIST) (VALUES FIXNUM &OPTIONAL))
+ ;   Source file: /data/x/grph/src/xgrph-cycle.lisp
+```
+
+## `xgrph:adj-find-cycle-basis`
+```
+:missing:
+
+ ; XGRPH:ADJ-FIND-CYCLE-BASIS
+ ;   [symbol]
+ ; 
+ ; ADJ-FIND-CYCLE-BASIS names a compiled function:
+ ;   Lambda-list: (VFX ADJ &AUX (RES (LIST))
+ ;                 (VISITED (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
+ ;   Derived type: (FUNCTION (FUNCTION HASH-TABLE) (VALUES LIST &OPTIONAL))
+ ;   Source file: /data/x/grph/src/xgrph-cycle.lisp
+```
+
+## `xgrph:adj-find-outline`
+```
+:missing:
+
+ ; XGRPH:ADJ-FIND-OUTLINE
+ ;   [symbol]
+ ; 
+ ; ADJ-FIND-OUTLINE names a compiled function:
+ ;   Lambda-list: (VFX ADJ)
+ ;   Derived type: (FUNCTION (FUNCTION HASH-TABLE)
+ ;                  (VALUES CONS BOOLEAN &OPTIONAL))
+ ;   Source file: /data/x/grph/src/xgrph-cycle.lisp
+```
+
+## `xgrph:adj-strip-filaments`
+```
+:missing:
+
+ ; XGRPH:ADJ-STRIP-FILAMENTS
+ ;   [symbol]
+ ; 
+ ; ADJ-STRIP-FILAMENTS names a compiled function:
+ ;   Lambda-list: (ADJ CYCLE)
+ ;   Derived type: (FUNCTION (HASH-TABLE LIST) (VALUES NULL &OPTIONAL))
+ ;   Source file: /data/x/grph/src/xgrph-cycle.lisp
+```
+
+## `xgrph:append!`
 ```
  ; XGRPH:APPEND!
  ;   [symbol]
@@ -540,8 +566,48 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:ITR-VSET!
+## `xgrph:es->adj-ht`
+```
+:missing:
 
+ ; XGRPH:ES->ADJ-HT
+ ;   [symbol]
+ ; 
+ ; ES->ADJ-HT names a compiled function:
+ ;   Lambda-list: (ES &OPTIONAL
+ ;                 (ADJ (MAKE-HASH-TABLE TEST (FUNCTION EQUAL))))
+ ;   Derived type: (FUNCTION (LIST &OPTIONAL HASH-TABLE)
+ ;                  (VALUES HASH-TABLE &OPTIONAL))
+ ;   Source file: /data/x/grph/src/xgrph-cycle.lisp
+```
+
+## `xgrph:find-cycle-basis`
+```
+ ; XGRPH:FIND-CYCLE-BASIS
+ ;   [symbol]
+ ; 
+ ; FIND-CYCLE-BASIS names a compiled function:
+ ;   Lambda-list: (G VFX &OPTIONAL (?P _))
+ ;   Derived type: (FUNCTION (GRPH:GRPH FUNCTION &OPTIONAL KEYWORD) *)
+ ;   Documentation:
+ ;     example: (xgrph:find-cycle-basis g (xgrph:2vfx v) :arch/is)
+ ;   Source file: /data/x/grph/src/xgrph-cycle.lisp
+```
+
+## `xgrph:find-outline`
+```
+ ; XGRPH:FIND-OUTLINE
+ ;   [symbol]
+ ; 
+ ; FIND-OUTLINE names a compiled function:
+ ;   Lambda-list: (G VFX &OPTIONAL (?P _))
+ ;   Derived type: (FUNCTION (GRPH:GRPH FUNCTION &OPTIONAL KEYWORD) *)
+ ;   Documentation:
+ ;     example: (xgrph:find-find-outline g (xgrph:2vfx v) :arch/is)
+ ;   Source file: /data/x/grph/src/xgrph-cycle.lisp
+```
+
+## `xgrph:itr-vset!`
 ```
  ; XGRPH:ITR-VSET!
  ;   [symbol]
@@ -553,8 +619,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:L@
-
+## `xgrph:l@`
 ```
  ; XGRPH:L@
  ;   [symbol]
@@ -566,8 +631,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:MOVE!
-
+## `xgrph:move!`
 ```
  ; XGRPH:MOVE!
  ;   [symbol]
@@ -579,8 +643,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:PATH!
-
+## `xgrph:path!`
 ```
  ; XGRPH:PATH!
  ;   [symbol]
@@ -592,8 +655,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:POS
-
+## `xgrph:pos`
 ```
  ; XGRPH:POS
  ;   [symbol]
@@ -611,8 +673,7 @@
  ;   Expansion: FSET:SEQ
 ```
 
-#### XGRPH:SPLIT!
-
+## `xgrph:split!`
 ```
  ; XGRPH:SPLIT!
  ;   [symbol]
@@ -624,8 +685,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:TRIANGULATE-EDGE-SET
-
+## `xgrph:triangulate-edge-set`
 ```
  ; XGRPH:TRIANGULATE-EDGE-SET
  ;   [symbol]
@@ -639,8 +699,7 @@
  ;   Source file: /data/x/grph/src/xgrph-triangulate.lisp
 ```
 
-#### XGRPH:VERT!
-
+## `xgrph:vert!`
 ```
  ; XGRPH:VERT!
  ;   [symbol]
@@ -652,8 +711,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:VERTS!
-
+## `xgrph:verts!`
 ```
  ; XGRPH:VERTS!
  ;   [symbol]
@@ -665,8 +723,7 @@
  ;   Source file: /data/x/grph/src/xgrph.lisp
 ```
 
-#### XGRPH:VSET!
-
+## `xgrph:vset!`
 ```
  ; XGRPH:VSET!
  ;   [symbol]

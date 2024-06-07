@@ -45,8 +45,8 @@
 
 ; TODO: allow nil as init value for rule?
 ; TODO: not pairs alternative, default
-(defmacro rqry (g &key (lim 1000) rules then)
-  (declare (symbol g) (list rules) (pn lim))
+(defmacro rqry (g &key (lim 1000) rules then (par *parallel*))
+  (declare (symbol g) (list rules) (pn lim) (boolean par))
   "evaluate simple datalog programs top-down. all rule names (with * prefix)
 are bound as variables that can be used in :then.
 
@@ -66,7 +66,7 @@ note the difference between rule types:
   (mvb (trivial non-trivial) (rules/split/trivial (rules/valid/format rules))
     (let ((all-names (undup (mapcar #'car rules))))
       (labels
-        ((rule/qry (a r) `(qry ,g :pairs t :select ,a :where ,(rec/repl/f r)))
+        ((rule/qry (a r) `(qry ,g :pairs t :select ,a :where ,(rec/repl/f r) :par ,par))
          (pairs/qt (a b) (mapcar (lambda (a b) `(quote (,a . ,b))) a b))
          (find-name-args (n) (second (find n rules :key #'car)))
          (repl/f (r) ; what args should we use (find-name-args)?
@@ -81,7 +81,7 @@ note the difference between rule types:
              `(loop with ,prv- of-type list = ,n
                     until (not ,prv-) repeat ,lim
                     for ,nxt- of-type list = ,(rule/qry a r)
-                    for ,acc- of-type list = (,(psel :or) ,n ,nxt-)
+                    for ,acc- of-type list = (,(psel par :or) ,n ,nxt-)
                     if (= (length ,n) (length ,acc-)) do (setf ,prv- nil)
                     else do (setf ,n ,acc- ,prv- ,nxt-)))))
         `(let (,@(rules/trivial g trivial)

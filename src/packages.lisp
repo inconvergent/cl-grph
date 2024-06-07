@@ -5,7 +5,7 @@
   (:import-from #:fset #:@ #:contains? #:do-map #:do-set #:empty-map
                 #:empty-set #:less #:member?)
   (:export
-    #:*dir-modes* #:*pos-modes* #:*clauses* *aggregates* #:v? #:ext-symbols? #:*parallel*
+    #:*parallel* #:*dir-modes* #:*pos-modes* #:*clauses* *aggregates* #:v? #:ext-symbols?
     #:to-vector #:ensure-list #:last* #:vector-last #:vector-first
     #:@edges #:@enum #:@pnum #:@in #:@out #:@either #:@both #:num-either
     #:@verts #:@vcnt #:@vmax #:@prop #:@mem #:@mid
@@ -33,7 +33,7 @@
   (:use #:common-lisp)
   (:import-from #:fset #:empty-seq #:seq)
   (:import-from #:veq #:dsb #:mvc #:mvb #:awg #:pn #:in)
-  (:import-from #:grph #:*dir-modes* #:*pos-modes* #:add! #:del!)
+  (:import-from #:grph #:*dir-modes* #:*pos-modes* #:add! #:del! #:grph)
   (:export
     #:@vert #:2@vert #:3@vert #:@verts #:2@verts #:3@verts
     #:@ #:2@ #:3@ #:l@ #:2l@ #:3l@
@@ -50,7 +50,13 @@
     #:2mirror! #:2mirror
     #:2center-connected
     #:2cut-to-area #:2cut-to-area!
-    #:triangulate-edge-set))
+    #:triangulate-edge-set
+    #:2vfx
+    #:es->adj-ht
+    #:adj->left-most-vert
+    #:adj-strip-filaments
+    #:find-cycle-basis #:adj-find-cycle-basis
+    #:find-outline #:adj-find-outline))
 
 (defpackage #:grph/io
   (:use #:common-lisp)
