@@ -80,7 +80,7 @@
              (main (p) (third (gk p :compiled-full t)))
              (default (p) (gk p :compiled t)))
       (apply #'format s "
-██ COMPILED QRY (~a) ██████████████████████████
+██ COMPILED QRY (GRPH ~a) ██████████████████████████
 ██ select:  ~a
 ██ where:   ~a
 ██ PROPS~%" (v?) (gkk p :select :where))

@@ -1,10 +1,13 @@
 (in-package :grph)
 
+(defun es/normalize (es) ; TODO: inefficient
+  "all edges are rotated to have the smallest index first. duplicates are removed."
+  (delete-duplicates (loop for (a b) in es collect (srt a b)) :test #'equalp))
+
 (defun edge-set->ht (es &optional (ht (make-hash-table :test #'equal)))
   (declare (list es) (hash-table ht))
-  "convert edge set to hash table."
-  (loop for (a b) in es
-        do (setf (gethash (if (< a b) `(,a ,b) `(,b ,a)) ht) t))
+  "convert edge set to hash table. normalize all edges to have the smallest index first."
+  (loop for (a b) in es do (setf (gethash (srt a b) ht) :/g/edge))
   ht)
 (defun ht->edge-set (ht)
   (declare (hash-table ht))
@@ -15,7 +18,7 @@
   (declare (list path) (boolean closed))
   "return edge set from cycle.
 ex: (1 2 3 4 5) -> ((1 2) (2 3) (3 4) (4 5))
-if closed is t, (1 5) will be included in the above output."
+if closed is t, (5 1) will be included in the above output."
   (loop for a in path
         and b in (if closed (cons (first (last path)) path) (cdr path))
         collect (list a b)))

@@ -111,8 +111,15 @@ NOTE: items in :in will be counted as val. ie they are bound as a value. see fx:
                                 :not ((list ,@(mapqt (ensure-list (second qc)))))))))
            qc))
        (res/inner (res inner)
+         ; TODO: inner is the compiled clause. res is sub clauses that should
+         ; be defined via let. it would be more efficient (with plet in
+         ; particular) to lift out all simple facts and define them outside.
+         ; this would also be more readable
+         ; (veq:vpr (gk p :in))
          (if (= (length res) 1) (cadar res)
-             `(,(psel par :let) (,@(veq:lpos res 0 2)) (declare (list ,@(veq:lpos res))) ,inner)))
+             `(,(psel par :let) (,@(veq:lpos res 0 2))
+                (declare (list ,@(veq:lpos res)))
+                ,inner)))
        (next/map/or (qc &optional jarg &aux (res (next/map qc)))
          (res/inner res (loop with body = (caar res)
                               for s in (veq:lpos (cdr res))
@@ -126,7 +133,16 @@ NOTE: items in :in will be counted as val. ie they are bound as a value. see fx:
        (next (qc &aux (c (car qc)))
          (unless qc (wrn "empty clause in :where: ~a." where))
          (unless (get-all-vars qc) (wrn "no vars in: ~a." qc))
-         (ecase c (:fact `(fact ,@(cdr qc)))
+         (ecase c (:fact (let* ((in* (gk p :in t))
+                                (triple (cdr qc))
+                                (consts (remove-if-not (lambda (s) (and (symb? s) (has-prefix? s #\!)))
+                                                       triple)))
+                           (if consts `(bind-const (fact ,@triple)
+                                          (list ,@(mapcar (lambda (s &aux (h (assoc s in* :test #'eq)))
+                                                                  `(cons ',(second h) ,(third h)))
+                                                          consts)))
+                             `(fact ,@triple))))
+
                   (:q `(q ,@(cdr qc)))
                   (:f `(progn ,@(cdr qc)))
                   (:and (next/map/and (do-proc-bindable qc)))
@@ -159,17 +175,15 @@ NOTE: items in :in will be counted as val. ie they are bound as a value. see fx:
 
     (loop for o in (gk p :in t) collect (etypecase o (symbol o) (list (car o))) into in
       finally (unless (and (every #'var? in) (no-dupes? in))
-                      (err "duplicate/bad value for :in."))
-              (unless (not #1=(intersection vars in))
-                      (err ":select and :in can not overlap: ~a" #1#)))
+                      (err "duplicate/bad value for :in.")))
 
     (unless (subsetp vars (get-all-vars (gk p :where t)))
             (wrn "selecting var(s) not in :where: ~a." vars))
 
+    ; TODO: multi aggs: have to check if they have the same arguments,
     ; (unless (subsetp (qry/aggregate (gkk p :then :collect :first))
     ;                   (gk p :select) :test #'equal)
     ;         (wrn "inconsistent aggr in :then/:collect/:first and :select"))
-    ; TODO: multi aggs: have to check if they have the same arguments,
     (qry/compile/check/messages p err wrn)
     p))
 

@@ -38,51 +38,69 @@ the following terminology is used:
   (mid nilmap :type fset:map :read-only t)
   (num-edges 0 :type pn :read-only t))
 
-; (define-struct-load-form grph)
+(define-struct-load-form grph)
 #+SBCL(declaim (sb-ext:freeze-type grph))
 
 ; GET / LOOKUP ----------------
 
 (defun @mem (g a b &aux (eset (@ (adj g) a)))
-  (declare (grph g) (in a b)) "t if edge (a b) exists."
+  (declare #.*opt* (grph g) (in a b)) "t if edge (a b) exists."
   (and eset (values (fset:@ eset b))))
 
 ; TODO: filter by edge/vert prop?
+; TODO: docs
 (defun @prop (g k &optional p)
-  (declare (grph g) ((or list in) k)) "get val of prop, p, for key, k should be edge (a b); or vert."
+  (declare #.*opt* (grph g) ((or list in) k))
+  "get props of k (edge ab or vert); or check if p is a prop of k."
   (if p (get-multi-rel (props g) k :prop p) ; t / nil if prop exists
         (get-multi-rel (props g) k)))
 (defun @mid (g k &optional p)
-  (declare (grph g)) "get val of prop, p, for key, k. should be a prop (keyword)."
+  (declare #.*opt* (grph g))
+  "get props of k (edge ab or vert); or check of p is a prop of k."
   (if p (get-multi-rel (mid g) k :prop p) ; t / nil if prop+edge/vert exists
         (get-multi-rel (mid g) k)))
 
 (defun adjcnt (adj &aux (n 0))
-  (declare (fset:map adj) (veq:pn n)) "count total number of edges in grph-adj."
+  (declare #.*opt* (fset:map adj) (veq:pn n)) "count total number of edges in grph-adj."
   (do-map (a edges adj) (declare (ignorable a))
     (do-map (b dir edges) (declare (ignorable b))
       (when dir (incf n))))
   n)
-(defun ecnt (g) (declare (grph g)) "count total number of edges in grph." (adjcnt (grph-adj g)))
-(defun @enum (g) (declare (grph g)) "total number of edges in graph." (grph-num-edges g))
-(defun @pnum (g) (declare (grph g)) "total number of props in graph." (fset:size (grph-mid g)))
-(defun @vcnt (g &aux (res 0)) (declare (grph g) (pn res)) "count all connected verts."
+(defun ecnt (g)
+  (declare #.*opt* (grph g)) "count total number of edges in grph."
+  (adjcnt (grph-adj g)))
+(defun @enum (g)
+  (declare #.*opt* (grph g)) "total number of edges in graph."
+  (grph-num-edges g))
+(defun @pnum (g)
+  (declare #.*opt* (grph g)) "total number of props in graph."
+  (fset:size (grph-mid g)))
+(defun @vcnt (g &aux (res 0))
+  (declare #.*opt* (grph g) (pn res)) "count all connected verts."
   (itr-verts (g a) (incf res)) res)
 
-(defun @edges (g &aux (res (list))) (declare (grph g) (list res)) "list of lists of all edges."
+(defun @edges (g &aux (res (list)))
+  (declare #.*opt* (grph g) (list res)) "list of lists of all edges."
   (itr-edges (g e) (push e res)) res)
-(defun @out (g a &aux (res (list))) (declare (grph g) (in a) (list res)) "list all outboud verts of a."
+(defun @out (g a &aux (res (list)))
+  (declare #.*opt* (grph g) (in a) (list res)) "list all outboud verts of a."
   (itr-adj (g a b ->) (push b res)) res)
-(defun @in (g a &aux (res (list))) (declare (grph g) (in a) (list res)) "list all outboud verts of a."
+(defun @in (g a &aux (res (list)))
+  (declare #.*opt* (grph g) (in a) (list res)) "list all inboud verts of a."
   (itr-adj (g a b <-) (push b res)) res)
-(defun @both (g a &aux (res (list))) (declare (grph g) (in a) (list res)) "list all verts of a that are bi-directional."
+(defun @both (g a &aux (res (list)))
+  (declare #.*opt* (grph g) (in a) (list res)) "list all verts of a that are bi-directional."
   (itr-adj (g a b <>) (push b res)) res)
-(defun @either (g a &aux (res (list))) (declare (grph g) (in a) (list res)) "list both inbound and outbond verts of a."
+(defun @either (g a &aux (res (list)))
+  (declare #.*opt* (grph g) (in a) (list res)) "list both inbound and outbond verts of a."
   (itr-adj (g a b ><) (push b res)) res)
 
-(defun @vmax (g &aux (res 0)) (declare (grph g) (pn res)) "get highest vertex index."
-  (itr-verts (g a) (setf res (max a res))) res)
-(defun @verts (g &aux (res (list))) (declare (grph g) (list res)) "list of all connected verts."
+(defun @vmax (g &aux (res 0))
+  (declare #.*opt* (grph g) (pn res)) "get highest vertex index."
+  (itr-verts (g a) (when (> a res) (setf res a)))
+  res)
+(defun @verts (g &aux (res (list)))
+  (declare #.*opt* (grph g) (list res)) "list of all connected verts."
   (itr-verts (g a) (push a res)) res)
 
 ; TODO: clear edge props fx?
@@ -100,6 +118,39 @@ the following terminology is used:
       (list (loop for p in props do (setf g (etypecase p (keyword (with-prop p))))))
       (fset:set (do-set (p props) (setf g (etypecase p (keyword (with-prop p)))))))
     g))
+
+; TODO: *prefix* for :/g/ prefix
+(defun sprop (&rest rest) (declare #'*opt*)
+  "make a special prop. special props have a distinct prefix: :/g/.
+and a category. eg: :/g/id/. where :id is the category.
+special props behave like all other props, but they can have special
+behaviour in some limited cases.
+
+see compound paths in grph:walk macro.
+
+possible future special props are types. eg
+  :/g/bzspl/ for bezier curves.
+or even :/g/circ/, where one edge denotes a center and radius. which would work
+well w/ svg export."
+  (apply #'psymb :keyword :/g/ rest))
+
+(defun sprop-id (&optional (sp-cat "^SID^"))
+  "generate a unique special prop :/g/id/[gensym]."
+  (sprop :id/ (gensym sp-cat)))
+
+(defun unpack-sprop (s)
+  (declare #.*opt* (keyword s))
+  "unpack eg. :/g/id/abc into values :id and :abc"
+  (unless (sprop? s) (error "not a special prop: ~a" s))
+  (dsb (ty val) (split-string #\/ (subseq (symbol-name s) 3))
+    (declare (string ty val))
+    (values (psymb :keyword ty) (psymb :keyword val))))
+
+(defun sprop? (s) (declare #'*opt*)
+  "is this a special prop? returns s or nil."
+  (typecase s (keyword (let ((str (symbol-name s)))
+                         (and (> (length str) 5)
+                              (string= str "/G/" :end1 3) s)))))
 
 (defun -add (g a b)
   (declare #.*opt* (grph g) (in a b))
@@ -148,19 +199,26 @@ returns: (values g created?)"
 returns: (values g deleted?)"
   (when (= a b) (warn "DEL: incorrect edge: (~a ~a)." a b))
   (-del g a b))
-(defun -del-prop (g ab prop) ; TODO: what happens with dangling mid/props values?
-  (declare #.*opt* (grph g) (list ab) (symbol prop))
-  (if (@prop g ab prop)
+
+; TODO: only expose del-props?
+; TODO: what happens with dangling mid/props values?
+(defun del-prop (g k prop)
+  (declare #.*opt* (grph g) ((or list fixnum) k) (symbol prop))
+  "delete prop from k."
+  (if (@prop g k prop)
       (values (grph (adj g) (grph-num-edges g)
-                    (del-multi-rel (props g) ab prop)
-                    (del-multi-rel (mid g) prop ab))
+                    (del-multi-rel (props g) k prop)
+                    (del-multi-rel (mid g) prop k))
               t)
       (values g nil)))
-(defun del-props (g ab props)
-  (declare #.*opt* (grph g) (list ab) ((or list fset:set) props))
-  (loop with deleted? = nil
-        for p in (etypecase props (list props) (fset:set (set->lst props)))
-        do (mvb (g* del?) (-del-prop g ab p)
-             (setf g g* deleted? (or del? deleted?)))
-        finally (return-from del-props (values g deleted?))))
+
+; TODO: what does deleted? really mean here?
+(defun del-props (g k props) ; TODO: optional props to delete all
+  (declare #.*opt* (grph g) ((or list fixnum) k) ((or list fset:set) props))
+  "delete props from k"
+  (let (deleted?)
+    (loop for p in (etypecase props (list props) (fset:set (set->lst props)))
+          do (mvb (g* del?) (del-prop g k p)
+                  (setf g g* deleted? (or del? deleted?))))
+    (values g deleted?)))
 

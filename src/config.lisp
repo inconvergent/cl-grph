@@ -6,15 +6,15 @@
 (declaim (boolean *parallel*))
 
 (defvar *parallel* nil)
-(defparameter *aggregates* '(:cnt :grp))
-(defparameter *clauses* '(:and :not :or :or-join :not-join :q :% :f :fact :uniq))
-(defparameter *dir-modes* '(:-> :<- :<> :><))
-(defparameter *pos-modes* '(:abs :rel))
+(defparameter *aggregates* '(:cnt :grp)
+  "valid aggregate clauses in qry.")
+(defparameter *clauses* '(:and :not :or :or-join :not-join :q :% :f :fact :uniq)
+  "valid query clauses.")
+(defparameter *dir-modes* '(:-> :<- :<> :><)
+  "valid edge direction modes.")
+(defparameter *pos-modes* '(:abs :rel)
+  "valid spatial modes.")
 
-(map-docstring '*aggregates* (format nil "valid aggregate clauses in qry: ~a" *aggregates*) :nodesc)
-(map-docstring '*clauses* (format nil "valid query clauses: ~a" *clauses*) :nodesc)
-(map-docstring '*dir-modes* (format nil"valid edge direction modes: ~a" *dir-modes*) :nodesc)
-(map-docstring '*pos-modes* (format nil "valid spatial modes: ~a" *pos-modes*) :nodesc)
 (map-docstring 'cancel "(cancel) can be used in some contexts (using, qry) to cancel
 the transaction and discard all changes" :nodesc)
 (map-docstring 'stop "(stop) can be used in some contexts (using, qry) to stop

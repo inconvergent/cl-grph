@@ -1,7 +1,9 @@
-
 (setf prove:*enable-colors* nil)
 (defpackage #:grph-tests (:use #:cl #:prove) (:export #:run-tests))
 (in-package #:grph-tests)
+
+; (setq *block-compile-default* t)
+; set prove:*debug-on-error* t
 
 (defun -run-tests (files)
   (labels ((rel (f) (mapcar (lambda (p) (asdf:system-relative-pathname
@@ -9,16 +11,18 @@
                             f)))
     (loop with fails = 0
           for f in (rel files)
-          do (format t "~&~%starting tests in: ~a~%" (grph::mkstr f))
+          do (format t "~&~%████ starting tests in: ~a~%" (grph::mkstr f))
              (unless (prove:run f :reporter :fiveam)
                      (incf fails))
-             (format t "~&done: ~a~%" (grph::mkstr f))
+             (format t "~&██    done: ~a~%" (grph::mkstr f))
           finally (return (unless (< fails 1) (uiop:quit 7))))))
 
 (defun run-tests ()
-  (-run-tests '(#P"test/qry-runtime.lisp" #P"test/grph.lisp" #P"test/qry.lisp"
+  (-run-tests '(#P"test/utils.lisp"
+                #P"test/grph.lisp" #P"test/grph-2.lisp"
+                #P"test/qry-runtime.lisp" #P"test/qry.lisp"
                 #P"test/qry-2.lisp" #P"test/qry-3.lisp" #P"test/xgrph.lisp"
-                #P"test/grph-walk.lisp")))
+                #P"test/grph-walk.lisp" #P"test/grph-walk-cpnd.lisp")))
 
 ; TODO: test qry par vs non-par
 

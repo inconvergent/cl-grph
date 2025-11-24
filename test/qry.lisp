@@ -1,6 +1,6 @@
 (in-package #:grph-tests)
 
-(plan 6)
+(plan 7)
 
 (subtest "qry preproc"
   (is (cdr (assoc :where
@@ -53,6 +53,10 @@
                         :where (or (?x :e ?y) (?x :a ?y))))
         (rs `(4)))
 
+    (is (rs (grph:qry g :select (?x ?y) :in ((?x 5))
+                        :where (or (?x :e ?y) (?x :a ?y))))
+        (rs `((5 4))))
+
       (is (rs (grph:qry g :select ?x
                           :where (and (not (?x :c _))
                                       (or (?x :a _) (?x :b _))
@@ -92,9 +96,9 @@
         (ls '((3 4) (3 5) (4 3) (4 5) (5 3) (5 4))))
     (is (ls (grph:qry g :select (?x ?y)
                         :where (and (or (?x :a ?y) (?x :b ?y)) (not (?x :a ?y)))
-                        :collect (list (+ ?x ?y) 88 ?x ?y)))
-        (ls '((7 88 3 4) (7 88 4 3) (8 88 3 5)
-              (8 88 5 3) (9 88 4 5) (9 88 5 4))))
+                        :collect (list (+ ?x ?y) 89 ?x ?y)))
+        (ls '((7 89 3 4) (7 89 4 3) (8 89 3 5)
+              (8 89 5 3) (9 89 4 5) (9 89 5 4))))
     (is (ls (grph:qry g :select (?x ?y) :where (or (?x :e ?y) (?x :a ?y))))
         (ls '((0 1) (1 0) (1 2) (1 3)
               (2 1) (3 1) (5 4) (4 5))))

@@ -1,168 +1,206 @@
 (in-package :grph)
 
-(defun props-edges (g)
-  (declare #.*opt* (grph g))
-  "list of lists of prop with flattend list of edges. see ingest-props-edges"
-  (labels ((flat (edges) (loop for e of-type list in edges nconc e)))
-    (grph:qry g :select (?p (grp ?x ?y)) :where (?x ?p ?y)
-                :collect (list ?p (flat (grp ?x ?y))))))
+; EDGE-SET ITERATORS
+; TODO: all s/itr could use improvements
+(defmacro es/itr-sprop ((g sp edges)
+                        (es &optional (sp-default :/g/_default/) (sp-cat :id))
+                        &body body)
+  (declare
+    (symbol g sp edges) (keyword sp-cat) ((or keyword null) sp-default))
+  "iterate sprop category [eg :id] and a ht of corresponding edges.
+if an edge has multiple sprops from the same category [:/g/id/id-1 :/g/id/id-2]
+the edge will be included for each sprop."
+  (awg (sp->edges es-in)
+   `(let ((,es-in ,es)
+          (,sp->edges (make-hash-table :test #'eql)))
+      (labels ((fnd-sp (c) (and (grph:sprop? c)
+                                (eql (grph:unpack-sprop c) ,sp-cat)))
+               (add-sp->edge (sp e)
+                 (mvb (edges exists) (gethash sp ,sp->edges)
+                   (unless exists (let ((new (make-hash-table :test #'equal)))
+                                    (setf (gethash sp ,sp->edges) new
+                                          edges new)))
+                   (setf (gethash e edges) sp))))
+        (loop for (a b) in ,es-in
+              for e = (srt a b)
+              for hit = nil
+              do (fset:do-set (c (fset:union
+                                   (or (grph:@prop ,g e) (fset:set))
+                                   (or (grph:@prop ,g (reverse e)) (fset:set))))
+                   (when (fnd-sp c) (add-sp->edge c e)
+                                    (setf hit t)))
+                 ,@(if sp-default `((unless hit (add-sp->edge ,sp-default e))))))
 
-(defun ingest-edges (edges &optional (g (grph)))
-  (declare (list edges) (grph g))
-  "ingest a list of edges with props. eg: ((0 :a 3) ...). and return a grph."
-  (grph:modify! (g in)
-    (loop for (l p r) in edges if (any? p) do (in-> l r)
-                               else do (in-> l r `(,(kv p)))))
-  g)
+      (loop for ,sp being the hash-keys of ,sp->edges
+            using (hash-value ,edges)
+            do (let ((,sp ,sp) (,edges ,edges))
+                 (declare (ignorable ,sp ,edges))
+                 ,@body)))))
 
-(defun ingest-props-edges (pedges &optional (g (grph)))
-  (declare (list pedges) (grph g)) "ingest list of props and flattened edges. see props-edges."
-   (grph:modify! (g in)
-     (loop for (p edges) in pedges for edges* = (group edges 2)
-           if (any? p) do (loop for (a b) in edges* do (in-> a b))
-           else do (loop for (a b) in edges* do (in-> a b `(,p)))))
-   g)
+; TODO: there are side-effects in edges. relevant for: es/itr-walk-segments,
+; es/itr-sprop
+(defun es/itr-walk (p c edges body)
+  (declare #.*opt* (symbol p c))
+  "INTERNAL. execute body with paths/segments from walks over this edge set in g.
+  p is the path, c is t if p is a closed loop.
+every edge in es is included in one path only, and only once.
+NOTE: edges is destroyed in the process. ignores edge dir."
+  (awg (start a b)
+   `(labels ((-get-start-edge ()
+             (loop for e being the hash-keys of ,edges
+                   do (return-from -get-start-edge e)))
+            (-next-vert-from (a &key but-not)
+              (car (remove-if
+                     (lambda (v) (or (= v but-not) (not (gethash (srt a v) ,edges))))
+                     (-@either a)))) ; defined in walk
+            (-closed? (p) (if (equal (first p) (last* p))
+                              (values (cdr p) t)
+                              (values p nil)))
+            (-until-dead-end (a but-not)
+              (loop with prv = a with res = (list prv)
+                    with nxt = (-next-vert-from a :but-not but-not)
+                    until (equal nxt nil)
+                    do (push nxt res)
+                       (remhash (srt prv nxt) ,edges)
+                       (let ((nxt* (-next-vert-from nxt :but-not prv)))
+                         (setf prv nxt nxt nxt*))
+                    finally (return res))))
+      (loop while (> (hash-table-count ,edges) 0)
+            for ,start = (-get-start-edge) for (,a ,b) = ,start
+            do (mvb (,p ,c) (-closed?
+                              (progn (remhash ,start ,edges)
+                                     `(,@(-until-dead-end ,a ,b)
+                                          ,@(reverse (-until-dead-end ,b ,a)))))
+                    (declare (ignorable ,p ,c) (list ,p) (boolean ,c))
+                    ,@body)))))
 
-(defmacro connected-verts (g &optional (p :_))
-  (declare (symbol p)) "get all connected verts."
-  (veq:with-symbs `(g ,g)
-  (if (any? p) `(qry g :select ?x :where (or (?x _ _) (_ _ ?x)))
-               `(let ((?p ,p)) (qry g :select ?x :in ?p
-                                      :where (or (?x ?p _) (_ ?p ?x)))))))
+(defun es/itr-walk-segments (p c edges body)
+  (declare #.*opt* (symbol p c))
+  "INTERNAL. same as es/itr-walk, but splits p into segments. ignores edge dir."
+  (awg (edg p* c*)
+   ; NOTE / TODO: this is kinda bad, but remember that edges is destroyed in
+   ; es/itr-walk, so we need a copy. fset would be more elegant, but less
+   ; efficient probably? might be better to rewrite the walker logic
+  `(let ((,edg (copy-hash-table ,edges)))
+    (labels ((-with-2cnt (p) (loop for v in p collect (list v (= 2 (-cnt v)))))
+             (-split-paths (p c) (rec (-with-2cnt (if c (close-path p) p))))
+             (-cnt (v) (loop for w in (-@either v) ; defined in walk
+                             if (gethash (srt w v) ,edges) summing 1))
+             (-closed? (p) (if (= (first p) (last* p))
+                               (values (butlast p) t)
+                               (values p nil)))
+             (rec (pp) (unless (> (length pp) 1) (return-from rec))
+                       (loop for i from 1 for (vi b) in (cdr pp)
+                             if (not b) do (return-from rec
+                                             (cons (veq:lpos (subseq pp 0 (1+ i)))
+                                                   (rec (subseq pp i)))))
+                       (list (veq:lpos pp))))
+      ,(es/itr-walk p* c* edg
+        `((loop for ,p* in (-split-paths ,p* ,c*)
+              do (mvb (,p ,c) (-closed? ,p*)
+                      (declare (ignorable ,p ,c) (list ,p) (boolean ,c))
+                      ,@body))))))))
 
-; this is a fx because that makes it easier to use in queries
-(defun num-either (g ?x &optional (?p :_))
-  (declare #.*opt* (grph g) (in ?x) (symbol ?p))
-  "number of adjacent verts to ?x. ignores edge dir."
-  (length (undup (if (any? ?p)
-                     (qry g :select ?y :in ?x :where (or (?x _ ?y) (?y _ ?x)))
-                     (qry g :select ?y :in (?x ?p)
-                            :where (or (?x ?p ?y) (?y ?p ?x)))))))
+(defun es/itr (p c edges body)
+  (declare #.*opt* (symbol p c))
+  "INTERNAL. iterate edges on the same pattern as segments, paths"
+  (awg (e) `(loop for ,e being the hash-keys of ,edges
+                  do (let ((,p ,e) (,c nil))
+                       (declare (ignorable ,c ,p) (list ,p))
+                       ,@body))))
 
 
-(defmacro edge-set (g &optional (p :_))
-  (declare (symbol p)) "get edge set. ignores edge dir."
-  (veq:with-symbs `(g ,g)
-  (if (any? p)
-      `(qry g :select (?x ?y) :where (and (% (< ?x ?y)) (or (?x _ ?y) (?y _ ?x))))
-      `(let ((?p ,p))
-         (qry g :select (?x ?y) :in ?p
-                :where (and (% (< ?x ?y)) (or (?x ?p ?y) (?y ?p ?x))))))))
 
-(defmacro dead-ends (g &optional (p :_) y)
-  (declare (symbol p) (boolean y))
-  "verts that have exactly one adjacent verts: [g-] ?y-?x ignores edge dir."
-   (veq:with-symbs `(g ,g)
-   (if (any? p)
-       `(qry g :select (?x ,(if y '?y))
-               :where (and (or (?x _ ?y) (?y _ ?x)) (% (= (num-either g ?x) 1)))
-               :collect ,(if y '(list ?x ?y) '?x))
-       `(let ((?p ,p))
-          (qry g :select (?x ,(if y '?y)) :in ?p
-                 :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (= (num-either g ?x ?p) 1)))
-                 :collect ,(if y '(list ?x ?y) '?x))))))
+; NOTE / TODO: it would be better to make versions of es/itr-walk etc that
+;              preserve edge direction when walking.
+(defmacro walk ((g &optional (p (gensym "PATH")) (c (gensym "CLOSED?"))
+                             (sid (gensym "SID")))
+                (modes &key (prop :_ prop?) (es nil es?) (sp-cat :id) (sp-default :/g/_default/)
+                       &aux (modes (valid-modes :walk modes
+                                    '(:progn :collect :dir :any
+                                      :paths :segments :edges :compound :keep :drop))))
+                &body body)
+  (declare (symbol g p c) (keyword prop sp-cat sp-default))
+  "walk edges in graph as tuples of (p c). where p is a path and c is t if p is closed.
 
-(defmacro two-isects (g &optional (p :_) y)
-  (declare (symbol p) (boolean y))
-  "verts that have exactly 2 adjacent verts [g-] ?y1-?x-?y2 [-g] ignores edge dir."
-  (veq:with-symbs `(g ,g)
-  (if (any? p)
-      `(qry g :select (?x ,(if y '?y))
-              :where (and (or (?x _ ?y) (?y _ ?x)) (% (= (num-either g ?x) 2)))
-              :collect ,(if y '(list ?x ?y) '?x))
-      `(let ((?p ,p))
-         (qry g :select (?x ,(if y '?y)) :in ?p
-                :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (= (num-either g ?x ?p) 2)))
-                :collect ,(if y '(list ?x ?y) '?x))))))
+ex:
 
-(defmacro segment-isects (g &optional (p :_) y)
-  (declare (symbol p) (boolean y))
-  "verts that do not have exactly 2 adjacent verts. ie. the set of dead
-ends and multi isects. ignores edge dir."
-  (veq:with-symbs `(g ,g)
-  (if (any? p)
-      `(qry g :select (?x ,(if y '?y))
-              :where (and (or (?x _ ?y) (?y _ ?x)) (% (/= (num-either g ?x) 2)))
-              :collect ,(if y '(list ?x ?y) '?x))
-      `(let ((?p ,p))
-         (qry g :select (?x ,(if y '?y)) :in ?p
-                :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (/= (num-either g ?x ?p) 2)))
-                :collect ,(if y '(list ?x ?y) '?x))))))
+  (grph:walk (g) (collect prop path))
 
-(defmacro multi-isects (g &optional (p :_) y)
-  (declare (symbol p) (boolean y))
-  "verts that have 3 or more adjacent verts. ignores edge dir."
-  (veq:with-symbs `(g ,g)
-  (if (any? p)
-      `(qry g :select (?x ,(if y '?y))
-              :where (and (or (?x _ ?y) (?y _ ?x)) (% (> (num-either g ?x) 2)))
-              :collect ,(if y '(list ?x ?y) '?x))
-      `(let ((?p ,p))
-         (qry g :select (?x ,(if y '?y)) :in ?p
-                :where (and (or (?x ?p ?y) (?y ?p ?x)) (% (> (num-either g ?x ?p) 2)))
-                :collect ,(if y '(list ?x ?y) '?x))))))
+  (grph:walk (g p c)
+             ((dir segments) :prop :path)
+    (print (list (reverse p) c)))
 
-(defun del-dead-ends (g &optional (p :_))
-  (declare #.*opt* (grph g) (symbol p))
-  "delete dead-ends until there are no more dead ends left. ignores edge dir."
-  (labels ((-del (a b) (del! g a b) (del! g b a)))
-    (loop for ee = (dead-ends g p t)
-          while ee do (loop for (a b) in ee do (-del a b))))
-  g)
+modes:
 
-(defun walk-edge-set (g es &aux (edges (edge-set->ht es)))
-  (declare #.*opt* (grph g) (list es) (hash-table edges))
-  "return a list of paths ((p1 closed?) (p2 closed?) ...) from edge set from g.
-every edge is included exactly once. ignores edge dir."
-  (labels
-    ((-srt (&rest e) (if (apply #'< e) e (reverse e)))
-     (-get-start-edge ()
-       (loop for e being the hash-keys of edges
-             do (return-from -get-start-edge e)))
-     (-next-vert-from (a &key but-not)
-       (car (remove-if (lambda (v) (or (= v but-not) (not (gethash (-srt a v) edges))))
-                       (@either g a)))) ; find new edges in g also (untraversed) in es
-     (closed? (p) (if (equal (first p) (last* p)) `(,(cdr p) t) `(,p nil)))
-     (-until-dead-end (a but-not)
-       (loop with prv = a with res = (list prv)
-             with nxt = (-next-vert-from a :but-not but-not)
-             until (equal nxt nil)
-             do (push nxt res)
-                (remhash (-srt prv nxt) edges)
-                (let ((nxt* (-next-vert-from nxt :but-not prv)))
-                  (setf prv nxt nxt nxt*))
-             finally (return res))))
-    (loop while (> (hash-table-count edges) 0)
-          for start = (-get-start-edge) for (a b) = start
-          for path = (progn (remhash start edges)
-                            `(,@(-until-dead-end a b)
-                              ,@(reverse (-until-dead-end b a))))
-          collect (closed? path))))
-(defun walk-grph (g &optional (p :_))
-  (declare #.*opt* (grph g) (symbol p)) "walk graph via walk-edge-set."
-  (walk-edge-set g (if (any? p) (edge-set g) (edge-set g p))))
+* :progn    : don't collect result.                                           [default]
+  :collect  : collect results as a list.
 
-; this is quite ineffiecient. rewrite a version of walk-edge-set instead?
-(defun walk-edge-set-segments (g es &aux (edges (edge-set->ht es)))
-  (declare #.*opt* (grph g) (list es)) "walk edge set and split into segments."
-  (labels ((srt (&rest e) (if (apply #'< e) e (reverse e)))
-           (rec (pp) (unless (> (length pp) 1) (return-from rec))
-                     (loop for i from 1 for (vi b) in (cdr pp)
-                           if (not b) do (return-from rec
-                                           (cons (veq:lpos (subseq pp 0 (1+ i)))
-                                                 (rec (subseq pp i)))))
-                     (list (veq:lpos pp)))
-           (2cnt (v) (= 2 (loop for w in (@either g v)
-                                if (gethash (srt w v) edges) summing 1)))
-           (with-2cnt (p) (loop for v in p collect (list v (2cnt v))))
-           (split-paths (p c) (rec (with-2cnt (if c (close-path p) p))))
-           (closed? (p) (if (= (first p) (last* p))
-                            (list (butlast p) t) (list p nil))))
-   (loop with res = (list)
-         for (p c) in (grph:walk-edge-set g es)
-         do (loop for p in (split-paths p c) do (push (closed? p) res))
-         finally (return res))))
-(defun walk-grph-segments (g &optional (p :_))
-  (declare #.*opt* (grph g) (symbol p)) "walk graph via walk-edge-set-segments."
-  (walk-edge-set-segments g (if (any? p) (edge-set g) (edge-set g p))))
+* :paths    : greedily walk to make as long paths as possible. verts can      [default]
+              be visited multiple times. handles [pure] loops.
+  :segments : split paths into segments. handles [pure] loops
+  :edges    : just return edges
+
+* :simple   : dont group by special prop                                      [default]
+  :compound : group by special prop [cat :id / :/g/id/]
+* :keep     : keep non-compond paths in :/g/_default/                         [default]
+  :drop     : drop non-compound paths
+
+* :any      : use paths as they come out of the walker                        [default]
+  :dir      : greedily attempt to align path direction with edges in the
+              graph by comparing the first edge in p with the graph, and
+              aligning the path to the edge direction.
+              useful for loops, and with the :segments mode.
+  " (awg (res edges es* p* c*)
+  (unless body (setf body `((list ,p ,c))))
+  ; this might be fine. but i have not checked. depends on some of the labels below
+  (when (and prop? es?) (warn "WALK: can not use :prop and :es simulataneously
+                                ~a ~a" prop? es?))
+  (labels ((do-es/itr (body*)
+             (let ((proc   (ecase (select-mode modes '(:any :dir))
+                                  (:dir  `(coerce-dir ,p* ,c* ,sid))
+                                  (:any  `(values ,p* ,c* ,sid))))
+                   (es/itr (ecase (select-mode modes '(:paths :segments :edges))
+                                  (:segments #'es/itr-walk-segments)
+                                  (:paths    #'es/itr-walk)
+                                  (:edges    #'es/itr))))
+               (funcall es/itr p* c* edges
+                 `((mvb (,p ,c) ,proc
+                        (declare (ignorable ,p ,c) (list ,p) (boolean ,c))
+                        ,body*))))))
+
+    `(let* ((,res (list))
+            (,sid ,sp-default)
+            (,es* (cond (,es? (es/normalize ,es))
+                        (,(any? prop) (edge-set ,g))
+                        (t (edge-set ,g ,prop))))
+            (,edges (edge-set->ht ,es*)))
+       (declare (ignorable ,edges ,sid)
+                (symbol ,sid) (keyword ,sid) (list ,es*) (hash-table ,edges))
+       ; this is messy ...
+       (labels ((ctx/prop (e) ; if prop is :_ we can check for
+                  ,(if (any? prop) `(apply #'@mem ,g e)
+                                   `(@prop ,g e ,prop)))
+                (ctx/mem (e sid)
+                   (if (eql sid ,sp-default) (ctx/prop e)
+                                             (and (@prop ,g e sid) (ctx/prop e))))
+                (coerce-dir (pth c sid)
+                   (if (ctx/mem (subseq pth 0 2) sid) (values pth c sid)
+                                                      (values (reverse pth) c sid)))
+                (-@either (v)
+                  ,(if (any? prop)
+                       `(@either ,g v)
+                       `(loop for w in (@either ,g v)
+                              if (@prop ,g (list w v) ,prop) collect w
+                              else if (@prop ,g (list v w) ,prop) collect w))))
+         ,(ecase (select-mode modes '(:simple :compound))
+                 (:simple #1=(do-es/itr (ecase (select-mode modes '(:progn :collect))
+                                               (:collect `(push (progn ,@body) ,res))
+                                               (:progn   `(progn ,@body)))))
+                 (:compound `(es/itr-sprop (,g ,sid ,edges)
+                                (,es* ,(and (eq :keep (select-mode modes '(:keep :drop)))
+                                            sp-default)
+                                      ,sp-cat)
+                                ,#1#))))
+       ,res))))
 

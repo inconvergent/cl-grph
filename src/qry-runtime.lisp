@@ -142,6 +142,11 @@
       (loop for k being the hash-keys of ht do (push k res))
       res)))
 
+(defun bind-const (res consts)
+  (declare #.*opt* (list res consts))
+  "append constant binds (via :in)"
+  (loop for k in res collect (concatenate 'list consts k)))
+
 (defun qry/project (aa select)
   (declare #.*opt* (list aa select))
   "select these vars from aa, and deduplicate rows"

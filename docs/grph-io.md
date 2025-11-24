@@ -9,7 +9,7 @@
  ;                  (VALUES NULL &OPTIONAL))
  ;   Documentation:
  ;     write o to fn. see import-dat.
- ;   Source file: /data/x/grph/src/xgrph-io.lisp
+ ;   Source file: /home/anders/x/grph/src/xgrph-io.lisp
 ```
 
 ## `grph/io:gexport`
@@ -25,7 +25,7 @@
  ;                  (VALUES CONS &OPTIONAL))
  ;   Documentation:
  ;     serialize g. see gimport.
- ;   Source file: /data/x/grph/src/xgrph-io.lisp
+ ;   Source file: /home/anders/x/grph/src/xgrph-io.lisp
 ```
 
 ## `grph/io:gimport`
@@ -38,7 +38,7 @@
  ;   Derived type: (FUNCTION (LIST) (VALUES T T T &OPTIONAL))
  ;   Documentation:
  ;     deserialize g. see gexport.
- ;   Source file: /data/x/grph/src/xgrph-io.lisp
+ ;   Source file: /home/anders/x/grph/src/xgrph-io.lisp
 ```
 
 ## `grph/io:gread`
@@ -51,7 +51,7 @@
  ;   Derived type: (FUNCTION (STRING) *)
  ;   Documentation:
  ;     read grph from fn. see gwrite.
- ;   Source file: /data/x/grph/src/xgrph-io.lisp
+ ;   Source file: /home/anders/x/grph/src/xgrph-io.lisp
 ```
 
 ## `grph/io:gwrite`
@@ -67,7 +67,7 @@
  ;                  *)
  ;   Documentation:
  ;     write grph to fn. see gread.
- ;   Source file: /data/x/grph/src/xgrph-io.lisp
+ ;   Source file: /home/anders/x/grph/src/xgrph-io.lisp
 ```
 
 ## `grph/io:gwrite-script`
@@ -80,7 +80,7 @@
  ;                 BODY)
  ;   Documentation:
  ;     write grph and body (:script) to fn.
- ;   Source file: /data/x/grph/src/xgrph-io.lisp
+ ;   Source file: /home/anders/x/grph/src/xgrph-io.lisp
 ```
 
 ## `grph/io:import-dat`
@@ -94,6 +94,6 @@
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     read data from fn. see export-dat.
- ;   Source file: /data/x/grph/src/xgrph-io.lisp
+ ;   Source file: /home/anders/x/grph/src/xgrph-io.lisp
 ```
 

@@ -1,7 +1,7 @@
 (in-package :grph)
 
 (defmacro adj (g) `(grph-adj ,g)) (defmacro mid (g) `(grph-mid ,g)) (defmacro props (g) `(grph-props ,g))
-(defmacro srt (a b) (declare (symbol a b)) `(if (< ,a ,b) (list a b) (list b a)))
+(defmacro srt (a b) (declare (symbol a b)) `(if (< ,a ,b) (list ,a ,b) (list ,b ,a)))
 
 (defmacro get-multi-rel (props k &key prop (default nil))
   (awg (pmap) `(let ((,pmap (@ ,props ,k)))
@@ -33,8 +33,12 @@
     `(do-map (,a* ,eset (adj ,g))
        (do-map (,b* ,has ,eset)
          (when ,has
-            ,(if b `(let ((,a ,a*) (,b ,b*)) (declare (ignorable ,a ,b)) ,@body)
-                `(let ((,a (list ,a* ,b*))) ,@body)))))))
+            ,(if b `(let ((,a ,a*) (,b ,b*)) (declare (ignorable ,a ,b)
+                                                      (veq:pn ,a ,b))
+                      ,@body)
+                   `(let ((,a (list ,a* ,b*)))
+                      (declare (ignorable ,a) (list ,a))
+                      ,@body)))))))
 (defmacro itr-adj ((g a b &optional (modes :->)) &body body)
   (declare (symbol g b) (symbol modes))
   "iterate all adjacent verts, b, of a. modes: (-> <- >< <>)."
@@ -151,12 +155,13 @@ of edges and/or props. faster for larger batches. g will be available
 unchanged inside the context. and the changes are applied at the end. use
 :out to bind the result to a different variable.
 
+transaction operations:
+ - ([sym]-cancel) : aborts the transaction,
+ - ([sym]-stop)   : stops the transaction, but keeps the changes,
+
 ex: (modify! (g mygrp)
       (loop for a = (rnd:rndi n) for b = (rnd:rndi n) repeat 10
-            do ; NOTE:
-               ; (mygrp-cancel) aborts the transaction,
-               ; (mygrp-stop) stops the transaction, but keeps the changes,
-               (rnd:either (mygrp-> a b '(:x :c))
+            do (rnd:either (mygrp-> a b '(:x :c))
                            (mygrp<> a b '(:y :d)))))"
   (awg (g ht mget madd sadd do-merge merge listify
         do-> ne hm-adj hm-mid hm-props stop bdy)
@@ -218,8 +223,7 @@ ex: (modify! (g mygrp)
                             ,bdy))))))))))
 
 (defmacro del! (g a b &optional p) ; TODO: del*! with modes
-  (declare (symbol g))
-  "del edge and re-bind. returns: deleted?"
+  (declare (symbol g)) "del edge and re-bind. returns: deleted?"
   (awg (a* b* g* deleted?)
     `(let ((,a* ,a) (,b* ,b))
       (mvb (,g* ,deleted?) ,(if p `(del-props ,g (list ,a* ,b*) ,p)
@@ -230,16 +234,35 @@ ex: (modify! (g mygrp)
   "del edge ab=(a b) and re-bind. returns: deleted?"
   (awg (a b) `(dsb (,a ,b) ,e (del! ,g ,a ,b ,p))))
 
-; (defmacro pdel! (g path &optional p) ; TODO: clear/pdel
-; or set-override option/mode in add*?
-;   (declare (symbol g))
-;   "del edge and re-bind. returns: deleted?"
-;   (awg (a* b* g* deleted?)
-;     `(let ((,a* ,a) (,b* ,b))
-;       (mvb (,g* ,deleted?) ,(if p `(del-props ,g (list ,a* ,b*) ,p)
-;                                   `(del ,g ,a* ,b*))
-;         (setf ,g ,g*)
-;         ,deleted?))))
+(defmacro del-props! (g k p) ; TODO: optional p to clear all
+  (declare (symbol g))
+  "del edge and re-bind. returns: deleted?"
+  (awg (p* k* g* deleted?)
+    `(let ((,k* ,k) (,p* ,p))
+      (mvb (,g* ,deleted?)
+        (typecase ,p* (list (del-props ,g ,k* ,p*))
+                      (keyword (del-prop ,g ,k* ,p*)))
+        (setf ,g ,g*)
+        ,deleted?))))
+
+
+; TODO: this is not very efficient. use modify? or rewrite with internals
+(defmacro collapse! (g a b)
+  (declare (symbol g))
+  "collapse edge ab[x]; create all edges ax/xa with all props.
+NOTE: all ba edges/props are also deleted.
+returns ab if it existed; or nil"
+  `(let* ((g* ,g) (?a ,a) (?b ,b)
+          (res (del! g* ?a ?b)))
+     (declare (grph g*))
+     (del! g* ?b ?a)
+     (qry g* :using ^g* :in (?b ?a)
+             :select (?p ?x) :where (?b ?p ?x)
+             :then (progn (del! ^g* ?b ?x) (add! ^g* ?a ?x ?p)))
+     (qry g* :using ^g* :in (?b ?a)
+             :select (?x ?p) :where (?x ?p ?b)
+             :then (progn (del! ^g* ?x ?b) (add! ^g* ?x ?a ?p)))
+     res))
 
 (defmacro using ((&rest using) &body body)
   (declare (notinline ^var? no-dupes?))

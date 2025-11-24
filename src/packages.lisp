@@ -5,14 +5,15 @@
   (:import-from #:fset #:@ #:contains? #:do-map #:do-set #:empty-map
                 #:empty-set #:less #:member?)
   (:export
-    #:*parallel* #:*dir-modes* #:*pos-modes* #:*clauses* *aggregates* #:v? #:ext-symbols?
+    #:*dev* #:*parallel* #:*dir-modes* #:*pos-modes* #:*clauses* *aggregates*
+    #:v? #:ext-symbols?
     #:to-vector #:ensure-list #:last* #:vector-last #:vector-first
     #:@edges #:@enum #:@pnum #:@in #:@out #:@either #:@both #:num-either
     #:@verts #:@vcnt #:@vmax #:@prop #:@mem #:@mid
     #:grph #:make #:prt
-    #:add #:del #:del-props #:prop
-    #:add! #:add*! #:ladd*! #:del! #:ldel! #:pdel! #:prop!
-    #:path! #:modify! #:split!
+    #:add #:del #:del-prop #:del-props #:prop
+    #:add! #:add*! #:ladd*! #:del! #:ldel! #:del-props! #:prop!
+    #:path! #:modify! #:split! #:collapse!
     #:itr-edges #:itr-adj #:itr-verts
     #:compile-query #:match
     #:qry #:lqry #:rqry #:stop #:cancel #:using
@@ -20,14 +21,18 @@
     #:connected-verts #:memo #:relneigh
     #:gather-match #:ingest-edges #:ingest-props-edges
     #:distinct #:first< #:first> #:lsort
-    #:walk-grph #:walk-edge-set #:walk-grph-segments #:walk-edge-set-segments
+    #:es/normalize
+    #:walk
     #:dead-ends #:edge-set #:props-edges
     #:segment-isects #:multi-isects #:two-isects
     #:del-dead-ends #:del-dead-ends!
     #:path->edge-set #:edge-set->path #:edge-set->ht #:ht->edge-set
-    #:normalise-fold #:normalise-fold!
+    #:normalize-edges #:normalize-edges!
     #:lst->set #:lst->map #:set->lst #:map->lst
-    #:set->lst-fx #:lst->set-fx))
+    #:set->lst-fx #:lst->set-fx
+    #:sprop #:sprop? #:unpack-sprop
+    #:sprop-id
+    ))
 
 (defpackage #:xgrph
   (:use #:common-lisp)

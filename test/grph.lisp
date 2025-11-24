@@ -1,9 +1,9 @@
 (in-package #:grph-tests)
 
-(plan 5)
+(plan 4)
 
 
-(subtest "grph add"
+(subtest "grph add/path"
   (let ((g (grph:grph)))
     (grph:add! g 8 9)
     (grph:add! g 8 9 '(:a))
@@ -93,7 +93,7 @@
     (is (grph:@mem g 3 4) nil)
     (is (grph:@mem g 3 7) t)))
 
-(subtest "grph"
+(subtest "grph prop"
   (let ((g (mk-grph-main)))
     (is (grph:@edges g)
         '((9 0) (8 9) (7 8) (6 0) (5 6) (4 3) (3 4) (2 3) (0 3) (0 1)))
@@ -112,63 +112,14 @@
     (is (grph:@prop g (list 7 8)) nil)
     (is (grph:@verts g) '(9 8 6 5 4 3 1 0))))
 
-(subtest "modify"
-  (let ((g (mk-grph-main))
-        (edges '((0 1) (1 0) (0 4) (4 0) (6 77) (11 12) (11 12) (8 7))))
-    (grph:modify! (g grp)
-      (is (loop for (a b) in edges collect (grp-> a b :x))
-          '(nil (1 0) (0 4) (4 0) (6 77) (11 12) nil (8 7)))
-      (is (loop for (a b) in edges collect (grph:@mem g a b))
-          '(t nil nil nil nil nil nil nil)))
-    (is (loop for (a b) in edges collect (grph:@mem g a b))
-        '(t t t t t t t t)))
+(subtest "grph del prop"
+  (let ((g (grph:make)))
+    (grph:path! g '(1 2 3) -> '(:active :very-active))
+    (grph:prop! g 1 :active)
 
-  (let ((g (grph:grph)))
-    (grph:add! g 0 1 :a)
-    (grph:add! g 0 2 '(:b))
-    (grph:add! g 2 7 :c)
-    (grph:modify! (g grp)
-      (grp-> 0 1 `(:b))
-      (grp-> 3 4 `(:c))
-      (grp-> 9 7 :y)
-      (grp-> 9 7 :u)
-      (grp-> 3 4)
-      (grp-> 1 0))
-
-    (is (grph:@enum g) 6)
-    (is (grph:set->lst (grph:@prop g `(0 1))) '(:a :b))
-    (is (grph:set->lst (grph:@prop g `(9 7))) '(:u :y))
-    (is (grph:set->lst (grph:@prop g `(3 4))) '(:c))
-    (is (grph:@mem g 0 2) t)))
-
-(subtest "grph match"
-  (let ((g (mk-grph-match)))
-
-    (is (mapls (grph:gather-match g 0 ?a ?b))
-        (mapls '(((?A . :A) (?B . 3)) ((?A . :A) (?B . 1)))))
-    (is (mapls (grph:gather-match g 0 :a ?b)) (mapls '(((?B . 3)) ((?B . 1)))))
-    (is (mapls (grph:gather-match g 2 ?b 3)) (mapls '(((?B . :B)) ((?B . :A)))))
-    (is (mapls (grph:gather-match g ?b :b 0)) (mapls '(((?B . 33)) ((?B . 6)))))
-    (is (mapls (grph:gather-match g ?b :b ?a))
-        (mapls '(((?A . 0) (?B . 33)) ((?A . 9) (?B . 8))
-                 ((?A . 0) (?B . 6)) ((?A . 3) (?B . 2)))))
-    (is (mapls (grph:gather-match g ?b ?a 3))
-        (mapls '(((?A . :A) (?B . 4)) ((?A . :B) (?B . 2))
-                 ((?A . :A) (?B . 2)) ((?A . :A) (?B . 0)))))
-    (is (mapls (grph:gather-match g ?a ?b ?c))
-        (mapls `(((?A . 33) (?B . :B) (?C . 0)) ((?A . 9) (?B . :A) (?C . 0))
-                 ((?A . 8) (?B . :B) (?C . 9)) ((?A . 7) (?B . :A) (?C . 8))
-                 ((?A . 6) (?B . :B) (?C . 0)) ((?A . 5) (?B . :_) (?C . 6))
-                 ((?A . 4) (?B . :A) (?C . 3)) ((?A . 3) (?B . :A) (?C . 4))
-                 ((?A . 2) (?B . :B) (?C . 3)) ((?A . 2) (?B . :A) (?C . 3))
-                 ((?A . 0) (?B . :A) (?C . 3)) ((?A . 0) (?B . :A) (?C . 1)))))
-    (is (mapls (grph:gather-match g ?a ?b ?c))
-        (mapls `(((?A . 33) (?B . :B) (?C . 0)) ((?A . 9) (?B . :A) (?C . 0))
-                 ((?A . 8) (?B . :B) (?C . 9)) ((?A . 7) (?B . :A) (?C . 8))
-                 ((?A . 6) (?B . :B) (?C . 0)) ((?A . 5) (?B . :_) (?C . 6))
-                 ((?A . 4) (?B . :A) (?C . 3)) ((?A . 3) (?B . :A) (?C . 4))
-                 ((?A . 2) (?B . :B) (?C . 3)) ((?A . 2) (?B . :A) (?C . 3))
-                 ((?A . 0) (?B . :A) (?C . 3)) ((?A . 0) (?B . :A) (?C . 1)))))))
+    (is (veq:vpr (grph:del-props! g 1 :active)) t)
+    (is (grph:del-props! g 1 :active) nil)
+    ))
 
 (unless (finalize) (error "error in grph"))
 

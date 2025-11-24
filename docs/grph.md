@@ -1,16 +1,45 @@
 ## `grph:*aggregates*`
 ```
-valid aggregate clauses in qry: (CNT GRP)
+ ; GRPH:*AGGREGATES*
+ ;   [symbol]
+ ; 
+ ; *AGGREGATES* names a special variable:
+ ;   Value: (:CNT :GRP)
+ ;   Documentation:
+ ;     valid aggregate clauses in qry.
 ```
 
 ## `grph:*clauses*`
 ```
-valid query clauses: (AND NOT OR OR-JOIN NOT-JOIN Q % F FACT UNIQ)
+ ; GRPH:*CLAUSES*
+ ;   [symbol]
+ ; 
+ ; *CLAUSES* names a special variable:
+ ;   Value: (:AND :NOT :OR :OR-JOIN :NOT-JOIN :Q :% :F :FACT :UNIQ)
+ ;   Documentation:
+ ;     valid query clauses.
+```
+
+## `grph:*dev*`
+```
+ ; GRPH:*DEV*
+ ;   [symbol]
+ ; 
+ ; *DEV* names a special variable:
+ ;   Value: NIL
+ ;   Documentation:
+ ;     compile in dev mode.
 ```
 
 ## `grph:*dir-modes*`
 ```
-valid edge direction modes: (-> <- <> ><)
+ ; GRPH:*DIR-MODES*
+ ;   [symbol]
+ ; 
+ ; *DIR-MODES* names a special variable:
+ ;   Value: (:-> :<- :<> :><)
+ ;   Documentation:
+ ;     valid edge direction modes.
 ```
 
 ## `grph:*parallel*`
@@ -27,7 +56,13 @@ valid edge direction modes: (-> <- <> ><)
 
 ## `grph:*pos-modes*`
 ```
-valid spatial modes: (ABS REL)
+ ; GRPH:*POS-MODES*
+ ;   [symbol]
+ ; 
+ ; *POS-MODES* names a special variable:
+ ;   Value: (:ABS :REL)
+ ;   Documentation:
+ ;     valid spatial modes.
 ```
 
 ## `grph:@both`
@@ -41,7 +76,7 @@ valid spatial modes: (ABS REL)
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list all verts of a that are bi-directional.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@edges`
@@ -54,7 +89,7 @@ valid spatial modes: (ABS REL)
  ;   Derived type: (FUNCTION (GRPH:GRPH) (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list of lists of all edges.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@either`
@@ -68,7 +103,7 @@ valid spatial modes: (ABS REL)
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list both inbound and outbond verts of a.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@enum`
@@ -82,7 +117,7 @@ valid spatial modes: (ABS REL)
  ;                  (VALUES (UNSIGNED-BYTE 32) &OPTIONAL))
  ;   Documentation:
  ;     total number of edges in graph.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@in`
@@ -95,8 +130,8 @@ valid spatial modes: (ABS REL)
  ;   Derived type: (FUNCTION (GRPH:GRPH (SIGNED-BYTE 32))
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
- ;     list all outboud verts of a.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;     list all inboud verts of a.
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@mem`
@@ -110,7 +145,7 @@ valid spatial modes: (ABS REL)
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     t if edge (a b) exists.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@mid`
@@ -123,8 +158,8 @@ valid spatial modes: (ABS REL)
  ;   Derived type: (FUNCTION (GRPH:GRPH T &OPTIONAL T)
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     get val of prop, p, for key, k. should be a prop (keyword).
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;     get props of k (edge ab or vert); or check of p is a prop of k.
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@out`
@@ -138,7 +173,7 @@ valid spatial modes: (ABS REL)
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list all outboud verts of a.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@pnum`
@@ -151,7 +186,7 @@ valid spatial modes: (ABS REL)
  ;   Derived type: (FUNCTION (GRPH:GRPH) *)
  ;   Documentation:
  ;     total number of props in graph.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@prop`
@@ -165,8 +200,8 @@ valid spatial modes: (ABS REL)
  ;                  (GRPH:GRPH (OR LIST (SIGNED-BYTE 32)) &OPTIONAL T)
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
- ;     get val of prop, p, for key, k should be edge (a b); or vert.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;     get props of k (edge ab or vert); or check if p is a prop of k.
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@vcnt`
@@ -180,7 +215,7 @@ valid spatial modes: (ABS REL)
  ;                  (VALUES (UNSIGNED-BYTE 32) &OPTIONAL))
  ;   Documentation:
  ;     count all connected verts.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@verts`
@@ -193,7 +228,7 @@ valid spatial modes: (ABS REL)
  ;   Derived type: (FUNCTION (GRPH:GRPH) (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list of all connected verts.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:@vmax`
@@ -207,7 +242,7 @@ valid spatial modes: (ABS REL)
  ;                  (VALUES (UNSIGNED-BYTE 32) &OPTIONAL))
  ;   Documentation:
  ;     get highest vertex index.
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:add`
@@ -224,7 +259,7 @@ valid spatial modes: (ABS REL)
  ;   Documentation:
  ;     new edge (a b). optionally set prop, p.
  ;     returns: (values g created?)
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:add!`
@@ -236,7 +271,7 @@ valid spatial modes: (ABS REL)
  ;   Lambda-list: (G A B &OPTIONAL PROPS)
  ;   Documentation:
  ;     add edge edge and re-bind. returns: (a b) or nil.
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:add*!`
@@ -248,13 +283,27 @@ valid spatial modes: (ABS REL)
  ;   Lambda-list: (G A B &OPTIONAL (MODES ->) PROPS)
  ;   Documentation:
  ;     add edge edge and re-bind. returns: (a b) or nil. modes: (-> <- <>)
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:cancel`
 ```
 (cancel) can be used in some contexts (using, qry) to cancel
 the transaction and discard all changes
+```
+
+## `grph:collapse!`
+```
+ ; GRPH:COLLAPSE!
+ ;   [symbol]
+ ; 
+ ; COLLAPSE! names a macro:
+ ;   Lambda-list: (G A B)
+ ;   Documentation:
+ ;     collapse edge ab[x]; create all edges ax/xa with all props.
+ ;     NOTE: all ba edges/props are also deleted.
+ ;     returns ab if it existed; or nil
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:collect-while`
@@ -268,7 +317,7 @@ the transaction and discard all changes
  ;   Lambda-list: ((&KEY (INIT (QUOTE (LIST))) (TEST (QUOTE NOT))
  ;                  (LIM 1000) (CRES (GENSYM CRES)) (CITR (GENSYM CITR)))
  ;                 &BODY BODY)
- ;   Source file: /data/x/grph/src/qry-extra.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:compile-query`
@@ -288,7 +337,7 @@ the transaction and discard all changes
  ;   Lambda-list: (G &OPTIONAL (P _))
  ;   Documentation:
  ;     get all connected verts.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:dead-ends`
@@ -300,7 +349,7 @@ the transaction and discard all changes
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
  ;     verts that have exactly one adjacent verts: [g-] ?y-?x ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:del`
@@ -315,7 +364,7 @@ the transaction and discard all changes
  ;   Documentation:
  ;     delete edge (a b). deletes associated props.
  ;     returns: (values g deleted?)
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:del!`
@@ -327,7 +376,7 @@ the transaction and discard all changes
  ;   Lambda-list: (G A B &OPTIONAL P)
  ;   Documentation:
  ;     del edge and re-bind. returns: deleted?
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:del-dead-ends`
@@ -337,11 +386,11 @@ the transaction and discard all changes
  ; 
  ; DEL-DEAD-ENDS names a compiled function:
  ;   Lambda-list: (G &OPTIONAL (P _))
- ;   Derived type: (FUNCTION (GRPH:GRPH &OPTIONAL SYMBOL)
+ ;   Derived type: (FUNCTION (T &OPTIONAL SYMBOL)
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
  ;     delete dead-ends until there are no more dead ends left. ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:del-dead-ends!`
@@ -352,18 +401,44 @@ the transaction and discard all changes
  ;   [symbol]
 ```
 
+## `grph:del-prop`
+```
+ ; GRPH:DEL-PROP
+ ;   [symbol]
+ ; 
+ ; DEL-PROP names a compiled function:
+ ;   Lambda-list: (G K PROP)
+ ;   Derived type: (FUNCTION (GRPH:GRPH (OR LIST FIXNUM) SYMBOL)
+ ;                  (VALUES GRPH:GRPH BOOLEAN &OPTIONAL))
+ ;   Documentation:
+ ;     delete prop from k.
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
+```
+
 ## `grph:del-props`
 ```
-:missing:
-
  ; GRPH:DEL-PROPS
  ;   [symbol]
  ; 
  ; DEL-PROPS names a compiled function:
- ;   Lambda-list: (G AB PROPS)
- ;   Derived type: (FUNCTION (GRPH:GRPH LIST (OR LIST FSET:SET))
+ ;   Lambda-list: (G K PROPS)
+ ;   Derived type: (FUNCTION (T (OR LIST FIXNUM) (OR LIST FSET:SET))
  ;                  (VALUES GRPH:GRPH T &OPTIONAL))
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Documentation:
+ ;     delete props from k
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
+```
+
+## `grph:del-props!`
+```
+ ; GRPH:DEL-PROPS!
+ ;   [symbol]
+ ; 
+ ; DEL-PROPS! names a macro:
+ ;   Lambda-list: (G K P)
+ ;   Documentation:
+ ;     del edge and re-bind. returns: deleted?
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:distinct`
@@ -376,7 +451,7 @@ the transaction and discard all changes
  ;   Derived type: (FUNCTION * (VALUES BOOLEAN &OPTIONAL))
  ;   Documentation:
  ;     t if values in rest are distinct.
- ;   Source file: /data/x/grph/src/qry-runtime.lisp
+ ;   Source file: /home/anders/x/grph/src/qry-runtime.lisp
 ```
 
 ## `grph:edge-set`
@@ -387,8 +462,8 @@ the transaction and discard all changes
  ; EDGE-SET names a macro:
  ;   Lambda-list: (G &OPTIONAL (P _))
  ;   Documentation:
- ;     get edge set. ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;     get [normalized] edge set. ignores edge dir.
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:edge-set->ht`
@@ -402,8 +477,8 @@ the transaction and discard all changes
  ;   Derived type: (FUNCTION (LIST &OPTIONAL HASH-TABLE)
  ;                  (VALUES HASH-TABLE &OPTIONAL))
  ;   Documentation:
- ;     convert edge set to hash table.
- ;   Source file: /data/x/grph/src/edge-set.lisp
+ ;     convert edge set to hash table. normalize all edges to have the smallest index first.
+ ;   Source file: /home/anders/x/grph/src/edge-set.lisp
 ```
 
 ## `grph:edge-set->path`
@@ -418,7 +493,7 @@ the transaction and discard all changes
  ;     convert edge set: ((3 4) (4 5) (5 6) (1 2) (6 1) (2 3))
  ;     into a path: (4 5 6 1 2 3)
  ;     second result is a boolean for whether it is a cycle.
- ;   Source file: /data/x/grph/src/edge-set.lisp
+ ;   Source file: /home/anders/x/grph/src/edge-set.lisp
 ```
 
 ## `grph:ensure-list`
@@ -431,7 +506,20 @@ the transaction and discard all changes
  ;   Derived type: (FUNCTION (T) (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     return l if l is a nil/list. otherwise return (list l).
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
+```
+
+## `grph:es/normalize`
+```
+ ; GRPH:ES/NORMALIZE
+ ;   [symbol]
+ ; 
+ ; ES/NORMALIZE names a compiled function:
+ ;   Lambda-list: (ES)
+ ;   Derived type: (FUNCTION (T) (VALUES LIST &OPTIONAL))
+ ;   Documentation:
+ ;     all edges are rotated to have the smallest index first. duplicates are removed.
+ ;   Source file: /home/anders/x/grph/src/edge-set.lisp
 ```
 
 ## `grph:ext-symbols?`
@@ -444,7 +532,7 @@ the transaction and discard all changes
  ;   Documentation:
  ;     list all external symbols in pkg. use :verbose to inlcude docstring.
  ;     use :pretty to print verbose output to stdout in a readable form.
- ;   Source file: /data/x/grph/src/docs.lisp
+ ;   Source file: /home/anders/x/grph/src/docs.lisp
 ```
 
 ## `grph:first<`
@@ -456,7 +544,7 @@ the transaction and discard all changes
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
  ;     equvialent to (and (< r1 r2) (< r1 r3) ...). r1 is evaluated only once.
- ;   Source file: /data/x/grph/src/qry-runtime.lisp
+ ;   Source file: /home/anders/x/grph/src/qry-runtime.lisp
 ```
 
 ## `grph:first>`
@@ -468,7 +556,7 @@ the transaction and discard all changes
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
  ;     equvialent to (and (> r1 r2) (> r1 r3) ...). r1 is evaluated only once.
- ;   Source file: /data/x/grph/src/qry-runtime.lisp
+ ;   Source file: /home/anders/x/grph/src/qry-runtime.lisp
 ```
 
 ## `grph:gather-match`
@@ -480,7 +568,7 @@ the transaction and discard all changes
  ;   Lambda-list: (G L P R)
  ;   Documentation:
  ;     return list of matches for (l p r).
- ;   Source file: /data/x/grph/src/qry-match.lisp
+ ;   Source file: /home/anders/x/grph/src/qry-match.lisp
 ```
 
 ## `grph:grph`
@@ -491,6 +579,7 @@ the transaction and discard all changes
  ;   [symbol]
  ; 
  ; GRPH names a compiled function:
+ ;   A constructor for GRPH:GRPH
  ;   Lambda-list: (&OPTIONAL (ADJ NILMAP) (NUM-EDGES 0) (PROPS NILMAP)
  ;                 (MID NILMAP))
  ;   Derived type: (FUNCTION
@@ -498,7 +587,7 @@ the transaction and discard all changes
  ;                   FSET:MAP)
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Inline proclamation: INLINE (inline expansion available)
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
  ; 
  ; GRPH names the structure-class #<STRUCTURE-CLASS GRPH:GRPH>:
  ;   Documentation:
@@ -549,7 +638,7 @@ the transaction and discard all changes
  ;   Derived type: (FUNCTION (HASH-TABLE) (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     inverse of edge-set->ht.
- ;   Source file: /data/x/grph/src/edge-set.lisp
+ ;   Source file: /home/anders/x/grph/src/edge-set.lisp
 ```
 
 ## `grph:ingest-edges`
@@ -559,11 +648,11 @@ the transaction and discard all changes
  ; 
  ; INGEST-EDGES names a compiled function:
  ;   Lambda-list: (EDGES &OPTIONAL (G (GRPH)))
- ;   Derived type: (FUNCTION (LIST &OPTIONAL GRPH:GRPH)
+ ;   Derived type: (FUNCTION (LIST &OPTIONAL T)
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
  ;     ingest a list of edges with props. eg: ((0 :a 3) ...). and return a grph.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:ingest-props-edges`
@@ -573,11 +662,11 @@ the transaction and discard all changes
  ; 
  ; INGEST-PROPS-EDGES names a compiled function:
  ;   Lambda-list: (PEDGES &OPTIONAL (G (GRPH)))
- ;   Derived type: (FUNCTION (LIST &OPTIONAL GRPH:GRPH)
+ ;   Derived type: (FUNCTION (LIST &OPTIONAL T)
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
  ;     ingest list of props and flattened edges. see props-edges.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:itr-adj`
@@ -589,7 +678,7 @@ the transaction and discard all changes
  ;   Lambda-list: ((G A B &OPTIONAL (MODES ->)) &BODY BODY)
  ;   Documentation:
  ;     iterate all adjacent verts, b, of a. modes: (-> <- >< <>).
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:itr-edges`
@@ -601,7 +690,7 @@ the transaction and discard all changes
  ;   Lambda-list: ((G A &OPTIONAL B) &BODY BODY)
  ;   Documentation:
  ;     iterate all edges, as either a=(v1 v2) or a=v1, b=v2.
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:itr-verts`
@@ -613,7 +702,7 @@ the transaction and discard all changes
  ;   Lambda-list: ((G A) &BODY BODY)
  ;   Documentation:
  ;     iterate all connected verts, as a.
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:ladd*!`
@@ -625,7 +714,7 @@ the transaction and discard all changes
  ; 
  ; LADD*! names a macro:
  ;   Lambda-list: (G E &OPTIONAL (MODES ->) PROPS)
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:last*`
@@ -638,7 +727,7 @@ the transaction and discard all changes
  ;   Derived type: (FUNCTION (LIST) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     last item in list.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:ldel!`
@@ -650,7 +739,7 @@ the transaction and discard all changes
  ;   Lambda-list: (G E &OPTIONAL P)
  ;   Documentation:
  ;     del edge ab=(a b) and re-bind. returns: deleted?
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:lqry`
@@ -669,7 +758,7 @@ the transaction and discard all changes
  ;       (let ((g (grph)) (q '(or (?x ?p ?y) (?y ?p ?x))))
  ;         (add! g 1 2)
  ;         (print (lqry g :select '(?x ?p ?y) :where q)))
- ;   Source file: /data/x/grph/src/qry.lisp
+ ;   Source file: /home/anders/x/grph/src/qry.lisp
 ```
 
 ## `grph:lsort`
@@ -683,7 +772,7 @@ the transaction and discard all changes
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     radix sort list of lists.
- ;   Source file: /data/x/grph/src/qry-runtime.lisp
+ ;   Source file: /home/anders/x/grph/src/qry-runtime.lisp
 ```
 
 ## `grph:lst->map`
@@ -695,7 +784,7 @@ the transaction and discard all changes
  ;   Lambda-list: (F)
  ;   Documentation:
  ;     convert fset:map to list.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:lst->set`
@@ -707,7 +796,7 @@ the transaction and discard all changes
  ;   Lambda-list: (F)
  ;   Documentation:
  ;     convert list to fset:set.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:lst->set-fx`
@@ -721,7 +810,7 @@ the transaction and discard all changes
  ;                  (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     make an fset:set with (fx o) for every o in ll. see set->lst-fx.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:make`
@@ -732,13 +821,14 @@ the transaction and discard all changes
  ;   [symbol]
  ; 
  ; MAKE names a compiled function:
+ ;   A constructor for GRPH:GRPH
  ;   Lambda-list: (&OPTIONAL (ADJ NILMAP) (NUM-EDGES 0) (PROPS NILMAP)
  ;                 (MID NILMAP))
  ;   Derived type: (FUNCTION
  ;                  (&OPTIONAL FSET:MAP (UNSIGNED-BYTE 32) FSET:MAP
  ;                   FSET:MAP)
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:map->lst`
@@ -750,7 +840,7 @@ the transaction and discard all changes
  ;   Lambda-list: (F)
  ;   Documentation:
  ;     convert fset:map to list.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:match`
@@ -763,7 +853,7 @@ the transaction and discard all changes
  ;   Documentation:
  ;     execute body with alist f with vars for every fact in the graph
  ;     that matches the pattern (lft mid rht). f is on the form ((?A . 0) (?P . :a)).
- ;   Source file: /data/x/grph/src/qry-match.lisp
+ ;   Source file: /home/anders/x/grph/src/qry-match.lisp
 ```
 
 ## `grph:memo`
@@ -776,7 +866,7 @@ the transaction and discard all changes
  ;   Derived type: (FUNCTION (FUNCTION) (VALUES FUNCTION &OPTIONAL))
  ;   Documentation:
  ;     return function that memoizes calls to fx.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:modify!`
@@ -792,14 +882,15 @@ the transaction and discard all changes
  ;     unchanged inside the context. and the changes are applied at the end. use
  ;     :out to bind the result to a different variable.
  ;     
+ ;     transaction operations:
+ ;      - ([sym]-cancel) : aborts the transaction,
+ ;      - ([sym]-stop)   : stops the transaction, but keeps the changes,
+ ;     
  ;     ex: (modify! (g mygrp)
  ;           (loop for a = (rnd:rndi n) for b = (rnd:rndi n) repeat 10
- ;                 do ; NOTE:
- ;                    ; (mygrp-cancel) aborts the transaction,
- ;                    ; (mygrp-stop) stops the transaction, but keeps the changes,
- ;                    (rnd:either (mygrp-> a b '(:x :c))
+ ;                 do (rnd:either (mygrp-> a b '(:x :c))
  ;                                (mygrp<> a b '(:y :d)))))
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:multi-isects`
@@ -811,34 +902,38 @@ the transaction and discard all changes
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
  ;     verts that have 3 or more adjacent verts. ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
-## `grph:normalise-fold`
+## `grph:normalize-edges`
 ```
- ; GRPH:NORMALISE-FOLD
+ ; GRPH:NORMALIZE-EDGES
  ;   [symbol]
  ; 
- ; NORMALISE-FOLD names a compiled function:
- ;   Lambda-list: (G)
- ;   Derived type: (FUNCTION (GRPH:GRPH) (VALUES GRPH:GRPH &OPTIONAL))
+ ; NORMALIZE-EDGES names a compiled function:
+ ;   Lambda-list: (G &OPTIONAL (MODE ><))
+ ;   Derived type: (FUNCTION (T &OPTIONAL KEYWORD)
+ ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
- ;     remove all edges (a b) where a > b, and create edge (b a) if it does not exist.
- ;     also moves all properties from (a b) to (b a).
- ;   Source file: /data/x/grph/src/qry-extra.lisp
+ ;     remove bi-directional edges, preserve properties.
+ ;     
+ ;     ->: normalize by removing ba if b > a.
+ ;         ensure that ab exists. and inherits props from ba
+ ;     ><: only normalize (to ab) if both ab and ba exists.
+ ;         otherwise preserve edge direction.
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
-## `grph:normalise-fold!`
+## `grph:normalize-edges!`
 ```
- ; GRPH:NORMALISE-FOLD!
+ ; GRPH:NORMALIZE-EDGES!
  ;   [symbol]
  ; 
- ; NORMALISE-FOLD! names a macro:
- ;   Lambda-list: (G)
+ ; NORMALIZE-EDGES! names a macro:
+ ;   Lambda-list: (G &OPTIONAL (MODE ><))
  ;   Documentation:
- ;     remove all edges (a b) where a > b, and create edge (b a) if it does not exist.
- ;     also moves all properties from (a b) to (b a).
- ;   Source file: /data/x/grph/src/qry-extra.lisp
+ ;     normalize with normalize-edges (see this).
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:num-either`
@@ -852,7 +947,7 @@ the transaction and discard all changes
  ;                  (VALUES (UNSIGNED-BYTE 44) &OPTIONAL))
  ;   Documentation:
  ;     number of adjacent verts to ?x. ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:path!`
@@ -864,7 +959,7 @@ the transaction and discard all changes
  ;   Lambda-list: (G PATH &OPTIONAL (MODES (QUOTE (OPEN ->))) PROPS)
  ;   Documentation:
  ;     add path (a b c ...). modes (-> <- <> open closed)
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:path->edge-set`
@@ -879,16 +974,8 @@ the transaction and discard all changes
  ;   Documentation:
  ;     return edge set from cycle.
  ;     ex: (1 2 3 4 5) -> ((1 2) (2 3) (3 4) (4 5))
- ;     if closed is t, (1 5) will be included in the above output.
- ;   Source file: /data/x/grph/src/edge-set.lisp
-```
-
-## `grph:pdel!`
-```
-:missing:
-
- ; GRPH:PDEL!
- ;   [symbol]
+ ;     if closed is t, (5 1) will be included in the above output.
+ ;   Source file: /home/anders/x/grph/src/edge-set.lisp
 ```
 
 ## `grph:prop`
@@ -899,13 +986,13 @@ the transaction and discard all changes
  ; PROP names a compiled function:
  ;   Lambda-list: (G K PROPS)
  ;   Derived type: (FUNCTION
- ;                  (GRPH:GRPH (OR LIST (SIGNED-BYTE 32))
- ;                             (OR LIST KEYWORD FSET:SET))
+ ;                  (T (OR LIST (SIGNED-BYTE 32))
+ ;                   (OR LIST KEYWORD FSET:SET))
  ;                  (VALUES GRPH:GRPH &OPTIONAL))
  ;   Documentation:
  ;     set prop, p, of edge or vert, k.
  ;   Inline proclamation: INLINE (inline expansion available)
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:prop!`
@@ -917,7 +1004,7 @@ the transaction and discard all changes
  ;   Lambda-list: (G K PROPS)
  ;   Documentation:
  ;     add edge/vert prop for key, k.
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:props-edges`
@@ -930,7 +1017,7 @@ the transaction and discard all changes
  ;   Derived type: (FUNCTION (GRPH:GRPH) (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     list of lists of prop with flattend list of edges. see ingest-props-edges
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:prt`
@@ -944,7 +1031,7 @@ the transaction and discard all changes
  ;   Lambda-list: (O &OPTIONAL S)
  ;   Derived type: (FUNCTION (T &OPTIONAL T)
  ;                  (VALUES (OR STRING NULL) &OPTIONAL))
- ;   Source file: /data/x/grph/src/grph.lisp
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:qry`
@@ -975,7 +1062,7 @@ the transaction and discard all changes
  ;      - :db T; print some useful debug info about the compiled query.
  ;     
  ;     see examples for more usage.
- ;   Source file: /data/x/grph/src/qry.lisp
+ ;   Source file: /home/anders/x/grph/src/qry.lisp
 ```
 
 ## `grph:qry-collect-while`
@@ -993,7 +1080,7 @@ the transaction and discard all changes
  ;                                 (% (not (member ?n cres))))
  ;          :first (progn (setf ?b ?n) ?n)
  ;          :cres cres))
- ;   Source file: /data/x/grph/src/qry-extra.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:relneigh`
@@ -1007,7 +1094,7 @@ the transaction and discard all changes
  ;   Documentation:
  ;     create list of edges in the relative neigborhood graph of inds according to
  ;     (dstfx i j) for indices i,j in inds.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:rqry`
@@ -1034,7 +1121,7 @@ the transaction and discard all changes
  ;      - simple rules reference earlier rules, but not themselves
  ;      - linear rules have (only) one self-reference (references to earlier
  ;        rules are allowed.)
- ;   Source file: /data/x/grph/src/qry-rules.lisp
+ ;   Source file: /home/anders/x/grph/src/qry-rules.lisp
 ```
 
 ## `grph:segment-isects`
@@ -1047,7 +1134,7 @@ the transaction and discard all changes
  ;   Documentation:
  ;     verts that do not have exactly 2 adjacent verts. ie. the set of dead
  ;     ends and multi isects. ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
 ```
 
 ## `grph:set->lst`
@@ -1059,7 +1146,7 @@ the transaction and discard all changes
  ;   Lambda-list: (F)
  ;   Documentation:
  ;     convert fset:set to list.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:set->lst-fx`
@@ -1073,7 +1160,7 @@ the transaction and discard all changes
  ;                  (VALUES LIST &OPTIONAL))
  ;   Documentation:
  ;     inverse of lst->set-fx.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:split!`
@@ -1092,7 +1179,56 @@ the transaction and discard all changes
  ;       ->, <- : delete ab or ba if it exists and create either acb or bca
  ;       <>     : deletes both edges if both exist and creates acb and bca
  ;       ><     : does -> or <- or both
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
+```
+
+## `grph:sprop`
+```
+ ; GRPH:SPROP
+ ;   [symbol]
+ ; 
+ ; SPROP names a compiled function:
+ ;   Lambda-list: (&REST REST)
+ ;   Derived type: FUNCTION
+ ;   Documentation:
+ ;     make a special prop. special props have a distinct prefix: :/g/.
+ ;     and a category. eg: :/g/id/. where :id is the category.
+ ;     special props behave like all other props, but they can have special
+ ;     behaviour in some limited cases.
+ ;     
+ ;     see compound paths in grph:walk macro.
+ ;     
+ ;     possible future special props are types. eg
+ ;       :/g/bzspl/ for bezier curves.
+ ;     or even :/g/circ/, where one edge denotes a center and radius. which would work
+ ;     well w/ svg export.
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
+```
+
+## `grph:sprop-id`
+```
+ ; GRPH:SPROP-ID
+ ;   [symbol]
+ ; 
+ ; SPROP-ID names a compiled function:
+ ;   Lambda-list: (&OPTIONAL (SP-CAT ^SID^))
+ ;   Derived type: (FUNCTION (&OPTIONAL T) *)
+ ;   Documentation:
+ ;     generate a unique special prop :/g/id/[gensym].
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
+```
+
+## `grph:sprop?`
+```
+ ; GRPH:SPROP?
+ ;   [symbol]
+ ; 
+ ; SPROP? names a compiled function:
+ ;   Lambda-list: (S)
+ ;   Derived type: (FUNCTION (T) (VALUES T &OPTIONAL))
+ ;   Documentation:
+ ;     is this a special prop? returns s or nil.
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:stop`
@@ -1112,7 +1248,7 @@ the transaction, but keep the changes
  ;                  (VALUES (SIMPLE-ARRAY * (*)) &OPTIONAL))
  ;   Documentation:
  ;     make non-adjustable array with init contents.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:two-isects`
@@ -1124,7 +1260,20 @@ the transaction, but keep the changes
  ;   Lambda-list: (G &OPTIONAL (P _) Y)
  ;   Documentation:
  ;     verts that have exactly 2 adjacent verts [g-] ?y1-?x-?y2 [-g] ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-queries.lisp
+```
+
+## `grph:unpack-sprop`
+```
+ ; GRPH:UNPACK-SPROP
+ ;   [symbol]
+ ; 
+ ; UNPACK-SPROP names a compiled function:
+ ;   Lambda-list: (S)
+ ;   Derived type: (FUNCTION (KEYWORD) (VALUES T T &OPTIONAL))
+ ;   Documentation:
+ ;     unpack eg. :/g/id/abc into values :id and :abc
+ ;   Source file: /home/anders/x/grph/src/grph.lisp
 ```
 
 ## `grph:using`
@@ -1150,7 +1299,7 @@ the transaction, but keep the changes
  ;     NOTE: this behaviour is only guaranteed for immutable data structures
  ;     (eg grph, fset); or for operations that do not mutate their operands, such as
  ;     push.
- ;   Source file: /data/x/grph/src/macros.lisp
+ ;   Source file: /home/anders/x/grph/src/macros.lisp
 ```
 
 ## `grph:v?`
@@ -1166,7 +1315,7 @@ the transaction, but keep the changes
  ;   Derived type: (FUNCTION (&OPTIONAL T) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     return/print grph version.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:vector-first`
@@ -1179,7 +1328,7 @@ the transaction, but keep the changes
  ;   Derived type: (FUNCTION (VECTOR) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     first element of vector.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
 ## `grph:vector-last`
@@ -1192,59 +1341,52 @@ the transaction, but keep the changes
  ;   Derived type: (FUNCTION (VECTOR) (VALUES T &OPTIONAL))
  ;   Documentation:
  ;     last element of vector.
- ;   Source file: /data/x/grph/src/utils.lisp
+ ;   Source file: /home/anders/x/grph/src/utils.lisp
 ```
 
-## `grph:walk-edge-set`
+## `grph:walk`
 ```
- ; GRPH:WALK-EDGE-SET
+ ; GRPH:WALK
  ;   [symbol]
  ; 
- ; WALK-EDGE-SET names a compiled function:
- ;   Lambda-list: (G ES &AUX (EDGES (EDGE-SET->HT ES)))
- ;   Derived type: (FUNCTION (GRPH:GRPH LIST) (VALUES LIST &OPTIONAL))
+ ; WALK names a macro:
+ ;   Lambda-list: ((G &OPTIONAL (P (GENSYM PATH)) (C (GENSYM CLOSED?))
+ ;                  (SID (GENSYM SID)))
+ ;                 (MODES &KEY (PROP _) (ES NIL) (SP-CAT ID)
+ ;                  (SP-DEFAULT /G/_DEFAULT/))
+ ;                 &BODY BODY)
  ;   Documentation:
- ;     return a list of paths ((p1 closed?) (p2 closed?) ...) from edge set from g.
- ;     every edge is included exactly once. ignores edge dir.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
-```
-
-## `grph:walk-edge-set-segments`
-```
- ; GRPH:WALK-EDGE-SET-SEGMENTS
- ;   [symbol]
+ ;     walk edges in graph as tuples of (p c). where p is a path and c is t if p is closed.
+ ;     
+ ;     ex:
+ ;     
+ ;       (grph:walk (g) (collect prop path))
+ ;     
+ ;       (grph:walk (g p c)
+ ;                  ((dir segments) :prop :path)
+ ;         (print (list (reverse p) c)))
+ ;     
+ ;     modes:
+ ;     
+ ;     * :progn    : don't collect result.                                           [default]
+ ;       :collect  : collect results as a list.
+ ;     
+ ;     * :paths    : greedily walk to make as long paths as possible. verts can      [default]
+ ;                   be visited multiple times. handles [pure] loops.
+ ;       :segments : split paths into segments. handles [pure] loops
+ ;       :edges    : just return edges
+ ;     
+ ;     * :simple   : dont group by special prop                                      [default]
+ ;       :compound : group by special prop [cat :id / :/g/id/]
+ ;     * :keep     : keep non-compond paths in :/g/_default/                         [default]
+ ;       :drop     : drop non-compound paths
+ ;     
+ ;     * :any      : use paths as they come out of the walker                        [default]
+ ;       :dir      : greedily attempt to align path direction with edges in the
+ ;                   graph by comparing the first edge in p with the graph, and
+ ;                   aligning the path to the edge direction.
+ ;                   useful for loops, and with the :segments mode.
  ; 
- ; WALK-EDGE-SET-SEGMENTS names a compiled function:
- ;   Lambda-list: (G ES &AUX (EDGES (EDGE-SET->HT ES)))
- ;   Derived type: (FUNCTION (GRPH:GRPH LIST) (VALUES LIST &OPTIONAL))
- ;   Documentation:
- ;     walk edge set and split into segments.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
-```
-
-## `grph:walk-grph`
-```
- ; GRPH:WALK-GRPH
- ;   [symbol]
- ; 
- ; WALK-GRPH names a compiled function:
- ;   Lambda-list: (G &OPTIONAL (P _))
- ;   Derived type: (FUNCTION (GRPH:GRPH &OPTIONAL SYMBOL) *)
- ;   Documentation:
- ;     walk graph via walk-edge-set.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
-```
-
-## `grph:walk-grph-segments`
-```
- ; GRPH:WALK-GRPH-SEGMENTS
- ;   [symbol]
- ; 
- ; WALK-GRPH-SEGMENTS names a compiled function:
- ;   Lambda-list: (G &OPTIONAL (P _))
- ;   Derived type: (FUNCTION (GRPH:GRPH &OPTIONAL SYMBOL) *)
- ;   Documentation:
- ;     walk graph via walk-edge-set-segments.
- ;   Source file: /data/x/grph/src/grph-walk.lisp
+ ;   Source file: /home/anders/x/grph/src/grph-walk.lisp
 ```
 
