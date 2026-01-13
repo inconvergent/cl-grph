@@ -70,15 +70,19 @@
         (add-new-edges edges isects)
         (del-hit-edges edges isects)
         (values g pos)))))
+
 (defmacro 2intersect-all! (g pos &rest rest)
  `(mvb (g* pos*) (2intersect-all ,g ,pos ,@rest)
     (setf ,g g* ,pos pos*)))
 
-; TODO: propagate props
+
 ; TODO: use modify! macro
-(veq:fvdef 3cut-all (g pos fx)
+; TODO: remove old, use modify
+(veq:fvdef 3cut-all (g pos fx &aux (old g))
   (declare (grph:grph g) (pos pos) (function fx))
-  "cut every edge where they intersect in 2d according to projection fx."
+  "cut every edge where they intersect in 2d
+according to projection (fx x y z) => (~ x1 y1).
+propagates properties."
   (labels
     ((edges-as-lines (edges)
        (declare (simple-list edges))
@@ -93,84 +97,100 @@
      (add-path-verts (old-edge line hits)
        (declare (list old-edge hits))
        "add verts along edge for each intersect"
-       (loop for (c . p) in hits
-             collect (3vert! pos (veq:f3lerp (veq:f3$ line 0 1) p))))
+       (loop for (c . p) in hits collect (3vert! pos (veq:f3lerp (veq:f3$ line 0 1) p))))
 
+     (do-add-new-path (edges hits e)
+       (let ((path-ind (add-path-verts e (3@verts pos e) hits)))
+         (when path-ind (grph:path! g `(,(car e) ,@path-ind ,(cadr e))
+                                    -> (grph:@prop old e)))))
      (add-new-paths (edges isects)
        (declare (simple-list edges isects))
        "add new edge along old edge with new verts for each intersect"
-       (loop for hits across isects for i of-type fixnum from 0
-             if hits
-             do (let* ((old-edge (aref edges i))
-                       (path-ind (add-path-verts old-edge
-                                   (3@verts pos old-edge) hits)))
-                  (declare (list old-edge path-ind))
-                  (when path-ind
-                    (grph:path! g
-                      (cons (first old-edge) `(,@path-ind ,@(last old-edge))))))))
+       (loop for i of-type fixnum from 0 for hits across isects
+             if hits do (do-add-new-path edges hits (aref edges i))))
+
      (del-hit-edges (edges isects)
        (declare (simple-list edges isects))
-       (loop for hits of-type list across isects
-             for i of-type fixnum from 0
+       (loop for i of-type fixnum from 0
+             for hits of-type list across isects
              if hits do (grph:ldel! g (aref edges i))
                         (loop for (c . p) in hits
                               do (grph:ldel! g (aref edges c))))))
-    (let* ((edges (grph:to-vector (grph:@edges g)))  ; edges ((v1 v2) (v8 v1) ...)
-           (lines (grph:to-vector (edges-as-lines edges))) ; lines: (#(ax ay bx by) #(cx cy dx dy) ...)
+          ; eg.  edges:  ( (v1 v2) (v8 v1) ... )
+          ;      lines:  ( #(ax ay bx by) #(cx cy dx dy) ... )
+          ;     isects:  #( ( (16 . 0.18584675) (5 . 0.35215548) ) NIL NIL ... )
+          ;              NOTE: p/q is the lerp
+    (let* ((edges (grph:to-vector (grph:@edges g)))
+           (lines (grph:to-vector (edges-as-lines edges)))
            (veq::*eps* 0.00001)
-           ; isects: #(((16 . 0.18584675) (5 . 0.35215548)) NIL NIL ...)
-           (isects (sort-hits (veq:f2lsegx lines)))) ;  p/q is the lerp
+           (isects (sort-hits (veq:f2lsegx lines))))
       ; (declare (grph::simple-list isects edges) (grph::simple-array lines))
       (del-hit-edges edges isects)
       (add-new-paths edges isects)
       (values g pos))))
+
 (defmacro 3cut-all! (g pos fx)
  `(mvb (g* pos*) (3cut-all ,g ,pos ,fx)
     (setf ,g g* ,pos pos*)))
 
-(veq:fvdef* 2cut-to-area (g pos &optional (top 0f0) (lft 0f0)
-                                          (rht 1000f0) (bot 1000f0))
-  (declare (grph:grph g) (pos pos) (veq:ff top lft bot rht))
-  "removes all edges outside envelope.
-all edges intersecting the envelope will be deleted, a new vert will be
-inserted on the intersection; connected to the inside vert."
+(veq:fvdef* 2cut-to-area (g pos &optional (top 0f0) (lft 0f0) (rht 1000f0) (btm 1000f0))
+  (declare (grph:grph g) (pos pos) (veq:ff top lft btm rht))
+  "cut all edges at the envelope borders; remove anything outside."
   (labels
-    ((inside (i)
-      (declare (pn i))
-      (veq:xlet ((f2!p (2@ pos i)))
-        (and (> (:vr p 0) lft) (> (:vr p 1) top)
-             (< (:vr p 0) rht) (< (:vr p 1) bot))))
-     (split-line (ai bi &aux (rev nil))
-       (declare (pn ai bi) (boolean rev))
-       (unless (inside ai) (rotatef ai bi) (setf rev t))
-       (veq:xlet ((f2!a (2@ pos ai))
-                  (f2!b (2@ pos bi))
-                  (f2!ab (f2!@- b a)))
-         (veq:~ rev ; there appears to be a slight bug here for lines
-           (veq:f2lerp a b ; that cross both a side and a top/bot
-             (cond ((> (:vr b 0) rht) (/ (- rht (:vr a 0)) (:vr ab 0)))
-                   ((> (:vr b 1) bot) (/ (- bot (:vr a 1)) (:vr ab 1)))
-                   ((< (:vr b 0) lft) (/ (- lft (:vr a 0)) (:vr ab 0)))
-                   (t (/ (- top (:vr a 1)) (:vr ab 1))))))))
-     (cutfx (&rest line)
-       (declare (list line))
-       (case (length (remove-if-not #'inside line))
-         (0 (values :outside nil 0f0 0f0))
-         (1 (veq:~ :split (apply #'split-line line)))
-         (t (values :keep nil 0f0 0f0)))))
-    (grph:qry g :using (^g ^pos) :select (?x ?y) :where (or (?x _ ?y))
-      :then (mvb (state rev (:va 2 px)) (cutfx ?x ?y)
-              (ecase state
-                (:keep nil)
-                (:outside (grph:del! ^g ?x ?y))
-                (:split (let ((props (grph:@prop g (list ?x ?y))))
-                          (grph:del! ^g ?x ?y)
-                          (2append! ^g ^pos (if rev ?y ?x) (veq:f2 px) abs props)))))))
+    ((inside (i) (veq:xlet ((f2!p (2@ pos i)))
+                   (and (>= rht (:vr p 0) lft) (>= btm (:vr p 1) top))))
+     (filter-edges (&aux (cands (make-hash-table :test #'equalp)))
+       (loop for ee in (grph:@edges g) for (a b) = ee
+             if (/= 2 (length (remove-if-not #'inside ee)))
+             do (setf (gethash (grph::srt a b) cands) t))
+       cands)
+     (find-isects (&aux (cands (filter-edges)))
+       (let* ((n (hash-table-count cands)) ; border lines: 0:top 1:rht 2:btm 3:lft
+              (lines (make-array (+ 4 n)))
+              (edges (make-array n)))
+         (loop for i from 0 for ee being the hash-keys of cands
+               do (setf (aref lines i) (2@verts pos ee)
+                        (aref edges i) ee))
+         (setf (aref lines n)       (veq:f2$ln lft top rht top)
+               (aref lines (+ n 1)) (veq:f2$ln rht top rht btm)
+               (aref lines (+ n 2)) (veq:f2$ln rht btm lft btm)
+               (aref lines (+ n 3)) (veq:f2$ln lft btm lft top))
+         (values (veq:f2ssegx lines n) edges)))
+
+     (do-drop (ee) (grph:ldel! g ee) (grph:ldel! g (reverse ee)))
+
+     (do-add-new1 (a v b &aux (p (grph:@prop g `(,a ,b))))
+       (if (inside a) (grph:add! g a v p) (grph:add! g v b p))
+       (grph:del! g a b))
+     (do-add-new2 (a v w b)
+       (grph:add! g v w (grph:@prop g (list a b))) (grph:del! g a b))
+
+     (do-cut1 (ee hit) ; cut edges w/1 isect
+       (veq:dsb (a b) ee
+         (let ((v (xgrph:2vert! pos (veq:f2lerp (2@ pos a b) (cdr hit)))))
+           (when (grph:@mem g a b) (do-add-new1 a v b))
+           (when (grph:@mem g b a) (do-add-new1 b v a)))))
+     (do-cut2 (ee hit) ; cut edges w/2 isects
+        (veq:dsb (a b) ee ; a-v-w-b
+         (let ((v (xgrph:2vert! pos (veq:f2lerp (2@ pos a b) (cdar hit))))
+               (w (xgrph:2vert! pos (veq:f2lerp (2@ pos a b) (cdadr hit)))))
+           (when (grph:@mem g a b) (do-add-new2 a v w b))
+           (when (grph:@mem g b a) (do-add-new2 b w v a))))))
+
+    (veq:mvb (isects edges) (find-isects)
+      (loop for i from 0 repeat (- (length isects) 4)
+            for hit = (aref isects i) for ee = (aref edges i) for hc = (length hit)
+            do (case hc (0 (do-drop ee)) ; edge is outside envelope
+                        (1 (do-cut1 ee (car hit))) ; edge isects envelope once
+                        (2 (do-cut2 ee (sort hit #'< :key  #'cdr))) ; twice
+                        (otherwise (warn "2cut-to-area: unexpected isects for: ~a" ee))))))
   (values g pos))
+
 (defmacro 2cut-to-area! (g pos &rest rest)
   (declare (symbol g pos))
   `(mvb (g* pos*) (2cut-to-area ,g ,pos ,@rest)
      (setf ,g g* ,pos pos*)))
+
 
 (veq:fvdef* 2cut (g pos (:va 4 line))
   (declare (grph:grph g) (pos pos) (veq:ff line))
@@ -186,6 +206,7 @@ vertex index in pos and s is the lerp along line"
           (mvb (isect s) (veq:f2segx line (2@ pos a b))
                (when isect (grph:split! ^g a b (new-vert? s) ><))))))
   (values g pos res)))
+
 (defmacro 2cut! (g pos &rest rest)
   (declare (symbol g pos))
   "cut g/pos along line. returns a list of (vi si) where vi is a new vertex
@@ -193,6 +214,7 @@ index in pos and s is the lerp along line"
   `(mvb (g* pos* res) (2cut ,g ,pos ,@rest)
      (setf ,g g* ,pos pos*)
      res))
+
 
 (veq:fvdef* 2mirror (g pos (:va 2 a b) &optional sidefx)
   (declare (grph:grph g) (pos pos) (veq:ff a b))
@@ -227,6 +249,7 @@ optionally delete edges on the side of ab where (sidefx (cross ab va) 0f0)"
           (if sidefx (grph:itr-edges (^g ea eb) (do-edge-del ea eb))
                      (grph:itr-edges (^g ea eb) (do-edge ea eb))))
         (values ^g ^pos cuts-ht)))))
+
 (defmacro 2mirror! (g pos &rest rest)
   (declare (symbol g pos))
  `(mvb (g* pos* res) (2mirror ,g ,pos ,@rest)

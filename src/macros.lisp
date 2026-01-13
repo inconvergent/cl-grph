@@ -146,7 +146,7 @@ modes:
         (:>< `(when (or ,ba ,ab) ,cc (when ,ba ,<-) (when ,ab ,->))))
      ,c*))))
 
-; TODO: del?, path?
+; TODO: del?, path?, split/cut?
 ; TODO: ignore :_ when creating edges/props
 (defmacro modify! ((g* sym &key (out g*)) &body body)
   (declare (symbol g* out sym))

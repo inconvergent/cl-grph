@@ -53,6 +53,7 @@
     #:2intersect-all #:2intersect-all!
     #:2cut #:2cut! #:3cut-all #:3cut-all!
     #:2mirror! #:2mirror
+    #:3flatten
     #:2center-connected
     #:2cut-to-area #:2cut-to-area!
     #:triangulate-edge-set

@@ -111,10 +111,8 @@
  ;   Lambda-list: (&REST REST)
  ;   Documentation:
  ;     WRAPS: %2CUT-TO-AREA
- ;     ARGS: (G POS &OPTIONAL (TOP 0.0) (LFT 0.0) (RHT 1000.0) (BOT 1000.0))
- ;     DOCSTRING: removes all edges outside envelope.
- ;     all edges intersecting the envelope will be deleted, a new vert will be
- ;     inserted on the intersection; connected to the inside vert.
+ ;     ARGS: (G POS &OPTIONAL (TOP 0.0) (LFT 0.0) (RHT 1000.0) (BTM 1000.0))
+ ;     DOCSTRING: cut all edges at the envelope borders; remove anything outside.
  ;     defined via veq:FVDEF*
  ;   Source file: /home/anders/x/grph/src/xgrph-isect.lisp
 ```
@@ -347,11 +345,13 @@
  ;   [symbol]
  ; 
  ; 3CUT-ALL names a compiled function:
- ;   Lambda-list: (G POS FX)
+ ;   Lambda-list: (G POS FX &AUX (OLD G))
  ;   Derived type: (FUNCTION (T T FUNCTION)
  ;                  (VALUES GRPH:GRPH FSET:SEQ &OPTIONAL))
  ;   Documentation:
- ;     cut every edge where they intersect in 2d according to projection fx.
+ ;     cut every edge where they intersect in 2d
+ ;     according to projection (fx x y z) => (~ x1 y1).
+ ;     propagates properties.
  ;   Source file: /home/anders/x/grph/src/xgrph-isect.lisp
 ```
 
@@ -365,6 +365,21 @@
  ; 3CUT-ALL! names a macro:
  ;   Lambda-list: (G POS FX)
  ;   Source file: /home/anders/x/grph/src/xgrph-isect.lisp
+```
+
+## `xgrph:3flatten`
+```
+ ; XGRPH:3FLATTEN
+ ;   [symbol]
+ ; 
+ ; 3FLATTEN names a compiled function:
+ ;   Lambda-list: (POS FLATFX &AUX (RES (POS)))
+ ;   Derived type: (FUNCTION (FSET:SEQ FUNCTION)
+ ;                  (VALUES FSET:SEQ &OPTIONAL))
+ ;   Documentation:
+ ;     flatten from 3->2d with flatfx.
+ ;     returns new xgrph:pos intance
+ ;   Source file: /home/anders/x/grph/src/xgrph.lisp
 ```
 
 ## `xgrph:3l@`

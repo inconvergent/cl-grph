@@ -179,6 +179,16 @@
       (f2!@+. (f2!@*. (f2!@- (xgrph:2@vert pos i) mx) s) x y)))
   pos)
 
+; TODO: inefficient use of range
+(veq:fvdef 3flatten (pos flatfx &aux (res (pos)))
+  (declare (pos pos res) (function flatfx))
+  "flatten from 3->2d with flatfx.
+returns new xgrph:pos intance"
+  (labels ((tx ((:va 3 pxyz)) (f@flatfx pxyz)))
+    (2verts! res (f32_@$tx
+                   (3@verts pos (loop for x from 0 below (3@num pos) collect x)))))
+  res)
+
 ; (veq:fvdef* 2center (pos &optional (x 0f0) (y 0f0) max-side) ; TODO:
 ;   (declare (pos pos) (veq:ff x y))
 ;   (mvb ((:va 2 mx wh) s) (-2cent (xgrph:2@verts pos
